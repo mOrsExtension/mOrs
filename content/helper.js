@@ -8,46 +8,48 @@ try {
    console.warn(`Assignment of chrome to browser failed:'${error}'`) // using warn rather than warnCS, because browser isn't registering right
 }
 
-//TODO #7 make message send the response, rather than requiring extraction of response from object
-//TODO #8 build a separate version of content message sender for when awaiting a response is unnecessary
-/** Send message to background worker (msgreceived.js) and await response;
-* helpChrome.js
-* @param {any} messageItem*/
-const sendAwaitResponse = messageItem => {
-   if (typeof messageItem == 'string') {
-      console.info(`Sent string to background scripts: '${messageItem}'`) // tells CS console that string message was delivered
-   } else {
-      if (
-         Object.keys(messageItem)[0] != 'info' &&
-         Object.keys(messageItem)[0] != 'warn'
-      ) {
-         console.info(
-         `Sent object to background scripts: ${JSON.stringify(messageItem)}'`
-         ) // tell CS console that non-string message was delivered
-      }
+class MessageSenderCS {
+   constructor (messageItem, doSendResponse = true) {
+      this.messageItem = messageItem
+      this.doNeedResponse = doSendResponse
+      this.msgStringy = JSON.stringify(this.messageItem)
+      this.doesSendInfo = typeof this.messageItem == 'object' && (
+         'info' in this.messageItem ||
+         'warn' in this.messageItem
+      )
    }
-   // ***** NOTE *****
-   // chrome.runtime.sendMessage does not support promises, needs resolved through callback in new promise // TODO #6 is this still true?
-   return new Promise((resolve, reject) => {
+
+   async sendMessage () {
+      if (!this.doesSendInfo) {
+         console.info(`Sending to background scripts: ${this.msgStringy}'`)
+      }
+      this.doNeedResponse ? await this.sendAwait() : this.sendOneWay()
+      return 'success'
+   }
+   async sendAwait() {
       try {
-         browser.runtime.sendMessage({ message: messageItem }, response => {
-            resolve (response)
-         })
+         let response = await browser.runtime.sendMessage({ message: this.messageItem })
+         this.response = response.response
       } catch (error) {
-         if (!messageItem.warnTxt) {
-            // avoiding potential looping error message if error message is responsible for warning
-            const msgString = typeof messageItem == 'string'?
-             messageItem :
-             JSON.stringify(messageItem)
-            warnCS(
-               `Error sending message ${msgString} ${error}`,
-               'helpChrome.js',
-               'sendAwaitResponse'
-            )
-            reject (error)
+         if (!this.doesSendInfo) {
+            warnCS(`Error sending '${this.msgStringy}': ${error}`, 'helper.js', 'MessageSenderCS.sendAwait')
          }
       }
-   })
+   }
+   sendOneWay() {
+      browser.runtime.sendMessage({ message: this.messageItem })
+   }
+
+   respond () {
+      return this.response
+   }
+}
+
+const deliverToBackground = async (messageItem, doAwaitResponse = true)  => {
+   let msg = new MessageSenderCS(messageItem, doAwaitResponse)
+   if (await msg.sendMessage() == "success") {
+      return doAwaitResponse ? msg.respond() : true
+   }
 }
 
 //Global variables (all content scripts):
@@ -128,7 +130,6 @@ const ifRegExMatch = (searchFor, initialText, resultNum = 0, groupNum = 0) => {
    )
    return ''
 }
-
 
 /**takes in an element, search RegEx on its innerHTML if there's a match, change element class
 * @param {any} anElem
@@ -214,14 +215,14 @@ const infoCS = (
          functionName = '??'
       }
    }
-   sendAwaitResponse({
+   deliverToBackground({
       info: {
          txt: infoMsg,
          script: scriptFileName,
          aCaller: functionName,
          color: color
-      }
-   })
+      },
+   }, false)
 }
 
 /**Sends "warning" message to console;
@@ -239,14 +240,14 @@ const warnCS = (warnMsg, scriptFileName = 'helper.js', functionName = '') => {
       }
    }
    console.warn(`${scriptFileName} - ${functionName}: ${warnMsg}`)
-   sendAwaitResponse({
+   deliverToBackground({
       warn: {
          txt: warnMsg,
          script: scriptFileName,
          aCaller: functionName,
          color: 'yellow'
       }
-   })
+   }, false)
 }
 
 /** expands single ORS section (when clicking on ORS button, e.g.)

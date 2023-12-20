@@ -18,8 +18,7 @@ const implementUserParameters = async () => {
 
    const getInformation = async (command, aFunction) => {
       try {
-         const response = await sendAwaitResponse(command)
-         const isReturnTrue = response.response
+         const isReturnTrue = await deliverToBackground(command)
          infoCS(
             `Response to '${command}'='${isReturnTrue}'`,
             'storedData.js',
@@ -121,8 +120,7 @@ class TagHandler {
 const userStylesRefresh = async () => {
    const theRootStyle = document.documentElement.style
    try {
-      const response = await sendAwaitResponse('getBrowserStoredColorData') // calls /background/style.js
-      const replacementSheet = response.response //returns object from json with keys & values
+      const replacementSheet = await deliverToBackground('getBrowserStoredColorData') // calls /background/style.js
       for (let key in replacementSheet) {
          theRootStyle.setProperty(`--${key}`, replacementSheet[key])
       }
