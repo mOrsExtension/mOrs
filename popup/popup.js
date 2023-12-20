@@ -1,11 +1,11 @@
 //popup.js
 //@ts-check
 
-//TODO #13 - move much of this off to background helpers, so don't duplicate in options and content.
+//TODO #15 - move much of popup.js to background helpers, so don't duplicate in options and content.
 
 const main = async () => {
 
-   // TODO: #14 Send this task to background storage.js and operate through messages
+   // TODO: #16 Relocate storing of user data background storage.js and operate through messages from popup.js
    /** Save user values to browser's user settings
    * @param {{any: any}} keyAndValueObj*/
    const promiseStoreKey = async keyAndValueObj => {
@@ -21,7 +21,7 @@ const main = async () => {
       }
    }
 
-   //TODO: #15 build entire message handling class for popup.js
+   //TODO: #17 rebuild message handling class for popup.js (and maybe elsewhere)
    /** Message passing to background.js (send message & resolves response)
    * @param {string|object} requestMsg */
    const promiseSendRequestToBG = async requestMsg => {
@@ -54,7 +54,7 @@ const main = async () => {
    * @param {string} warnTxt
    * @param {string} calledBy */
    const warnPopup = (warnTxt, calledBy = '??') => {
-      promiseSendRequestToBG({  //TODO, can I kill await? There's no reason to wait on logging
+      promiseSendRequestToBG({
          warn: {
             script: 'popup.js',
             txt: warnTxt,
@@ -112,9 +112,10 @@ const main = async () => {
          warnPopup(`Error displaying css options: ${e}`, 'promiseRefreshOptions')
          return false
       }
-      return true // TODO: #16 not sure if we need to return anything, but might work better in promise.all
+      return true // TODO: #18 Check to confirm whether return is necessary; might work better in promise.all
    }
 
+  /**TODO #19 this displayUserOptions mess has to have a better way to operate, especially in conjunction with updating background listener to accept objects with multiple commands (issue #1)*/
    const displayUserOptions = async () => {
       const storedDataFinder = () => {
          return Promise.all([
@@ -138,7 +139,6 @@ const main = async () => {
                break
             }
          }
-         // @ts-ignore  (property exists)
          for (let i = 0; i < orLawDropDown.options.length; i++) {
             if (orLawDropDown?.options[i].value == storedData[1]) {
                orLawDropDown.selectedIndex = i
@@ -159,8 +159,7 @@ const main = async () => {
 
    /**send message in popup text field to user
    * @param {String} msgText
-   * @param {String} color
-   */
+   * @param {String} color */
    const userMsg = (msgText, color = 'default') => {
       htmlMsgBox.innerHTML = `<span style='color:${color}'>${msgText}</span>`
    }

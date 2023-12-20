@@ -8,8 +8,8 @@ try {
    console.warn(`Assignment of chrome to browser failed:'${error}'`) // using warn rather than warnCS, because browser isn't registering right
 }
 
-//TODO #6 make message send the response, rather than requiring extraction of response
-//TODO #7 build separate version of content message sender for when response is unnecessary
+//TODO #7 make message send the response, rather than requiring extraction of response from object
+//TODO #8 build a separate version of content message sender for when awaiting a response is unnecessary
 /** Send message to background worker (msgreceived.js) and await response;
 * helpChrome.js
 * @param {any} messageItem*/
@@ -27,7 +27,7 @@ const sendAwaitResponse = messageItem => {
       }
    }
    // ***** NOTE *****
-   // chrome.runtime.sendMessage does not support promises, needs resolved through callback in new promise
+   // chrome.runtime.sendMessage does not support promises, needs resolved through callback in new promise // TODO #6 is this still true?
    return new Promise((resolve, reject) => {
       try {
          browser.runtime.sendMessage({ message: messageItem }, response => {
@@ -51,8 +51,8 @@ const sendAwaitResponse = messageItem => {
 }
 
 //Global variables (all content scripts):
-const aTab = '(?:&nbsp;|\\s){0,8}' //regExp for a tab/blank space, used occasionally // TODO #8 move this to first clean or separate module, rather than global variable kludge.
-let thisChapNum // found in heading.js // TODO #9 - make this part of heading object
+const aTab = '(?:&nbsp;|\\s){0,8}' //regExp for a tab/blank space, used occasionally // TODO #9 move this to first clean or separate module, rather than global variable kludge.
+let thisChapNum // found in heading.js // TODO #10 make this part of heading object
 
 /**Converts a [string|RegExp, flags] to /RegExp/flags; helper.js
 * @param {string|RegExp} searchFor
@@ -98,7 +98,7 @@ const ifRegExMatch = (searchFor, initialText, resultNum = 0, groupNum = 0) => {
       //first make sure there's at least one result
       if (resultNum == 0 || groupNum == 0) {
          const myIndex = resultNum > groupNum ? resultNum : groupNum //greater of index or matchPos
-         const resultsList = initialText.match(thisRegExp) // TODO: #10 I think this could work as intended with matchAll. Maybe revisit.
+         const resultsList = initialText.match(thisRegExp) // TODO: #11 Revisit and make work better as Reg Exp class handler using matchAll, etc.
          if (resultsList && resultsList.length > resultNum) {
             const ans = resultsList[myIndex]
             infoCS(

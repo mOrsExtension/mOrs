@@ -38,7 +38,7 @@ const sanitize = userText => {
 }
 
 class OrsSearch {
-   static errorUrl = 'https://github.com/mOrsExtension/mOrs/blob/master/mORSerror.md'  // TODO #2 create wiki and link to specific page
+   static errorUrl = 'https://github.com/mOrsExtension/mOrs/blob/master/mORSerror.md'  // TODO #2 create wiki and link to specific page on navigation error
    static orsRegExp = /\b0*([1-9]\d{0,2}[a-c]?)(\.\d{3,4})?/ // finds "chapter" or "chapter.section", e.g. "459A"
    static yearRegExp = /\b(?:19|20)\d{2,}\b/
    static chpRegExp = /(?:-|(?:19|20)\d{2}\s|c\.\s?)([1-9]\d{0,3}\b)/
@@ -64,7 +64,7 @@ class OrsSearch {
       let orsUrl = this.orsSec.replace(OrsSearch.orsRegExp, '00$1.html#$&') // add more than enough zeros
       orsUrl = orsUrl.replace(/^0{1,2}(\d{3})/, '$1') // trim any excess leading 0s to 3 digits
 
-      /** TODO #3 REVIEW REPLACEMENT CODE:
+      /** TODO #3 Review replacement code for trimming leading zeros
        * let orsUrl = this.orsSec.replace(OrsSearch.orsRegExp, (match, p1) => {
        *    const paddedNumber = p1.padStart(3, '0'); // Ensure the number is 3 digits with leading zeros
        *    return `00${paddedNumber}.html#$&`; // Use the padded number in the replacement

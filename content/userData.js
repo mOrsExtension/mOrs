@@ -1,13 +1,21 @@
 //storedData.js
 //@ts-check
 
-//TODO - build userData class with setters & getters?
+//TODO #12 - build userData classes with setters & getters to implement userParameters?
+/*    class RetrieveUserDataAndRespond {
+      constructor (command, responseFunction) {
+         this.command = command
+         this.responseFunction = responseFunction
+      }
+   } */
 
 const implementUserParameters = async () => {
 
    /** returns promise to take in a command and executes function if true (or false if any)
    * @param {string} command
    * @param {any} aFunction */
+
+
    const getInformation = async (command, aFunction) => {
       try {
          const response = await sendAwaitResponse(command)
@@ -57,7 +65,6 @@ const navigateToTag = async () => {
       navToTag.scrollBrowserToTarget()
    }
 }
-
 const idFinder = /(?:\.html\#)([^\/]*)/
 const newDelay = msecs => {
    setTimeout(() => {return true}, msecs)

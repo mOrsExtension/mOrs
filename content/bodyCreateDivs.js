@@ -167,7 +167,7 @@ const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
                   `Section type not recognized for ${paraHTML.slice(0, 60)}`,
                   'createDivs.js',
                   'buildBodyDivs/SectionStart'
-               )  // TODO #5 Need method for handling "that would become operative upon" language for 469.992 note section and 196.800, etc. notes.
+               )  // TODO #5 Handle future amend section for "that would become operative upon" language for 469.992 and 196.800, etc. note sections
             }
             currentSec = makeNewDiv(
                aPara,
