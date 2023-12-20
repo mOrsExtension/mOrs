@@ -1,0 +1,74 @@
+<html lang="en">
+<head>
+   <meta name="viewport" content="width=device-width" />
+   <meta charset="UTF-8" />
+   <title>mORS</title>
+   <link href="../data/main.css" rel="stylesheet" />
+</head>
+<body class="popup">
+   <div class="popup">
+      <h2>mORS <a href="https://github.com/mOrsExtension/mOrs/" id="version" rel="noopener">v.-0.99</a></h2>
+      <p>for Oregon Revised Statutes</p>
+   </div>
+   <div class="popup">
+      <h3><label for=mORSnavigate>Navigate:</label></h3>
+      <p>
+         <input
+         type="text"
+         name="mORSnavigate"
+         id="mORSnavigate"
+         />
+      </p>
+      <p>
+         <button type="button" id="launchButton">Launch</button>
+         <button type="button" id="helpButton">Help</button>
+         <button type="button" id="exampleButton">Examples</button>
+      </p>
+      <p class="userMsg" id="userMsg"></p> <!-- Allows popup.js to send line or two of text to popup frame -->
+   </div>
+   <div class="popup">
+      <h3>Extension Options:</h3>
+      <p>
+         <label for="cssSelector">Display Colors:</label>&nbsp;&nbsp;
+         <select id="cssSelector"></select>
+         <button type="button" id="colorOptions">Set Custom Colors</button>
+      </p>
+      <p>
+         <label for="OrLaws">Oregon Session Law Lookup Source:</label>
+      </p>
+      <p>
+         <select id="OrLaws">
+            <option selected value="OrLeg">Ore. Legislature (1999-)</option>
+            <option value="Hein">HeinOnline (1859-; account required)</option>
+            <option value="Both">Ore. Leg. with Hein Backup</option>
+            <option value="None">None</option>
+         </select>
+      </p>
+      <p class="popupOption">
+         <input type="checkbox" id="showBurnt" />
+         <label for="showBurnt">Show repealed/renumbered sections</label>
+      </p>
+      <p class="popupOption">
+         <input type="checkbox" id="showSNote" />
+         <label for="showSNote">Show section source notes</label>
+      </p>
+      <p class="popupOption">
+         <input type="checkbox" id="showFullWidth" />
+         <label for="showFullWidth">Full width display</label>
+      </p>
+      <p class="popupOption">
+         <input type="checkbox" id="collapseDefault" />
+         <label for="collapseDefault">Collapse all ORS sections by default</label>
+      </p>
+      <p class="popupOption">
+         <input type="checkbox" id="showMenu" />
+         <label for="showMenu">Show menu button on ORS pages</label>
+      </p>
+      <p class="popupOption">
+         <input type="checkbox" id="showNav"/>
+         <label for="showNav">Show volume navigation on ORS pages</label>
+      </p>
+   </div>
+</body>
+<script src="popup.js"></script>
+</html>

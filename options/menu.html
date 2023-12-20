@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta content="text/html"; charset="utf-8">
+   <meta name="viewport" content="width=device-width">
+   <title>Custom Color Options</title>
+   <link href="../../data/main.css" rel="stylesheet" />
+   <style>
+      div {
+         text-align: center;
+      }
+   </style>
+
+</head>
+
+<body id="optionsMenu">
+   <h2>Custom Color Options:</h2>
+   <div id="ColorOptions">
+      <p><label for="background">Main Background Color:</label></p>
+      <p id="mainBack" class="colorInput"> <input type="color" id="background"> </p>
+      <p><label for="altBack"> Secondary Background Color:</label></p>
+      <p class="colorInput"> <input type="color" id="altBack"></p>
+      <p><label for="formBack">Form Background Color:</label></p>
+      <p class="colorInput"> <input type="color" id="formBack"></p>
+      <p><label for="buttonColor"> Button Background Color: </label></p>
+      <p class="colorInput"> <input type="color" id="buttonColor"></p>
+      <p><label for="note">Note Color:</label></p>
+      <p class="colorInput"> <input type="color" id="note"></p>
+      <hr>
+      <p><label for="mainText">Main Text Color:</label></p>
+      <p class="colorInput"> <input type="color" id="mainText"></p>
+      <p><label for="heading">Heading Text Color:<label</p>
+      <p class="colorInput"> <input type="color" id="heading"></p>
+      <p><label for="subheading">Subheading Text Color:</label></p>
+      <p class="colorInput"> <input type="color" id="subheading"> </p>
+      <p><label for="sourceNote">Source Note Text Color:</p>
+      <p class="colorInput"> <input type="color" id="sourceNote"> </p>
+      <p><label for="linkText">Link Text Color:</label></p>
+      <p class="colorInput"> <input type="color" id="linkText"> </p>
+   </div>
+   <button id="exportSave" class="collapser">Import/Export Values</button>
+   <div id="exportDiv" class="collapsable invisibility">
+      <label for="textColorCode">Import values (paste export code):</label>
+      <textarea id="textColorCode" rows="2" cols="35"></textarea>
+      <p>Copy text to use in different browser or to use later.</p>
+      <p class="warning">Warning: "Submit" or "Load Preset" will replace and save over existing values. Copy values first.</p>
+      <p>
+         <button type="button" id="import">Submit</button>
+         <button type="button" id="cancelExport">Cancel</button>
+      </p>
+      <label for="loadPreset">Load preset color values</label>
+      <select id="loadPreset"></select>
+   </div>
+   <div id="buttons">
+      <button type="button" id="save">Save</button>
+      <button type="button" id="refresh">Cancel (Refresh)</button>
+   </div>
+</body>
+
+</html>

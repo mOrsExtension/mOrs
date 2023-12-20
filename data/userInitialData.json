@@ -1,0 +1,22 @@
+{
+   "cssSelectorStored": "Dark",
+   "lawsReaderStored": "OrLeg",
+   "showBurntStored": true,
+   "showSNsStored": true,
+   "showFullWidth": false,
+   "collapseDefaultStored": false,
+   "showMenuStored": true,
+   "showNavStored":true,
+   "userColors" : {
+      "background": "#336677",
+      "altBack": "#222233",
+      "formBack": "#223344",
+      "buttonColor": "#335b70",
+      "note": "#3030cc",
+      "mainText": "#f1d6d0",
+      "heading": "#fde849",
+      "subheading": "#cab302",
+      "sourceNote": "#c77543",
+      "linkText": "#37d2d2"
+   }
+}
