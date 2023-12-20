@@ -21,7 +21,7 @@ const buildFloatingMenuDiv = async () => {
    /** adding buttons
     * @param {string} id
     * @param {string} text
-    * @param {()=>{}} onClick */
+    * @param {any} onClick */
    const createButton = (id, text, onClick) => {
       let thisButton = document.createElement('button')
       thisButton.id = id
@@ -32,10 +32,7 @@ const buildFloatingMenuDiv = async () => {
 
    /**calculating next/prev chapter number & returning chapter url */
    const findOffsetUrl = async offset => {
-      const response = await sendAwaitResponse({
-         chapInfo: { chapNum: thisChapNum, offset: offset }
-      })
-      const offSetChap = response.response
+      const offSetChap = deliverToBackground({chapInfo: { chapNum: thisChapNum, offset: offset }}, true)
       let url = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${offSetChap[0]}.html`
       return replacer(url, /(ors)0+(\d{3})/, '$1$2') // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
    }
@@ -76,6 +73,7 @@ const buildFloatingMenuDiv = async () => {
 }
 
 const buildVolumeNav = async () => {
+
    /**  Convert the JSON data into nested HTML lists*/
    const VolOutlineJsonToHtml = data => {
       let mainList = ''
@@ -101,27 +99,24 @@ const buildVolumeNav = async () => {
 
    let volumeOutlineDiv = document.createElement('div')
    volumeOutlineDiv.id = 'volumeOutline'
-   const response = await sendAwaitResponse({'getJson': 'VolumeOutline'})
-   const volJson = response.response
+   const volJson = await deliverToBackground({'getJson': 'VolumeOutline'}, true)
+   // console.log (volJson)
    volumeOutlineDiv.innerHTML = VolOutlineJsonToHtml(volJson)
 
    //open to current chapter & highlight:
-   const response2 = await sendAwaitResponse({
-      chapInfo: { chapNum: thisChapNum }
-   })
-   const chapInfo = response2.response
+   const chapInfo = await deliverToBackground({chapInfo: { chapNum: thisChapNum }}, true)
    volumeOutlineDiv.querySelectorAll('details').forEach(aDetail => {
       if (aDetail.dataset.volume == chapInfo[2]) {
          (Boolean(aDetail.firstElementChild)
-         ? aDetail.firstElementChild.classList.add('highlight')
+         ? aDetail.firstElementChild?.classList.add('highlight')
          : infoCS('Volume was not highlighted', 'newDivs.js', 'buildVolumeNav'))
          aDetail.open = true
       }
       if (aDetail.dataset.title == chapInfo[1]) {
          aDetail.open = true
          Boolean(aDetail.firstElementChild)
-         ? aDetail.firstElementChild.classList.add('highlight')
-         : infoCS('Volume was not highlighted', 'newDivs.js', 'buildVolumeNav')
+         ? aDetail.firstElementChild?.classList.add('highlight')
+         : infoCS('Title was not highlighted', 'newDivs.js', 'buildVolumeNav')
 
          aDetail.querySelectorAll('span').forEach(aSpan => {
             if (aSpan.dataset.chapter == thisChapNum) {

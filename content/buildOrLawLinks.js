@@ -6,8 +6,7 @@
 const newOrUpdateOrLawLinks = async bodyMain => {
    try {
       const anchorList = getAnchorList(bodyMain)
-      const response = await sendAwaitResponse('getOrLaw') // check user form input for source of OrLaws lookup (Hein/OrLeg)
-      const orLaw = response.response
+      const orLaw = await deliverToBackground('getOrLaw', true) // check user form input for source of OrLaws lookup (Hein/OrLeg)
       switch (orLaw) {
          case 'Hein': {
             buildHeinLinks(anchorList)
@@ -145,7 +144,7 @@ let oreLegLookupJson = null // cashing global object
 const getOrLegLookupJson = async () => {
    if (oreLegLookupJson == null) {
       infoBG('retrieving OrLegLookup', 'buildOrLawLinks.js', 'getOrLegLookupJson')
-      oreLegLookupJson = await sendAwaitResponse({'getJson':'OrLawLegLookup'})
+      oreLegLookupJson = await deliverToBackground({'getJson':'OrLawLegLookup'}, true)
    } return oreLegLookupJson
 }
 

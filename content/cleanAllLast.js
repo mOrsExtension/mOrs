@@ -100,8 +100,7 @@ const errataFixes = async (/**@type {String}*/ bodyHtml) => {
    /**returns errataList from JSON file /data/errataList.json as {key:value} object*/
    const promiseErrataList = await (async () => {
       try {
-         const response = await sendAwaitResponse({'getJson':'ErrataList'})
-         return response.response
+         return await deliverToBackground({'getJson':'ErrataList'})
       } catch (e) {
          warnCS(e)
          return bodyHtml
