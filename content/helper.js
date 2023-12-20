@@ -53,7 +53,6 @@ const deliverToBackground = async (messageItem, doAwaitResponse = true)  => {
 }
 
 //Global variables (all content scripts):
-const aTab = '(?:&nbsp;|\\s){0,8}' //regExp for a tab/blank space, used occasionally // TODO #9 move this to first clean or separate module, rather than global variable kludge.
 let thisChapNum // found in heading.js // TODO #10 make this part of heading object
 
 /**Converts a [string|RegExp, flags] to /RegExp/flags; helper.js
@@ -129,17 +128,6 @@ const ifRegExMatch = (searchFor, initialText, resultNum = 0, groupNum = 0) => {
       'ifRegExMatch'
    )
    return ''
-}
-
-/**takes in an element, search RegEx on its innerHTML if there's a match, change element class
-* @param {any} anElem
-* @param {string | RegExp} searchFor
-* @param {string} newClass
-*/
-const reclassElementByHTML = (anElem, searchFor, newClass) => {
-   if (aRegExp(searchFor, '').test(anElem.innerHTML)) {
-      anElem.className = newClass
-   }
 }
 
 /** logical xor (only a or b, but not both)

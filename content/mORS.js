@@ -12,7 +12,7 @@ const runMain = async () => {
    let mainDiv = document.createElement('div') // moving remaining body into its own separate "main" div
    mainDiv.id = 'main'
    mainDiv.innerHTML = docBody.innerHTML
-   mainDiv = DomClean2(mainDiv) // bodyclean.js
+   mainDiv = bodyCleanUp(mainDiv) // bodyclean.js
    mainDiv = buildBodyDivs(mainDiv) // createDivs.js
    const floatMenuDiv = await buildFloatingMenuDiv() // newDivs.js building it even if user won't use it, because they can turn it on later
    const volumeNav = await buildVolumeNav() //newDivs.js building new menu for navigating through volumes
