@@ -1,31 +1,33 @@
 //bodyclean.js
 //@ts-check
 
-/** Calculates & reclassifies Heading, TOC & body through DOM */
-function DomClean2 (/**@type {HTMLDivElement} */ docBody) {
-   /** First pass clean up list [SearchString, classParagraphAs]
+
+function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
+   const tabRegExp = '(?:&nbsp;|\\s){0,8}' //regExp for a tab/blank space
+
+   /** First pass tagging paragraphs [SearchString, classParagraphAs]
    * Tags ORS Refs, Leadlines, Forms, & makes links for internal ORS refs */
    const /**@type {[String|RegExp, String][]} */  firstPassClass = [
       // finding paragraphs starting with subsections (e.g., (2), (14))
-      [`^${aTab}\\(\\d{1,2}\\)`, 'subSec'],
+      [`^${tabRegExp}\\(\\d{1,2}\\)`, 'subSec'],
 
       // lower case (repeating) letters (e.g., (a), (v), (bb), (iv))
-      [`^${aTab}\\([a-z]{1,5}\\)`, 'para'],
+      [`^${tabRegExp}\\([a-z]{1,5}\\)`, 'para'],
 
-      // upper case repeating letters (e.g., (A), (V), (BB), (XX))
-      [`^${aTab}\\([A-Z]{1,5}\\)[^]`, 'subPara'],
+      // upper case (repeating) letters (e.g., (A), (V), (BB), (XX))
+      [`^${tabRegExp}\\([A-Z]{1,5}\\)[^]`, 'subPara'],
 
-      // session law sections (E.g., "Sec. 14.") may include leadline
-      [`^<b>${aTab}(Sec\\.\\s\\d{1,3}[a-f]?\\.[^>\\]]*?)<\\/b>`, 'sectionStart'],
+      // session law sections (E.g., "Sec. 14.") may or may not include leadline
+      [`^<b>${tabRegExp}(Sec\\.\\s\\d{1,3}[a-f]?\\.[^>\\]]*?)<\\/b>`, 'sectionStart'],
 
       // ORS sections, already wrapped in anchor <a>; may have leadline or be further amended version
-      [`^<b>${aTab}<a class="orsLink">`, 'sectionStart'],
+      [`^<b>${tabRegExp}<a class="orsLink">`, 'sectionStart'],
 
       // source notes (e.g., [20.., [Formerly, ... etc.) not in separate paragraph
-      [`^${aTab}\\[(<a class="sessionLaw"|Para|Sub|Former|Repeal|Renum|Am|\(Enacted))`,'sourceNote'],
+      [`^${tabRegExp}\\[(<a class="sessionLaw"|Para|Sub|Former|Repeal|Renum|Am|\(Enacted))`,'sourceNote'],
 
       // Notes paragraphs ("Note:", "Note 4:") prepping for wrap in <div>
-      [`^${aTab}<b>${aTab}Note(\\s\\d)?:${aTab}<\\/b>`, 'startNote'],
+      [`^${tabRegExp}<b>${tabRegExp}Note(\\s\\d)?:${tabRegExp}<\\/b>`, 'startNote'],
 
       // Heading (5+ initial capital letters) (E.g., "PENALTIES"; but not "TAX")
       [/^[^a-z0-9(_]{3,}[^a-z0-9(_]*$/, 'headingLabel'],
@@ -38,7 +40,9 @@ function DomClean2 (/**@type {HTMLDivElement} */ docBody) {
    ]
    docBody.querySelectorAll('p').forEach(aPara => {
       firstPassClass.forEach(([searchFor, /**@type {String} */ newClass]) => {
-         reclassElementByHTML(aPara, searchFor, newClass)
+         if (aRegExp(searchFor, '').test(aPara.innerHTML)) {
+            aPara.classList.add(newClass)
+         }
       })
    })
 
@@ -48,7 +52,7 @@ function DomClean2 (/**@type {HTMLDivElement} */ docBody) {
    ).forEach(aPara => {
       aPara.innerHTML = replacer(
          aPara.innerHTML,
-         `^${aTab}(?:<b>)?${aTab}`,
+         `^${tabRegExp}(?:<b>)?${tabRegExp}`,
          '',
          ''
       ) //search for leading tabs & delete
@@ -131,12 +135,12 @@ function DomClean2 (/**@type {HTMLDivElement} */ docBody) {
       // go through each paragraph classed as section
       aPara.innerHTML = replacer(
          aPara.innerHTML,
-         `(\\/a>${aTab})([^]{2,})`,
+         `(\\/a>${tabRegExp})([^]{2,})`,
          '$1<span class="leadline">$2</span>'
       ) // following new ORS section
       aPara.innerHTML = replacer(
          aPara.innerHTML,
-         `(Sec\\.\\s\\d{1,3}[a-f]?\\.${aTab})([^]{2,})`,
+         `(Sec\\.\\s\\d{1,3}[a-f]?\\.${tabRegExp})([^]{2,})`,
          '$1<span class="leadline">$2</span>'
       ) // following Sec. ##. note section.
    })
