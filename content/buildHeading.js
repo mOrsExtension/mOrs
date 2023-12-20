@@ -94,8 +94,7 @@ const buildHeading = async headingInfo => {
    /**looks up volume & title from json file */
    const buildH2 = async () => {
       if (!headingInfo.isFormerProvisions) {
-         const response = await sendAwaitResponse({chapInfo: { chapNum: thisChapNum }})
-         const chapInfo = response.response
+         const chapInfo = await deliverToBackground({chapInfo: { chapNum: thisChapNum }}, true)
          h2Elem2.textContent = `Title ${chapInfo[1]}: ${chapInfo[4]},`
          h2Elem1.textContent = `Volume ${chapInfo[2]},`
          return chapInfo.length == 5 // error testing
