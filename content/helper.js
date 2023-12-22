@@ -8,47 +8,52 @@ try {
    console.warn(`Assignment of chrome to browser failed:'${error}'`) // using warn rather than warnCS, because browser isn't registering right
 }
 
-class MessageSenderCS {
-   constructor (messageItem, doSendResponse = true) {
-      this.messageItem = messageItem
-      this.doNeedResponse = doSendResponse
-      this.msgStringy = JSON.stringify(this.messageItem)
-      this.doesSendInfo = typeof this.messageItem == 'object' && (
-         'info' in this.messageItem ||
-         'warn' in this.messageItem
-      )
-   }
-
-   async sendMessage () {
-      if (!this.doesSendInfo) {
-         console.info(`Sending to background scripts: ${this.msgStringy}'`)
-      }
-      this.doNeedResponse ? await this.sendAwait() : this.sendOneWay()
-      return 'success'
-   }
-   async sendAwait() {
-      try {
-         let response = await browser.runtime.sendMessage({ message: this.messageItem })
-         this.response = response.response
-      } catch (error) {
-         if (!this.doesSendInfo) {
-            warnCS(`Error sending '${this.msgStringy}': ${error}`, 'helper.js', 'MessageSenderCS.sendAwait')
-         }
-      }
-   }
-   sendOneWay() {
-      browser.runtime.sendMessage({ message: this.messageItem })
-   }
-
-   respond () {
-      return this.response
-   }
-}
-
 const deliverToBackground = async (messageItem, doAwaitResponse = true)  => {
    let msg = new MessageSenderCS(messageItem, doAwaitResponse)
    if (await msg.sendMessage() == "success") {
       return doAwaitResponse ? msg.respond() : true
+   }
+}
+
+class MessageSenderCS {
+   constructor (message, doRespond) {
+      this.message = message
+      this.doRespond = doRespond
+      this.msgStringy = JSON.stringify(this.message)
+      this.isLog = (typeof this.message == 'object' && 'log' in this.message)
+   }
+
+   async sendMessage () {
+      if (!this.isLog) {
+         console.info(`Sending to background scripts: ${this.msgStringy}'`)
+      }
+      this.doRespond
+       ? await this.sendAwait()
+       : this.sendOneWay()
+      return 'success'
+   }
+   async sendAwait() {
+      try {
+         let response = await browser.runtime.sendMessage({ message: this.message })
+         if ('response' in response) {
+            this.response = response.response
+         } else {
+            console.warn(`Error, response received was ${JSON.stringify(response)}`)
+         }
+      } catch (error) {
+         if (!this.isLog) {
+            warnCS(`Error sending '${this.msgStringy}': ${error}`, 'helper.js', 'sendAwait')
+         }
+      }
+   }
+
+   sendOneWay() {
+      browser.runtime.sendMessage({ message: this.message })
+   }
+
+
+   respond () {
+      return this.response
    }
 }
 
@@ -204,11 +209,13 @@ const infoCS = (
       }
    }
    deliverToBackground({
-      info: {
-         txt: infoMsg,
-         script: scriptFileName,
-         aCaller: functionName,
-         color: color
+      log : {
+         info: {
+            txt: infoMsg,
+            script: scriptFileName,
+            aCaller: functionName,
+            color: color
+         }
       },
    }, false)
 }
@@ -229,11 +236,13 @@ const warnCS = (warnMsg, scriptFileName = 'helper.js', functionName = '') => {
    }
    console.warn(`${scriptFileName} - ${functionName}: ${warnMsg}`)
    deliverToBackground({
-      warn: {
-         txt: warnMsg,
-         script: scriptFileName,
-         aCaller: functionName,
-         color: 'yellow'
+      log: {
+         warn: {
+            txt: warnMsg,
+            script: scriptFileName,
+            aCaller: functionName,
+            color: 'yellow'
+         }
       }
    }, false)
 }

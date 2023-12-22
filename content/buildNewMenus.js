@@ -1,4 +1,4 @@
-//newMenu.js
+//buildNewMenus.js
 //@ts-check
 
 /** add floating div menu with version info & select buttons */
@@ -99,12 +99,17 @@ const buildVolumeNav = async () => {
 
    let volumeOutlineDiv = document.createElement('div')
    volumeOutlineDiv.id = 'volumeOutline'
-   const volJson = await deliverToBackground({'getJson': 'VolumeOutline'}, true)
-   // console.log (volJson)
-   volumeOutlineDiv.innerHTML = VolOutlineJsonToHtml(volJson)
+   let volOutline = ''
+   try {
+      const volJson = await deliverToBackground({'fetchJson': 'VolumeOutline'}, true)
+      volOutline = VolOutlineJsonToHtml(volJson)
+   } catch (error) {
+      warnCS(`Could not fetch volume outline, error: ${error}`, 'buildNewMenus.js', 'buildVolumeNav')
+   }
+   volumeOutlineDiv.innerHTML = volOutline
 
    //open to current chapter & highlight:
-   const chapInfo = await deliverToBackground({chapInfo: { chapNum: thisChapNum }}, true)
+   const chapInfo = await deliverToBackground({getChapInfo: { chapNum: thisChapNum }}, true)
    volumeOutlineDiv.querySelectorAll('details').forEach(aDetail => {
       if (aDetail.dataset.volume == chapInfo[2]) {
          (Boolean(aDetail.firstElementChild)

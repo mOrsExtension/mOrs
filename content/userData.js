@@ -12,22 +12,21 @@
 const implementUserParameters = async () => {
 
    /** returns promise to take in a command and executes function if true (or false if any)
-   * @param {string} command
-   * @param {any} aFunction */
-
-
-   const getInformation = async (command, aFunction) => {
+   * @param {string} dataRequest
+   * @param {any} responsiveFunction */
+   const getInformation = async (dataRequest, responsiveFunction) => {
       try {
-         const isReturnTrue = await deliverToBackground(command)
+         const response = await deliverToBackground({'getItem': dataRequest})
+         const isReturnTrue = response[dataRequest]
          infoCS(
-            `Response to '${command}'='${isReturnTrue}'`,
+            `Response to '${dataRequest}'='${isReturnTrue}'`,
             'storedData.js',
             'getInformation'
          )
-         aFunction(isReturnTrue)
+         responsiveFunction(isReturnTrue)
       } catch (e) {
          warnCS(
-            `Error seeking response to '${command}': ${e}`,
+            `Error seeking response to '${dataRequest}': ${e}`,
             'storedData.js',
             'getInformation'
          )
@@ -35,22 +34,22 @@ const implementUserParameters = async () => {
    }
 
    // MAIN Implement User Parameters
-   await getInformation('getCollapsed', isTrue => {
+   await getInformation('collapseDefaultStored', isTrue => {
       isTrue ? collapseAllSections() : expandAllSections() // in helper.js
    })
-   await getInformation('getShowBurnt', isTrue => {
+   await getInformation('doShowBurnt', isTrue => {
       doShowBurnt(isTrue) // in helper.js
    })
-   await getInformation('getShowSNs', isTrue => {
+   await getInformation('showSNStored', isTrue => {
       doShowSourceNotes(isTrue) //  in helper.js
    })
-   await getInformation('getFullWidth', isTrue => {
+   await getInformation('showFullWidth', isTrue => {
       setFullWidth(isTrue) // in helper.js
    })
-   await getInformation('getShowMenu', isTrue => {
+   await getInformation('showMenuStored', isTrue => {
       doShowMenu(isTrue) // in helper.js
    })
-   await getInformation('getShowNavigation', isTrue => {
+   await getInformation('showNavStored', isTrue => {
       doShowNav(isTrue) // in helper.js
     })
    return true
@@ -59,7 +58,7 @@ const implementUserParameters = async () => {
 /** determines section from url (based on #xxx) */
 /** scroll to html id tag in url, if any */
 const navigateToTag = async () => {
-   let navToTag = new TagHandler (window.location.toString())
+   let navToTag = new TagHandler ()
    if (navToTag.hasTarget) {
       navToTag.scrollBrowserToTarget()
    }
@@ -120,7 +119,7 @@ class TagHandler {
 const userStylesRefresh = async () => {
    const theRootStyle = document.documentElement.style
    try {
-      const replacementSheet = await deliverToBackground('getBrowserStoredColorData') // calls /background/style.js
+      const replacementSheet = await deliverToBackground({miscTask: 'buildColorData'}) // calls /background/style.js
       for (let key in replacementSheet) {
          theRootStyle.setProperty(`--${key}`, replacementSheet[key])
       }

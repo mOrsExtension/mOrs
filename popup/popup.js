@@ -3,10 +3,46 @@
 
 //TODO #15 - move much of popup.js to background helpers, so don't duplicate in options and content.
 
-const main = async () => {
+class MessageDispatch {
+   constructor(msg, sendTo='background') {
+      this.sender = (sendTo=='tabs' ? 'toMORS' : 'message')  //TODO rename background sender?
+      this.msg = msg
+      if (msg != undefined) {
+         this.stringyMsg = JSON.stringify(msg)
+      }
+   }
 
-   // TODO: #16 Relocate storing of user data background storage.js and operate through messages from popup.js
-   /** Save user values to browser's user settings
+   async sendResponse (){
+      infoCS(`Sending ${this.msg} to ${this.sender} and awaiting response.`, 'sendResponse')
+      try {
+         const response = await browser.runtime.sendMessage({[this.sender]: this.msg})
+         if (response.response != null && response.response != undefined) {
+            this.response = response.response
+            this.stringyResponse = JSON.stringify(response.response)
+            infoCS(`Response from ${this.sender}: ${this.stringyResponse}`, 'sendResponse')
+            return response.response
+         } else {
+            throw new Error(`Response from ${this.sender} to ${this.msg} was unexpected value: '${JSON.stringify(response)}'`)
+         }
+      } catch (error) {
+         if (!('log' in this.msg)) {
+            warnCS(`Could not send and receive response: ${error}`, 'sendResponse')
+         }
+      }
+   }
+
+   sendOneWay () {
+      infoCS(`Sending ${this.msg} to ${this.sender} (no response requested).`, 'sendResponse')
+      try {
+         browser.runtime.sendMessage({[this.sender]: this.msg})
+      } catch (error) {
+         warnCS(`Could not send message: ${error}`, 'sendResponse')
+      }
+   }
+}
+
+const main = async () => {
+      /** Save user values to browser's user settings
    * @param {{any: any}} keyAndValueObj*/
    const promiseStoreKey = async keyAndValueObj => {
       try {
@@ -21,85 +57,91 @@ const main = async () => {
       }
    }
 
-   //TODO: #17 rebuild message handling class for popup.js (and maybe elsewhere)
-   /** Message passing to background.js (send message & resolves response)
-   * @param {string|object} requestMsg */
-   const promiseSendRequestToBG = async requestMsg => {
-      try {
-         const response = await browser.runtime.sendMessage({message: requestMsg})
-         return response.response
-      } catch (error) {
-         const requestString = (typeof requestMsg == "object" ? JSON.stringify(requestMsg) : requestMsg)
-         /** if can't send things to background, then popupWarn is likely broken too */
-         console.warn(`Failed: {message: ${requestString}} was NOT sent to background/msgReader.js`)
-         console.warn(error)
-      }
-   }
+   // //TODO: #17 rebuild message handling class for popup.js (and maybe elsewhere)
+   // /** Message passing to background.js (send message & resolves response)
+   // * @param {string|object} requestMsg */
+   // const let msg = new MessageDispatch = async requestMsg => {
+   //    try {
+   //       const response = await browser.runtime.sendMessage({message: requestMsg})
+   //       return response.response
+   //    } catch (error) {
+   //       const requestString = (typeof requestMsg == "object" ? JSON.stringify(requestMsg) : requestMsg)
+   //       /** if can't send things to background, then popupWarn is likely broken too */
+   //       console.warn(`Failed: {message: ${requestString}} was NOT sent to background/msgReader.js`)
+   //       console.warn(error)
+   //    }
+   // }
+
 
    /** Info message handling (Log to service worker inspection)
    * @param {string} infoTxt
    * @param {string} [calledBy]*/
    const infoPopup = (infoTxt, calledBy = '??') => {
-      promiseSendRequestToBG({
-         info: {
-            script: 'popup.js',
-            txt: infoTxt,
-            aCaller: calledBy,
-            color: 'cyan'
+      let msg = new MessageDispatch({
+         log : {
+            info: {
+               txt: infoTxt,
+               aCaller: calledBy,
+               script: 'popup.js',
+               color: 'cyan'
+            }
          }
       })
+      msg.sendOneWay()
    }
 
    /**  Warning message handling (Log to service worker inspection)
    * @param {string} warnTxt
    * @param {string} calledBy */
    const warnPopup = (warnTxt, calledBy = '??') => {
-      promiseSendRequestToBG({
-         warn: {
-            script: 'popup.js',
-            txt: warnTxt,
-            aCaller: calledBy
+      let msg = new MessageDispatch({
+         log :{
+            warn: {
+               script: 'popup.js',
+               txt: warnTxt,
+               aCaller: calledBy
+            }
          }
       })
+      msg.sendOneWay
    }
 
-   /** Send message to ORS tabs (no response requested).
-   * Receiving done by tabs through /content/addListeners.js
-   * @param {object} message*/
-   const sendMsgToOrsTabs = async message => {
-      try {
-         const orsTabs = await promiseSendRequestToBG('getOrsTabs')
-         for (const aTab of orsTabs) {
-            browser.tabs.sendMessage(aTab.id, { toMORS: message })
-            infoPopup(
-               `Sent '${JSON.stringify(message)}' to tab #${aTab.id}`,
-               'sendMsgToOrsTabs'
-            )
-         }
-      } catch (e) {
-         warnPopup(e, 'sendMsgToOrsTabs')
-      }
-   }
+   // /** Send message to ORS tabs (no response requested).
+   // * Receiving done by tabs through /content/addListeners.js
+   // * @param {object} message*/
+   // const let msg = new MessageDispatch = async message => {
+   //    try {
+   //       const orsTabs = await let msg = new MessageDispatch({miscTask: 'queryTabs'})
+   //       for (const aTab of orsTabs) {
+   //          browser.tabs.sendMessage(aTab.id, { toMORS: message })
+   //          infoPopup(
+   //             `Sent '${JSON.stringify(message)}' to tab #${aTab.id}`,
+   //             'let msg = new MessageDispatch'
+   //          )
+   //       }
+   //    } catch (e) {
+   //       warnPopup(e, 'let msg = new MessageDispatch')
+   //    }
+   // }
 
-   /**retrieves user data preferences for purpose of popup stylesheet */
+
+   /**retrieves user data preferences to style popup stylesheet */
    const updateCssPopup = async () => {
-      try {
-         const newCss = await promiseSendRequestToBG('getBrowserStoredColorData') // calls /background/style.js
-         infoPopup(
-            `Setting popup stylesheet properties:\n${JSON.stringify(newCss)}`,
-            'updateCssPopup'
-         )
-         for (let key in newCss) {
-            theRoot.style.setProperty(`--${key}`, newCss[key])
-         }
-      } catch (e) {
-         warnPopup(`Error applying stylesheet ${e}.`, 'updateCssPopup')
+      let msg = new MessageDispatch({miscTask: 'buildColorData'}) // calls /background/style.js
+      const newCss = await msg.sendResponse()
+      infoPopup(
+         `Setting popup stylesheet properties:\n${JSON.stringify(newCss)}`,
+         'updateCssPopup'
+      )
+      for (let key in newCss) {
+         theRoot.style.setProperty(`--${key}`, newCss[key])
       }
    }
 
    /**Retrieves list of available options from background/webResources.js & puts it into popup */
-   const promiseRefreshOptions = async () => {
-      let colorOptionsList = await promiseSendRequestToBG('getPaletteList') // pull in existing options in json, plus one "Custom"
+   const displayPaletteDropdownList = async () => {
+      let msg = new MessageDispatch({miscTask: 'getPaletteList'}) // pull in existing options in json, plus one "Custom"
+      let colorOptionsList = await msg.sendResponse()
       try {
          cssDropDown.options.length = 0 // not cssDropDown.options = []? But if it ain't broke...
          colorOptionsList.forEach(colorOption => {
@@ -110,51 +152,51 @@ const main = async () => {
          })
       } catch (e) {
          warnPopup(`Error displaying css options: ${e}`, 'promiseRefreshOptions')
-         return false
       }
-      return true // TODO: #18 Check to confirm whether return is necessary; might work better in promise.all
    }
 
   /**TODO #19 this displayUserOptions mess has to have a better way to operate, especially in conjunction with updating background listener to accept objects with multiple commands (issue #1)*/
-   const displayUserOptions = async () => {
-      const storedDataFinder = () => {
-         return Promise.all([
-            promiseSendRequestToBG('getCssUserOption'), //0 index in storedDataFinder below
-            promiseSendRequestToBG('getOrLaw'), //1
-            promiseSendRequestToBG('getShowBurnt'), //2
-            promiseSendRequestToBG('getShowSNs'), //3
-            promiseSendRequestToBG('getFullWidth'), //4
-            promiseSendRequestToBG('getCollapsed'), //5
-            promiseSendRequestToBG('getShowMenu'), //6
-            promiseRefreshOptions()
-         ])
-      }
 
-      // MAIN displayUserOptions
+      const displayUserOptions = async () => {
       try {
-         const storedData = await storedDataFinder()
+         await displayPaletteDropdownList()
+         const storedData = await fetchStoredData()
+         showBurntCheck.checked = storedData.doShowBurnt
+         showSNsCheck.checked = storedData.showSNsStored
+         showFWCheck.checked = storedData.showFullWidth
+         collapseCheck.checked = storedData.collapseDefaultStored
+         showMenuCheck.checked = storedData.showMenuStored
+         showNavCheck.checked = storedData.showNavStored
          for (let i = 0; i < cssDropDown.options.length; i++) {
-            if (cssDropDown?.options[i].value == storedData[0]) {
+            if (cssDropDown?.options[i].value == storedData.cssSelectorStored) {
                cssDropDown.selectedIndex = i
                break
             }
          }
          for (let i = 0; i < orLawDropDown.options.length; i++) {
-            if (orLawDropDown?.options[i].value == storedData[1]) {
+            if (orLawDropDown?.options[i].value == storedData.lawsReaderStored) {
                orLawDropDown.selectedIndex = i
                break
             }
          }
-         showBurntCheck.checked = storedData[2]
-         showSNsCheck.checked = storedData[3]
-         showFWCheck.checked = storedData[4]
-         collapseCheck.checked = storedData[5]
-         showMenuCheck.checked = storedData[6]
+
          let manifest = browser.runtime.getManifest()
          versionID.innerHTML = `v.${manifest.version}`
       } catch (e) {
          warnPopup(e)
       }
+   }
+   const fetchStoredData = () => {
+      return let msg = new MessageDispatch({getStorage: [  // may want to rename some of these
+         'lawsReaderStored',
+         'cssSelectorStored',
+         'showSNsStored',
+         'doShowBurnt',
+         'showFullWidth',
+         'showMenuStored',
+         'showNavStored',
+         'collapseDefaultStored'
+      ]})
    }
 
    /**send message in popup text field to user
@@ -166,21 +208,27 @@ const main = async () => {
 
    /** Setup all event listeners for form drop downs & buttons */
    const addAllListeners = () => {
-      //User enters after filling out 'Navigate:' form box
+      //User enters after filling out 'Navigate:' form box - // TODO: #22 fix submit functionality so enter will close and search as expected
       orsSearch?.addEventListener('submit', () => {
          infoPopup(`Search ran for '${orsSearch.value}'`)
-         promiseSendRequestToBG({ navToOrs: orsSearch.value })
+         searchOrs(orsSearch.value)
       })
       // User clicks "Launch" button
       launchButton.addEventListener('click', () => {
          infoPopup(`Search ran for '${orsSearch.value}'`)
-         promiseSendRequestToBG({ navToOrs: orsSearch.value })
+         searchOrs(orsSearch.value)
       })
+      const searchOrs = (search) => {
+         let msg = new MessageDispatch({ navToOrs: search})
+         msg.sendOneWay()
+      }
+
+      const launchNewTab = (url) => {
+         browser.tabs.create({'url': url})
+      }
       // User clicks "Help" button
       helpButton?.addEventListener('click', () => {
-         browser.tabs.create({
-            url: 'https://github.com/mOrsExtension/mOrs/blob/master/mORSerror.md'
-         })
+         launchNewTab('https://github.com/mOrsExtension/mOrs/blob/master/mORSerror.md')
       })
       // User clicks "Example" button
       exampleButton?.addEventListener('click', () => {
@@ -189,23 +237,25 @@ const main = async () => {
       // User clicks "Set Custom Colors"
       colorOptions?.addEventListener('click', () => {
          infoPopup('launching options.html', 'addAllListeners/colorOptions')
-         browser.tabs.create({url: browser.runtime.getURL(`/options/chrome/options.html`)})
+         launchNewTab(browser.runtime.getURL(`/options/options.html`))
       })
       //User changes option on "Display Colors:"
       cssDropDown?.addEventListener('change', async () => {
          try {
             await promiseStoreKey({ cssSelectorStored: cssDropDown.value })
-            sendMsgToOrsTabs({ updateCss: true }) // alert tabs that css sheet has changed (value does not matter, so sending true)
+            let msg = new MessageDispatch({ updateCss: true }, 'tabs') // alert tabs of css changes
+            msg.sendOneWay()
             updateCssPopup() // update colors on the current popup as well
          } catch (e) {
-            warnPopup(`error storing css from dropdown ${e}`)
+            warnPopup(`error storing css from dropdown: ${e}`)
          }
       })
       //User changes option on "Oregon Session Law Lookup Source"
       orLawDropDown?.addEventListener('change', async () => {
          try {
             await promiseStoreKey({ lawsReaderStored: orLawDropDown.value })
-            sendMsgToOrsTabs({ updateOrLawsReader: orLawDropDown.value })
+            let msg = new MessageDispatch({ updateOrLawsReader: orLawDropDown.value }, 'tabs')
+            msg.sendOneWay()
          } catch (e) {
             warnPopup(`store lawReader dropdown: ${e}`)
          }
@@ -213,10 +263,11 @@ const main = async () => {
       //User changes option on "Show repealed/renumbered sections"
       showBurntCheck?.addEventListener('change', async () => {
          try {
-            await promiseStoreKey({ showBurntStored: showBurntCheck.checked })
-            sendMsgToOrsTabs({ showBurnt: showBurntCheck.checked }) // alert tabs that visibility of burnt sections has changed
+            await promiseStoreKey({ doShowBurnt: showBurntCheck.checked })
+            let msg = new MessageDispatch({ showBurnt: showBurntCheck.checked }, 'tabs') // alert tabs to change burnt visibility
+            msg.sendOneWay()
          } catch (e) {
-            warnPopup('store burntCheck failed.')
+            warnPopup('store burntCheck failed: ${e}')
             warnPopup(e)
          }
       })
@@ -224,9 +275,10 @@ const main = async () => {
       showSNsCheck?.addEventListener('change', async () => {
          try {
             await promiseStoreKey({ showSNsStored: showSNsCheck.checked })
-            sendMsgToOrsTabs({ showSourceNote: showSNsCheck.checked }) // alert tabs that visibility of source notes has changed
+            let msg = new MessageDispatch({ showSourceNote: showSNsCheck.checked }) // alert tabs to change source note visibility
+            msg.sendOneWay()
          } catch (e) {
-            warnPopup(`store source note check failed`)
+            warnPopup(`store source note check failed: ${e}`)
             warnPopup(e)
          }
       })
@@ -234,9 +286,10 @@ const main = async () => {
       showFWCheck?.addEventListener('change', async () => {
          try {
             await promiseStoreKey({ showFullWidth: showFWCheck.checked })
-            sendMsgToOrsTabs({ displayFullWidth: showFWCheck.checked })
+            let msg = new MessageDispatch({ displayFullWidth: showFWCheck.checked })
+            msg.sendOneWay()
          } catch (e) {
-            warnPopup(`full width check failed`)
+            warnPopup(`full width check failed: ${e}`)
             warnPopup(e)
          }
       })
@@ -244,9 +297,10 @@ const main = async () => {
       collapseCheck?.addEventListener('change', async () => {
          try {
             await promiseStoreKey({ collapseDefaultStored: collapseCheck.checked })
-            sendMsgToOrsTabs({ collapseAll: collapseCheck.checked })
+            let msg = new MessageDispatch({ collapseAll: collapseCheck.checked }, 'tabs')
+            msg.sendOneWay()
          } catch (e) {
-            warnPopup(`store collapse by default checkbox failed`)
+            warnPopup(`store 'collapse by default' checkbox failed: ${e}`)
             warnPopup(e)
          }
       })
@@ -254,10 +308,10 @@ const main = async () => {
       showNavCheck?.addEventListener('change', async () => {
          try {
             await promiseStoreKey({ showNavStored: showNavCheck.checked })
-            sendMsgToOrsTabs({ showNav: showNavCheck.checked }) // change visibility of menu
+            let msg = new MessageDispatch({ showNav: showNavCheck.checked }) // change visibility of menu
+            msg.sendOneWay()
          } catch (e) {
-            warnPopup(`store Menu checkbox failed`)
-            warnPopup(e)
+            warnPopup(`store 'show Menu' checkbox failed: ${e}`)
          }
       })
 
@@ -265,7 +319,8 @@ const main = async () => {
       showMenuCheck?.addEventListener('change', async () => {
          try {
             await promiseStoreKey({ showMenuStored: showMenuCheck.checked })
-            sendMsgToOrsTabs({ showMenu: showMenuCheck.checked }) // change visibility of menu
+            let msg = new MessageDispatch({ showMenu: showMenuCheck.checked }) // change visibility of menu
+            msg.sendOneWay()
          } catch (e) {
             warnPopup(`store Menu checkbox failed`)
             warnPopup(e)

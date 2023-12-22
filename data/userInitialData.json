@@ -1,7 +1,7 @@
 {
    "cssSelectorStored": "Dark",
    "lawsReaderStored": "OrLeg",
-   "showBurntStored": true,
+   "doShowBurnt": true,
    "showSNsStored": true,
    "showFullWidth": false,
    "collapseDefaultStored": false,

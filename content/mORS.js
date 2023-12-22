@@ -5,7 +5,7 @@ const runMain = async () => {
    let docBody = document.body.cloneNode(true)
    docBody = await firstClean(docBody)
    const extractHeadingInfo = stripInfo(docBody) // heading.js
-   docBody = extractHeadingInfo.bodyComponent // firstClean.js
+   docBody = extractHeadingInfo.bodyComponent // firstClean.js //TODO, make object for whole body, build new heading without using original
    const tocDiv = extractHeadingInfo.headData.isFormerProvisions
    ? null
    : buildTOC(docBody) // toc.js
@@ -21,6 +21,7 @@ const runMain = async () => {
    finalCleanUp([headingDiv, volumeNav, tocDiv, mainDiv, floatMenuDiv]) // finalClean.js : puts together pieces, does post html rendering cleanup
    addButtons() // buttons.js : add buttons for collapsable sections, expanding links & button listeners
    if (await implementUserParameters()) { // storedData.js : implement remaining stored data (other than OrLaw lookup/menu)
+
       navigateToTag() // navToTag.js : navigate to tag (#) in url, if any
    }
 }
