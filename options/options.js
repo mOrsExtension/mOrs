@@ -53,7 +53,7 @@ window.addEventListener('load', async () => {
    }
 
    const getUserColorInputsFromBrowser = async () => {
-      return await sendAndReceiveFromBackground('getBrowserStoredColorData')
+      return await sendAndReceiveFromBackground({miscTask: 'buildColorData'})
    }
    /** take color object and update input selection buttons;
     * fires on page load, cancel/reset or receiving input code
@@ -103,7 +103,7 @@ window.addEventListener('load', async () => {
       infoOptions(`Hiding export buttons set to : ${doHide}`, 'doHideImportMenu')
    }
    const populatePresetDropdown = async () => {
-      const colorOptionsList = await sendAndReceiveFromBackground('getPaletteList')
+      const colorOptionsList = await sendAndReceiveFromBackground({miscTask: 'getPaletteList'})
       colorOptionsList.pop() // remove "custom" as separate option
       loadPresetSelector.options.length = 0
       const blankOption = document.createElement("option")
@@ -204,7 +204,7 @@ window.addEventListener('load', async () => {
 
    /**change to load preset dropdown */
    loadPresetSelector.addEventListener('change', async () => {
-      const presetColors = await sendAndReceiveFromBackground({ 'getJson' : 'cssPresetColors' })
+      const presetColors = await sendAndReceiveFromBackground({ fetchJson : 'cssPresetColors' })
       const userChoice = loadPresetSelector.value
       if (presetColors[userChoice] != null) {
          const presetPalette = presetColors[userChoice]
@@ -235,7 +235,7 @@ window.addEventListener('load', async () => {
    /** sends message to each ORS tab's content script (addListeners.js) */
    const sendMessageToTabs = async (tabMessage) => {
       try {
-         const orsTabsList = await sendAndReceiveFromBackground('getOrsTabs')
+         const orsTabsList = await sendAndReceiveFromBackground({miscTask: 'queryTabs'})
          for (const aTab of orsTabsList) {
             browser.tabs.sendMessage(aTab.id, {toMORS : tabMessage})
          }
@@ -249,11 +249,13 @@ window.addEventListener('load', async () => {
    * @param {string} functionName*/
    const infoOptions = (infoMsg, functionName = '??') => {
       sendMessageToBackground({
-         info: {
-            txt: infoMsg,
-            script: 'options.js',
-            aCaller: functionName,
-            color: '#db8' //pinkish
+         log: {
+            info: {
+               txt: infoMsg,
+               script: 'options.js',
+               aCaller: functionName,
+               color: '#db8' //pinkish
+            }
          }
       })
    }
@@ -263,11 +265,13 @@ window.addEventListener('load', async () => {
    * @param {string} functionName*/
    const warnOptions = (warnMsg, functionName = '??') => {
       sendMessageToBackground({
-         warn: {
-            txt: warnMsg,
-            script: 'options.js',
-            aCaller: functionName,
-            color: 'yellow'
+         log: {
+            warn: {
+               txt: warnMsg,
+               script: 'options.js',
+               aCaller: functionName,
+               color: 'yellow'
+            }
          }
       })
    }
