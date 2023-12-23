@@ -1,11 +1,22 @@
 //createDivs.js
 //@ts-check
 
+//TODO: #24 #bugfix: createDivs generally not working
+
 /** called only from mORS.js (main script)
 Creates divs for headings, note groups, sections, notes and forms */
 const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
+   let body = new DivBuilder()
+}
+class DivBuilder {
 
-   /**Disconnects everything after head>sub>temp>note>section>form (break is intentionally absenst)
+
+}
+
+
+
+function mainTemp() {
+   /**Disconnects everything after head>sub>temp>note>section>form (break is intentionally absent)
    * @param {String} divType */
    const initVars = divType => {
       switch (divType) {  // intended to cascade downward (intentionally with no breaks)
@@ -59,7 +70,7 @@ const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
    * @param {Element|null} useDiv */
    const addToDiv = (
       aPara,
-      useDiv = inWhere([currentForm, currentSec, currentNote])
+      useDiv = getParentElement([currentForm, currentSec, currentNote])
    ) => {
       /**make sure neither are falsy */
       if (aPara && useDiv) {
@@ -69,27 +80,19 @@ const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
       }
    }
 
-   //MAIN
-   // global variables
-   let currentNote = null
-   let currentSec = null
-   let currentHead = null
-   let currentSubHead = null
-   let currentTemp = null
-   let currentForm = null
-   let changeDomList = []
-
-   /** takes list of parent, returns first one that exists */
-   const inWhere = (/** @type {any[]} */ parentList) => {
+   /** takes list of potential parents, returns first one that exists, if none, returns the main body */
+   const getParentElement = (/** @type {any[]} */ parentList) => {
       parentList.push(bodyCopy)
       let answer
       parentList.forEach(possibleParent => {
-         if (possibleParent && !answer) {
+         if (possibleParent != null && !answer) {
             answer = possibleParent
          }
       })
       return answer
    }
+
+
    bodyCopy.querySelectorAll('p').forEach(aPara => {
       const paraHTML = aPara.innerHTML
       switch (aPara.className) {  // assign it to a div based on a its class
@@ -118,7 +121,7 @@ const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
             currentTemp = makeNewDiv(
                aPara,
                'tempProvisions',
-               inWhere([currentSubHead, currentHead])
+               getParentElement([currentSubHead, currentHead])
             )
          } break
 
@@ -127,7 +130,7 @@ const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
             currentNote = makeNewDiv(
                aPara,
                'note',
-               inWhere([currentTemp, currentSubHead, currentHead])
+               getParentElement([currentTemp, currentSubHead, currentHead])
             )
          } break
 
@@ -169,11 +172,7 @@ const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
                   'buildBodyDivs/SectionStart'
                )  // TODO #5 Handle future amend section for "that would become operative upon" language for 469.992 and 196.800, etc. note sections
             }
-            currentSec = makeNewDiv(
-               aPara,
-               `section ${getType()}`,
-               inWhere([currentNote, currentSubHead, currentHead])
-            ) // and this section is a new ORS div (parented by main body)
+            currentSec = makeNewDiv(aPara, `section ${getType()}`, getParentElement([currentNote, currentSubHead, currentHead])) // and this section is a new ORS div (parented by main body)
          } break // "section"
 
             case 'startForm': {
@@ -202,7 +201,7 @@ const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
                )
                addToDiv(
                   aPara,
-                  inWhere([
+                  getParentElement([
                      currentSec,
                      currentNote,
                      currentTemp,
@@ -220,7 +219,7 @@ const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
             default: {
                addToDiv(
                   aPara,
-                  inWhere([
+                  getParentElement([
                      currentForm,
                      currentSec,
                      currentNote,
