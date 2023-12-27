@@ -3,38 +3,31 @@
 
 //TODO: #24 #bugfix: createDivs generally not working
 
-/** called only from mORS.js (main script)
-Creates divs for headings, note groups, sections, notes and forms */
-const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
-   let body = new DivBuilder()
-}
 class GenericDiv {
-   constructor (element, type, parent) {
-      this.elementList = [element]
+   constructor (firstElement, type, parent) {
+      this.elementList = [firstElement]
       this.parent = parent
       this.classList = []
       this.classList.push(type)
+      this.Div = this.constructOwnDiv()
    }
-
-   addParagraph (paragraph) {
-      this.elementList.push(paragraph)
-   }
-
-   addChild (childParagraph) {
-      let newChild = new aDiv(childParagraph, this)
-      this.elementList.push(newChild)
-   }
-
-   getParent () {
-      return this.parent()
-   }
-
    constructOwnDiv () {
       let newDiv = document.createElement('div')
       this.elementList.forEach(anElem => {
          newDiv.appendChild(anElem)
       })
       newDiv.className = this.classList.join(' ')
+      return newDiv
+   }
+
+   addParagraph (paragraph) {
+      this.elementList.push(paragraph)
+   }
+
+   addChild (childParagraph, type) {
+      let newChild = new GenericDiv(childParagraph, type, this)
+      this.elementList.push(newChild.Div)
+      return newChild
    }
 }
 
@@ -44,8 +37,62 @@ class SectionDiv extends GenericDiv {
    }
 }
 
+class ParaClassAndParentIdentifier {
+   constructor (className) {
+      this.className = className
+      this.sortClass()
+   }
+
+   sortClass() {
+      switch(this.className) {
+         case 'headingLabel': {
+            if (parents.active.form == null) {
+               this.build('head', 'body', 'heading')
+            } else {
+               this.buildForm()
+            }
+         } break
+         case 'subheadLabel': {
+            if (parents.active.form == null) {
+               this.build('sub', 'head', 'subhead')
+            } else {
+               this.buildForm()
+            }
+         } break
+         case 'tempHeadLabel': {
+            this.build('temp', 'sub', 'tempProvision')
+         } break
+         case 'startNote': {
+            this.build('note', 'temp', 'note')
+         } break
+         case 'startForm': {
+            this.build('form', 'sec', 'form')
+         } break
+         case 'sectionStart': {
+            this.build('sec', 'note', 'sec')
+         } break
+         default: {
+            this.parent = parents.getExistingParentElement('form')
+            this.buildsNew = 'none'
+         } break
+      }
+   }
+
+   build(close, parent, build) {
+      parents.closeParents(close)
+      this.type = close
+      this.parent = parents.getExistingParentElement(parent)
+      this.buildNew = build
+   }
+
+   buildForm() {
+      this.parent = parents.getExistingParentElement('form')
+      this.buildsNew = 'none'
+   }
+}
+
 // initializing object for holding which parent of certain children class is active
-let newBody = document.createElement('body')
+let newBody = new GenericDiv()
 let parents = {active: {
       body:newBody,
       head:null,
@@ -77,149 +124,75 @@ let parents = {active: {
    }
 }
 
-class ParaClassAndParentIdentifier {
-   /* Three bad names:
-      returnsParagraphClass
-      looksAtYourCurrentLabelAndContextAndDeterminesWhereYouActuallyBelong
-      straightensOutParagrphsActualClass
-      addsDetailToClassBasedOnContext
-   */
-      constructor (className) {
-         this.className = className
-         this.sortClass()
-      }
-
-      sortClass() {
-         switch(this.className) {
-
-            case 'tempHeadLabel': {
-               this.build('temp', 'sub', 'temp')
-            } break;
-            case 'startNote': {
-               this.build('note', 'temp', 'note')
-            } break;
-            case 'startForm': {
-               this.build('form', 'sec', 'form')
-            } break;
-            case 'sectionStart': {
-               this.build('sec', 'note', 'sec')
-            } break;
-            case 'headingLabel': {
-               this.build('head', 'body', 'head')
-            } break;
-            case 'subheadLabel': {
-               this.build('sub', 'head', 'sub')
-            } break;
-            default: {
-               this.parent = parents.getExistingParentElement('form')
-               this.buildsNew = null
-            }
-         }
-      }
-
-      checkIsForm() {
-         if (parents.active.form != null) {
-            this.parent = parents.active.form
-            this.buildsNew = null
-            return false
-         }
-      }
-
-      build(close, parent, build) {
-         parents.closeParents(close)
-         this.parent = parents.getExistingParentElement(parent)
-         this.buildNew = build
-      }
-    }
-
-
-function mainTemp() {
+/** called only from mORS.js (main script)
+Creates divs for headings, note groups, sections, notes and forms */
+const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
    bodyCopy.querySelectorAll('p').forEach(aPara => {
       const paraHTML = aPara.innerHTML
-      let paraClassAndPArent = new ParaClassAndParentIdentifier(aPara.className)
-      if (paraClassAndPArent.buildNew = null) {
-         paraClassAndPArent.parent.addChild(aPara)
+      let aParaClasses = aPara.className
+      if (aParaClasses == 'endForm') {
+         parents.closeParents('form')
+         next aPara
+      }
+      const paraType = new ParaClassAndParentIdentifier(aParaClasses)
+      let /**@type {GenericDiv} */ paraParent = paraType.parent
+      if (paraType.buildNew=='none') {
+         paraParent.addChild(aPara)
+      } else if (paraType.buildNew == 'sec') {
+         console.log('messy parts of sec')
       } else {
-         let newN
+         let newDiv = paraParent.addChild(aPara, paraType.className)
+         parents.active[paraType.type] = newDiv
       }
+   })
+}
 
-      }
+class SectionClassifier {
+   constructor (
+      /**@type {HTMLParagraphElement}*/ aPara,
+      /**@type {GenericDiv}*/ purportedParent
+   ) {
+      this.aPara = aPara
+      this.paraParent = purportedParent
+      this.paraText = aPara?.textContent || ''
+      this.prevSibText = aPara.previousElementSibling?.textContent || ''
+      this.type = this.isParent_ANDAddClass_ORFindParent()
+       ? 'note'
+       : this.isBurnt()
+       ? 'burnt'
+   }
 
-      // still will need to deal with these specifics:
-               // case 'endForm': {   Deal with these, but for now, can be sorted via default.
-            //    closeForm()
-            // } break;
-            // case 'sourceNote': {
-            //    addToSection()
-            //    closeSection()
-            // } break;
 
+   isParent_ANDAddClass_ORFindParent () {
+      if (this.paraParent.classList.includes('note')) {
+         let noteClass = ['noteSec']
+         if (/Sec\.\s\d{1,3}[a-f]?\./.test(this.paraText)) {
+            noteClass.push('sessionLaw')
+         }
+         if (/repeal[^]*user.s\sconvenience/.test(this.prevSibText)) {
+            noteClass.push('futureRepeal')
+         }
+         if (/amendment[^]*become[^]*after[^]*\sconvenience/.test(this.prevSibText) ||
+          (/amendment[^]*would become[^]*\sconvenience/.test(this.prevSibText))) {
+            noteClass.push('furtherAmend')
+         }
+         if (/amendment[^]*become[^]*until[^]*\sconvenience/.test(this.prevSibText)) {
+            noteClass.push('priorAmend')
+         }
+         if (noteClass?.length > 1) {
+            this.newClasses = noteclass
+            return true
+         }
+         parents.closeParents('temp')
+         this.paraParent = parents.getExistingParentElement('sub')
+      } return false
+   }
 
-   //
-      switch (aPara.className) {  // assign it to a div based on a its class
-         switch(aPara.className) {
-         case 'headingLabel': {
-            /** headings in a form are not chapter headings */
-            if (currentForm) {
-               addToDiv(aPara, currentForm)
-               break
-            }
-            initVars('head')
-            currentHead = makeNewDiv(aPara, 'heading', bodyCopy) // made at chapter root
-         } break
+   isBurnt() {
 
-         case 'subheadLabel': {
-            /** subheadings in a form are not chapter subheading */
-            if (currentForm) {
-               addToDiv(aPara, currentForm)
-               break
-            }
-            initVars('sub')
-            currentSubHead = makeNewDiv(aPara, 'subhead', currentHead) // must be a heading to nest sub within
-         } break
+   }
+}
 
-         case 'tempHeadLabel': {
-            initVars('temp')
-            currentTemp = makeNewDiv(
-               aPara,
-               'tempProvisions',
-               getParentElement([currentSubHead, currentHead])
-            )
-         } break
-
-         case 'startNote': {
-            initVars('note') // close any open forms, sections or other notes
-            currentNote = makeNewDiv(
-               aPara,
-               'note',
-               getParentElement([currentTemp, currentSubHead, currentHead])
-            )
-         } break
-
-         case 'sectionStart': {
-            initVars('section')
-            const getType = () => {
-               if (currentNote) { // if it is in a note div
-                  let noteClass = ['noteSec']
-                  if (/Sec\.\s\d{1,3}[a-f]?\./.test(aPara.textContent)) {
-                     noteClass.push('sessionLaw')
-                  }
-                  if (/repeal[^]*user.s\sconvenience/.test(aPara.previousElementSibling?.textContent)) {
-                     noteClass.push('futureRepeal')
-                  }
-                  if (/amendment[^]*become[^]*after[^]*\sconvenience/.test(
-                     aPara.previousElementSibling?.textContent
-                  )) {
-                     noteClass.push('furtherAmend')
-                  }
-                  if (/amendment[^]*become[^]*until[^]*\sconvenience/.test(
-                     aPara.previousElementSibling?.textContent
-                  )) {
-                     noteClass.push('priorAmend')
-                  }
-                  if (noteClass?.length > 1) {
-                     return noteClass.join(' ')
-                  }
                   initVars('note') // otherwise, close the note div (the section is ORS sec or burnt sec that's outside note)
                }
                if (aPara.nextSibling?.className == 'sourceNote') {
@@ -236,19 +209,6 @@ function mainTemp() {
             }
             currentSec = makeNewDiv(aPara, `section ${getType()}`, getParentElement([currentNote, currentSubHead, currentHead])) // and this section is a new ORS div (parented by main body)
          } break // "section"
-
-         case 'startForm': {
-            /** no reason this should be in an unclosed form, but just in case... */
-            initVars('form')
-            /** should always be the case that this is in a section (or a section in a note). Still checking.*/
-            currentSec
-            ? currentForm = makeNewDiv(aPara, 'form', currentSec)
-            : warnCS(
-               `Something may be wrong with form div #${currentSec} starting with ${aPara.textContent.slice(0, 50)}...`,
-               'createDivs.js',
-               "buildBodyDivs:'start form'"
-            )
-         } break
 
          case 'endForm': {
             if (currentForm) { // this ought to be in a form, but just checking
