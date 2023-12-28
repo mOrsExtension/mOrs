@@ -18,7 +18,7 @@ const regExpCleanUp = bodyHTML => {
       [/\s\s+/, ' '], // removes left over double spaces ('done twice to deal with odd number of spaces >2)
       [/<div[^>]*>/, ''], // remove opening divs
       [/<\/div>/, ''], // remove closing divs
-      [/\[(19\d{2}|20\d{2}|Sub|For|Re|Am)/, '</p><p class="default">[$1'], // new paragraph for source notes (e.g., [20.., [Formerly, ... etc.) not in separate paragraph
+      [/\[(19\d{2}|20\d{2}|Sub|For|Re|Am)/, '</p><p class="default">[$1'], // new paragraph for source notes
       [/<\/b>/, '</b></p><p class="default">'] // new paragraph after bold text ends
    ]
    cleanUpList.forEach(([toReplace, replaceWith]) => {
