@@ -83,7 +83,7 @@ const addButtons = () => {
       const targetSection = document.getElementById(linkText)
       const collapsible = targetSection?.children[1]
       if (collapsible?.classList.contains('collapsible')) {
-         return collapsible
+         return targetSection
       }
       warnCS(
          `Link target: '${linkText}' does not exist; or lacks collapsible children:\n Target is '${

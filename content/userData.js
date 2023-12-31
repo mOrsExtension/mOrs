@@ -110,7 +110,7 @@ class TagHandler {
       try {
          expandSingle(this.targetDocElement) // helper.js - expands the section if collapsed
       } catch (error) {
-         warnCS(error, "navToTag.js", "navigateToTag")
+         warnCS(error, "userData.js", "navigateToTag")
       }
    }
 }
