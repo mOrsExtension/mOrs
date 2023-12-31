@@ -247,6 +247,7 @@ const warnCS = (warnMsg, scriptFileName = 'helper.js', functionName = '') => {
    }, false)
 }
 
+//TODO #25 collapse doesn't seem to be targeting right element
 /** expands single ORS section (when clicking on ORS button, e.g.)
 * @param {Element} collapseElem  */
 const expandSingle = collapseElem => {
@@ -254,7 +255,7 @@ const expandSingle = collapseElem => {
       collapseElem.children[1].classList.remove('invisibility')
    } else {
       warnCS(
-         `Target ${collapseElem.textContent?.slice(0, 60)} is not a section`,
+         `Target '${collapseElem.textContent?.slice(0, 60)}' is '${collapseElem.classList}' & not a section`,
          'helper.js',
          'expandSingle'
       )

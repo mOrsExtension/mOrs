@@ -24,7 +24,7 @@
          ],
          "js": [
             "/content/bodyClean.js",
-            "/content/bodyCreateDivs.js",
+            "/content/buildBodyDivs.js",
             "/content/buildButtons.js",
             "/content/buildHeading.js",
             "/content/buildNewMenus.js",

@@ -23,7 +23,7 @@ function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
       // ORS sections, already wrapped in anchor <a>; may have leadline or be further amended version
       [`^<b>${tabRegExp}<a class="orsLink">`, 'sectionStart'],
 
-      // source notes (e.g., [20.., [Formerly, ... etc.) not in separate paragraph
+      // source notes
       [`^${tabRegExp}\\[(<a class="sessionLaw"|Para|Sub|Former|Repeal|Renum|Am|\(Enacted))`,'sourceNote'],
 
       // Notes paragraphs ("Note:", "Note 4:") prepping for wrap in <div>
@@ -41,7 +41,7 @@ function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
    docBody.querySelectorAll('p').forEach(aPara => {
       firstPassClass.forEach(([searchFor, /**@type {String} */ newClass]) => {
          if (aRegExp(searchFor, '').test(aPara.innerHTML)) {
-            aPara.classList.add(newClass)
+            aPara.className=newClass
          }
       })
    })
