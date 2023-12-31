@@ -1,6 +1,4 @@
-//bodyclean.js
-//@ts-check
-
+//bodyClean.js
 
 function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
    const tabRegExp = '(?:&nbsp;|\\s){0,8}' //regExp for a tab/blank space
@@ -24,7 +22,7 @@ function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
       [`^<b>${tabRegExp}<a class="orsLink">`, 'sectionStart'],
 
       // source notes
-      [`^${tabRegExp}\\[(<a class="sessionLaw"|Para|Sub|Former|Repeal|Renum|Am|\(Enacted))`,'sourceNote'],
+      [`^${tabRegExp}\\[(<a class="sessionLaw"|Para|Sub|Former|Repeal|Renum|Am|Enacted)`,'sourceNote'],
 
       // Notes paragraphs ("Note:", "Note 4:") prepping for wrap in <div>
       [`^${tabRegExp}<b>${tabRegExp}Note(\\s\\d)?:${tabRegExp}<\\/b>`, 'startNote'],
