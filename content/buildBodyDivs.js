@@ -4,7 +4,8 @@
 //CLASSES:
 class GenericDiv {
    constructor (/**@type {HTMLParagraphElement} */ firstElement, classList) {
-      this.classList = [].concat(classList)
+      this.classList = []
+      this.classList = this.classList.concat(classList)
       this.Div = this.constructNewDiv(firstElement)
    }
    constructNewDiv (elem) {
@@ -142,7 +143,6 @@ class SectionClassifier {
 
 // GLOBAL VARIABLES
 // initializing object for holding which parent of certain children class is active
-
 const newMainBodyDiv = new GenericDiv(document.createElement('p'), '')
 newMainBodyDiv.Div.id = 'main'
 newMainBodyDiv.Div.innerHTML = ''
@@ -169,13 +169,115 @@ let parents = {active: {
       revList.slice(revList.indexOf(startWith)).every(possibleParent => {
          if (this.active[possibleParent] != null && answer==this.active.body) {
             answer = this.active[possibleParent]
-            console.log(`found ${possibleParent} = ${this.active[possibleParent]}`)
             return false
          }
-         console.log(`no ${possibleParent}`)
          return true
       })
       return answer
+   }
+}
+
+let cleanerObject = {
+   /**@type {HTMLDivElement} */ body : document.createElement('div'),
+   month:
+   '(?:January|February|March|April|May|June|July|August|September|October|November|December)',
+   doAllCleanUp() {
+      this.getFormParagraphs()
+      this.getNoteParagraphs()
+      return this.body
+   },
+   getFormParagraphs () {
+      this.body.querySelectorAll('div.form').forEach(formDiv => {
+         formDiv.querySelectorAll('p').forEach(formPElem => {
+            this.fixParaBasedOnClass(formPElem)
+         })
+      })
+   },
+   fixParaBasedOnClass(formPElem) {
+      switch (formPElem.className) {
+         case 'startForm':
+         case 'endForm': {
+            formPElem.remove()
+         } break
+         case 'headingLabel':{
+            formPElem.className = 'formHeading'
+         } break
+         default: {
+            if (/^[^a-z]+$/.test(formPElem.textContent) && !/^(_|\s)+$/.test(formPElem.textContent)) {
+               formPElem.className = 'formHeading'
+            } else {
+               formPElem.className = 'default'
+            }
+         }
+      }
+   },
+   getNoteParagraphs () {
+      this.body.querySelectorAll('div.note').forEach(noteDiv => {
+         noteDiv.querySelectorAll('p').forEach(notePara => {
+            this.cleanUpNotes(notePara, noteDiv)
+         })
+      })
+   },
+   cleanUpNotes(notePara, noteDiv) {
+
+      switch (notePara.classList) {
+         case 'startNote': {
+            notePara.textContent = notePara.textContent.trim()
+         } break
+         case 'furtherAmend': {
+            const introPara = notePara.previousElementSibling
+            const isDateTrue = this.colorBasedOnDate(
+               introPara,
+               `on\\sand\\safter\\s(${this.month}\\s\\d{1,2},\\s20\\d{2}),`,
+               'afterDate'
+            )
+            noteDiv.classList.add(isDateTrue ? 'isTrue' : 'isFalse')
+         } break
+         case 'priorAmend': {
+            const introPara = notePara.previousElementSibling
+            const isDateTrue = this.colorBasedOnDate(
+               introPara,
+               `until\\s(${this.month}\\s\\d{1,2},\\s20\\d{2}),`,
+               'untilDate'
+            )
+            noteDiv.classList.add(isDateTrue ? 'isTrue' : 'isFalse')
+         }
+         case 'futureRepeal': {
+            const introPara = notePara.previousElementSibling
+            const isDateTrue = this.colorBasedOnDate(
+               introPara,
+               `until\\s(${this.month}\\s\\d{1,2},\\s20\\d{2}),`,
+               'untilDate'
+            )
+            noteDiv.classList.add(isDateTrue ? 'isTrue' : 'isFalse')
+         }
+      }
+   },
+   /**wraps text found by regular expression in an span and gives it a class; helper.js
+    * @param {HTMLElement} searchedElem / Element to be replaced
+    * @param {string|RegExp} searchText / entire expression to be wrapped
+    * @param {string} spanClass / assigned class */
+   colorBasedOnDate (searchedElem, searchText, spanClass) {
+      const searchFor = RegExp(searchText)
+      let elemHTML = searchedElem.innerHTML
+      let isDateTrue = false
+      let foundMatch = elemHTML.match(searchFor)
+      if (foundMatch) {
+         const theDate = new Date(foundMatch[1])
+         const theText = foundMatch[0]
+         isDateTrue = (theDate > new Date()) == (spanClass == 'untilDate')
+         elemHTML = this.addWrap(elemHTML, theText, isDateTrue)
+      }
+      return isDateTrue
+   },
+   addWrap (elemHTML, match, isDateTrue) {
+      const newSpan = document.createElement('span')
+      newSpan.textContent = match
+      newSpan.classList.add(isDateTrue ? 'isTrue' : 'isFalse')
+      let wrappedArray = elemHTML.split(match)
+      wrappedArray.splice(1, 0, newSpan.innerHTML)
+      console.log(wrappedArray)
+      return wrappedArray.join('')
    }
 }
 
@@ -190,6 +292,9 @@ const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
       /**@type {String} */ aPara.buildType = paraID.buildType
       if (aPara.buildType == 'none') {
          aPara.parent.addParagraph(pElem)  // put generic paragraph into parent
+         if (pElem.classList.contains('endForm')) {
+            parents.closeParents('form') // whatever comes after the end line of a form doesn't belong in form
+         }
          return
       }
       if (aPara.buildType == 'sec') {
@@ -197,138 +302,12 @@ const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
          aPara.parent = secType.paraParent
          aPara.buildClass = aPara.buildClass.concat(secType.addClassList)
       }
-      console.log(aPara.parent.classList)
       let newDiv = aPara.parent.addChild(pElem, aPara.buildClass)
       parents.active[aPara.buildType] = newDiv
-      if (pElem.classList.contains('endForm')) {
-         parents.closeParents('form') // whatever comes after the end line of a form doesn't belong in form
-      }
       if (pElem.classList.contains('sourceNote'))
          parents.closeParents('sec') // whatever comes after source notes doesn't belong in its section
    })
    let newBodyDiv = newMainBodyDiv.Div
    cleanerObject.body = (newBodyDiv)
-
+   return cleanerObject.doAllCleanUp()
 }
-// cleaning up forms
-
-let cleanerObject = {
-   /**@type {HTMLDivElement} */ body : null,
-   notes: this.body.querySelectorAll('div.note'),
-   getFormParagraphs () {
-      this.body.querySelectorAll('div.form').forEach(formDiv => {
-         formDiv.querySelectorAll('p').forEach(formPElem => {
-            this.fixParaBasedOnClass(formPElem)
-         })
-      })
-   },
-   fixParaBasedOnClass(formPElem) {
-      switch (formPElem.className) {
-         case 'startForm':
-         case 'endForm': {
-            formPElem.textContent.replace(/-/g, "=")
-         } break
-         case 'headingLabel':{
-            formPElem.className = 'formHeading'
-         } break
-         default: {
-            if (/^[^a-z]+$/.test(formPElem.textContent) && !/^_+$/.test(formPElem.textContent)) {
-               formPElem.className = 'formHeading'
-            } else {
-               formPElem.className = 'default'
-            }
-         }
-      }
-   },
-   getNoteParagraphs () {
-      this.body.querySelectorAll('div.note').forEach(aDiv => {
-         aDiv.querySelectorAll('p').forEach(notePara => {
-            this.cleanUpNotes(notePara)
-         })
-      })
-   },
-
-   //cleaning up notes:
-   cleanUpNotes(notePara) {
-      switch (notePara.classList) {
-         case:
-         break;
-      }
-
-      if (notePara.classList.contains('startNote')) {
-         notePara.className = 'formHeading'
-         notePara.textContent = notePara.textContent.trim()
-      }
-      if (notePara.classList.contains('furtherAmend')) {
-         const introPara = notePara.previousElementSibling
-         const isDateTrue = wrapDateInSpan(
-            introPara,
-            `on\\sand\\safter\\s(${month}\\s\\d{1,2},\\s20\\d{2}),`,
-            'afterDate'
-         )
-         aDiv.classList.add(isDateTrue ? 'isTrue' : 'isFalse')
-      }
-      if (notePara.classList.contains('priorAmend')) {
-         const introPara = notePara.previousElementSibling
-         const isDateTrue = wrapDateInSpan(
-            introPara,
-            `until\\s(${month}\\s\\d{1,2},\\s20\\d{2}),`,
-            'untilDate'
-         )
-         aDiv.classList.add(isDateTrue ? 'isTrue' : 'isFalse')
-      }
-      if (notePara.classList.contains('futureRepeal')) {
-         const introPara = notePara.previousElementSibling
-         const isDateTrue = wrapDateInSpan(
-            introPara,
-            `until\\s(${month}\\s\\d{1,2},\\s20\\d{2}),`,
-            'untilDate'
-            )
-            aDiv.classList.add(isDateTrue ? 'isTrue' : 'isFalse')
-         }
-      })
-   })
-
-         /**wraps text found by regular expression in an span and gives it a class; helper.js
-         * @param {Node} searchedElem / Element to be replaced
-         * @param {string|RegExp} searchText / entire expression to be wrapped
-         * @param {string} spanClass / assigned class */
-         wrapDateInSpan (searchedElem, searchText, spanClass) {
-            let searchFor = aRegExp(searchText)
-            const elemNodes = searchedElem.childNodes
-            let isDateTrue = false
-            elemNodes.forEach(aNode => {
-               if (aNode.nodeType === Node.TEXT_NODE) {
-                  const matchedText = Array.from(aNode.textContent.matchAll(searchFor))
-                  if (matchedText[0]) {
-                     const splitText = aNode.textContent.split(matchedText[0][0])
-                     const wrappedParts = splitText.reduce((acc, part, index) => {
-                        if (index == 0) {
-                           acc.push(document.createTextNode(part))
-                           const newSpan = document.createElement('span')
-                           newSpan.classList.add(spanClass)
-                           let theDate = new Date(matchedText[0][1])
-                           isDateTrue = !xOR(theDate > new Date(), spanClass == 'untilDate')
-                           newSpan.classList.add(isDateTrue ? 'isTrue' : 'isFalse'),
-                           newSpan.textContent = matchedText[0][0]
-                           acc.push(newSpan)
-                        } else {
-                           acc.push(document.createTextNode(part))
-                        }
-                        return acc
-                     }, [])
-
-                     wrappedParts.forEach(part => {
-                        searchedElem.appendChild(part)
-                        searchedElem.insertBefore(part, aNode)
-                     })
-                     aNode.remove()
-                  }
-               } else if (aNode.nodeType === Node.ELEMENT_NODE) {
-                  wrapDateInSpan(aNode, searchFor, spanClass)
-               }
-            })
-            return isDateTrue
-         }
-      return newBody
-   }

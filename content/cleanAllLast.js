@@ -2,14 +2,11 @@
 //@ts-check
 
 const firstClean = async (bodyNode) => {
-   let bodyHtml = bodyNode.innerHTML
+   let bodyHtml = await(errataFixes(bodyNode.innerHTML))
    bodyHtml = regExpCleanUp(bodyHtml)
    bodyNode.innerHTML = wrapAnchorText(bodyHtml)
    bodyNode = removeSpanStyles(bodyNode)
-   bodyNode = cleanParagraphs(bodyNode)
-   bodyHtml = await(errataFixes(bodyNode.innerHTML))
-   bodyNode.innerHTML = bodyHtml
-   return bodyNode
+   return removeAttributesAndStylesFromPElems(bodyNode)
 }
 
 const regExpCleanUp = bodyHTML => {
@@ -83,13 +80,12 @@ const removeSpanStyles = (/**@type {Node}*/ docBody) => {
    return docBody
 }
 
-const cleanParagraphs = (/**@type {Node}*/ docBody) => {
-   const pElements = docBody.querySelectorAll('p')
-   pElements.forEach(aPara => {
-      aPara.removeAttribute('style') // remove all style elements
-      aPara.removeAttribute('align') // remove all align elements
-      aPara.className = 'default' // Reclassify all <p> elements to "default"
-      if (!/[\S]+/.test(aPara.textContent)) {aPara.remove()} //delete paragraphs without text
+const removeAttributesAndStylesFromPElems = (/**@type {Node}*/ docBody) => {
+   docBody.querySelectorAll('p').forEach(pElem => {
+      pElem.removeAttribute('style') // remove all style elements
+      pElem.removeAttribute('align') // remove all align elements
+      pElem.className = 'default' // Reclassify all <p> elements to "default"
+      if (!/[\S]+/.test(pElem.textContent)) {pElem.remove()} //delete paragraphs without text
    })
    return docBody
 }

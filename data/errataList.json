@@ -1,14 +1,14 @@
 {
-   "90": {
+   "90.582": {
       "old": "(<span [^>]*?>(?:&nbsp;){5,} 90.582[^]*?)</span>[^]*?(inspection.)",
       "new": "<b>$1 $2"
    },
-   "105": {
+   "105.124": {
       "old": "<b>(_{77,})<\/b>",
       "new": "$1"
    },
    "285B.664" : {
-      "old" : "(default\">)([^\\[]+?285B\\.664[^\\[]+?Requirements[^\\[]+?regional)[^\\[]+?(solutions advisory)",
-      "new" : "$1<b>$2$3"
+      "old" : ">([>^\\[]+?285B\\.664[^\\[]+?Requirements[^\\[]+?regional[^\\[]+?solutions advisory)",
+      "new" : "><b>$1"
    }
 }
