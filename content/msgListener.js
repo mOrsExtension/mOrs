@@ -15,11 +15,11 @@ const listenToPopup = () => {
          )
          switch (Object.keys(msgText)[0]) {
             case 'showBurnt':
-            doShowBurnt(msgText['showBurnt']) // helper.js
+            showBurnt(msgText['showBurnt']) // helper.js
             break
 
             case 'showSourceNote':
-            doShowSourceNotes(msgText['showSourceNote']) // helper.js
+            showSourceNotes(msgText['showSourceNote']) // helper.js
             break
 
             case 'updateOrLawsReader':
@@ -39,11 +39,11 @@ const listenToPopup = () => {
             break
 
             case 'showMenu':
-            doShowMenu(msgText['showMenu']) // helper.js
+            showMenu(msgText['showMenu']) // helper.js
             break
 
             case 'showNav':
-            doShowNav(msgText['showNav'])
+            showVolumeOutline(msgText['showNav'])
             break
 
             default:

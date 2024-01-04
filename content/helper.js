@@ -154,12 +154,12 @@ const setFullWidth = isFull => {
       fwButtonLabel.textContent = isFull ? 'Reading Mode' : 'Full Width'
    }
 }
-
 /** toggle Full Width of ORS display from 85ch to 100% */
 const toggleFullWidth = () => {
    setFullWidth(document.documentElement.style.getPropertyValue('--SectionWidth') == '85ch')
 }
 
+/** Sets display of quert selection when changed in popup or startup*/
 const makeVisible = (querySelection, isVisible) => {
    document.querySelectorAll(querySelection).forEach(anElement => {
       isVisible
@@ -167,24 +167,16 @@ const makeVisible = (querySelection, isVisible) => {
       : anElement.classList.add('invisibility')
    })
 }
-
-/** Sets display of burnt (repealed/renumbered) sections when changed in popup or startup
-* @param {boolean} doShow */
-const doShowBurnt = doShow => {
+const showBurnt = doShow => {
    makeVisible('div.section.burnt', doShow)
 }
-
-const doShowMenu = doShow => {
+const showMenu = doShow => {
    makeVisible('div#floatMenu', doShow)
 }
-
-const doShowNav = doShow => {
+const showVolumeOutline = doShow => {
    makeVisible('div#volumeOutline', doShow)
 }
-
-/** Displays source notes on startup & changed in popup
-* @param {boolean} doShow */
-const doShowSourceNotes = doShow => {
+const showSourceNotes = doShow => {
    makeVisible('p.sourceNote', doShow)
 }
 

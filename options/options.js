@@ -1,13 +1,6 @@
 //options.js
+//depends on ../popup/popAndOpHelper.js
 //@ts-check
-
-// Entrance into code
-let browser
-try {
-   browser = chrome
-} catch {
-   console.warn('browser = chrome failure') // can't use warnOptions, because it's not loaded yet
-}
 
 window.addEventListener('load', async () => {
    await browser.storage.sync.set({ cssSelectorStored: 'Custom' })
@@ -53,7 +46,8 @@ window.addEventListener('load', async () => {
    }
 
    const getUserColorInputsFromBrowser = async () => {
-      return await sendAndReceiveFromBackground({miscTask: 'buildColorData'})
+      let msg = new MessageDispatch({'miscTask': 'buildColorData'})
+      return await msg.sendAwaitResponse()
    }
    /** take color object and update input selection buttons;
     * fires on page load, cancel/reset or receiving input code
@@ -103,7 +97,8 @@ window.addEventListener('load', async () => {
       infoOptions(`Hiding export buttons set to : ${doHide}`, 'doHideImportMenu')
    }
    const populatePresetDropdown = async () => {
-      const colorOptionsList = await sendAndReceiveFromBackground({miscTask: 'getPaletteList'})
+      let msg = new MessageDispatch ({miscTask: 'getPaletteList'})
+      const colorOptionsList = await msg.sendAwaitResponse()
       colorOptionsList.pop() // remove "custom" as separate option
       loadPresetSelector.options.length = 0
       const blankOption = document.createElement("option")
@@ -158,7 +153,8 @@ window.addEventListener('load', async () => {
       const saveColorsAndAlertTabs = async (userColors) => {
          await saveToUserBrowserStorage({'userColors' : userColors})
          setInputCodeAndHtmlColors(userColors)
-         sendMessageToTabs({updateCss:true})
+         let msg = new MessageDispatch({updateCss:true}, 'tabs')
+         msg.sendOneWay()
       }
       const saveToUserBrowserStorage = async (userData) => {
          try {
@@ -204,7 +200,8 @@ window.addEventListener('load', async () => {
 
    /**change to load preset dropdown */
    loadPresetSelector.addEventListener('change', async () => {
-      const presetColors = await sendAndReceiveFromBackground({ fetchJson : 'cssPresetColors' })
+      let msg = new MessageDispatch({ fetchJson : 'cssPresetColors' })
+      const presetColors = await msg.sendAwaitResponse()
       const userChoice = loadPresetSelector.value
       if (presetColors[userChoice] != null) {
          const presetPalette = presetColors[userChoice]
@@ -232,23 +229,11 @@ window.addEventListener('load', async () => {
       }
    }
 
-   /** sends message to each ORS tab's content script (addListeners.js) */
-   const sendMessageToTabs = async (tabMessage) => {
-      try {
-         const orsTabsList = await sendAndReceiveFromBackground({miscTask: 'queryTabs'})
-         for (const aTab of orsTabsList) {
-            browser.tabs.sendMessage(aTab.id, {toMORS : tabMessage})
-         }
-      } catch (error) {
-         warnOptions(`Error retrieving tabs list and sending to list :'${tabMessage}'` , 'sendMessageToTabs')
-      }
-   }
-
    /** Sends "information" message to console; viewable in "inspect service worker"
    * @param {string} infoMsg
    * @param {string} functionName*/
    const infoOptions = (infoMsg, functionName = '??') => {
-      sendMessageToBackground({
+      let msg = new MessageDispatch({
          log: {
             info: {
                txt: infoMsg,
@@ -258,13 +243,14 @@ window.addEventListener('load', async () => {
             }
          }
       })
+      msg.sendOneWay()
    }
 
    /**Sends "warning" message to console; viewable in "inspect service worker."
    * @param {string} warnMsg
    * @param {string} functionName*/
    const warnOptions = (warnMsg, functionName = '??') => {
-      sendMessageToBackground({
+      let msg = new MessageDispatch({
          log: {
             warn: {
                txt: warnMsg,
@@ -274,6 +260,7 @@ window.addEventListener('load', async () => {
             }
          }
       })
+      msg.sendOneWay()
    }
 
    main()
