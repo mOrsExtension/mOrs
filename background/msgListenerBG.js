@@ -1,37 +1,6 @@
 //background/msgListener.js
 //@ts-check
 
-/** receives messages from popup.js, options.js & content scripts (/content/*.js) */
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-   (async ()=> {
-      let response = await handleMessage(message, sender)
-      sendResponse(response)      // still does not support async; callback wrapper required
-   })()
-   return true    // also required to keep port open
-})
-
-const handleMessage = async (message, sender) => {
-   let newMsg = new MessageHandlerBG(message, sender)
-   if (!newMsg.isLog) {  // don't want a create duplicate log messages
-      infoBG(`Background received from '${newMsg.fromName}' request '${newMsg.stringyMsg}'`, 'msgListenerBG.js', 'handleMessage', "#fb8")
-   }
-   try {
-      if (await newMsg.doTasksAndFetchResponse()) {
-         if(!newMsg.isLog) {
-            infoBG(`Responding to request with '${newMsg.stringyResponse}'`, 'msgListenerBG.js', 'handleMessage', "#fb8")
-         }
-         return ({response : newMsg.responseMsg})
-      } else {
-         let error = new Error ('Completing task and fetching response failed on handleMessage()')
-         warnCS(error.message, 'msgListenerBG.js', 'handleMessage')
-         return error
-      }
-   } catch (error) {
-      warnBG(error, 'msgListenerBG.js', 'handleMessage')
-      return error
-   }
-}
-
 class MessageHandlerBG {
    constructor (message, sender) {
       if (message.message==null) {
@@ -51,18 +20,18 @@ class MessageHandlerBG {
       this.responseMsg = (
          ('getStorage' in this.receivedMsg)
          ? await this.getFromStorage()   // returns object(s)
-         : ('log' in this.receivedMsg)
-         ? await this.logMessage()   // returns true (displays message on background service worker)
          : ('fetchJson' in this.receivedMsg)
          ? await this.fetchJson() // returns jsonItem
          : ('buildOrLawLink' in this.receivedMsg)
          ? await this.buildOrLawLink()  // returns link
          : ('getChapInfo' in this.receivedMsg)
          ? await this.getChapInfo()  // returns obj(vol, title, chp)
-         : ('newOrsTabs' in this.receivedMsg)
-         ? await this.newOrsTabs()  // returns true (launches new tabs)
          : ('miscTask' in this.receivedMsg)
          ? await this.miscTasks()  // returns any
+         : ('newOrsTabs' in this.receivedMsg)
+         ? this.newOrsTabs()  // returns true (launches new tabs)
+         : ('log' in this.receivedMsg)
+         ? this.logMessage()   // returns true (displays message on background service worker)
          : new Error (`message type not identified for request:/n${this.stringyMsg}`)
       )
       try {
@@ -79,9 +48,15 @@ class MessageHandlerBG {
    async getFromStorage() {
       let get = this.receivedMsg.getStorage
       let ansObj = {}
+
       if (Array.isArray(get)) {
+         let /** @type {Promise[]} */ promiseList = []
          get.forEach(async (item) => {
-            ansObj[item] = await this.getItemFromStorage(item)
+            promiseList.push(this.getItemFromStorage(item))
+         })
+         let storageList = await Promise.all(promiseList)
+         get.forEach((item, index) => {
+            ansObj[item] = storageList[index]
          })
       } else {
          ansObj[get] = await this.getItemFromStorage(get)
@@ -95,8 +70,8 @@ class MessageHandlerBG {
    async miscTasks() {
       let task = this.receivedMsg.miscTask
       return (
-         (task == 'queryTabs')
-         ? await promiseQueryToTabs({url: '*://www.oregonlegislature.gov/bills_laws/ors/ors*.html*'})
+         (task == 'getOrsTabIds')
+         ? await getTabIdsFromTabQuery({url: '*://www.oregonlegislature.gov/bills_laws/ors/ors*.html*'})
          : (task == 'buildColorData' )
          ? await promiseGenerateCss() // styles.js returns object (list of user prefs)
          : (task == 'getPaletteList')
@@ -137,5 +112,40 @@ class MessageHandlerBG {
    newOrsTabs () {
       buildAndNavigateToUrls(this.receivedMsg.navToOrs)   //navigate.js
       return true
+   }
+}
+
+
+/** receives messages from popup.js, options.js & content scripts (/content/*.js) */
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+   (async ()=> {
+      let response = await handleMessage(message, sender)
+      sendResponse(response)      // still does not support async; callback wrapper required
+   })()
+   return true    // also required to keep port open
+})
+
+const handleMessage = async (message, sender) => {
+   let newMsg = new MessageHandlerBG(message, sender)
+   if (newMsg.receivedMsg == null || newMsg.receivedMsg == undefined) {
+      return
+   }
+   if (!newMsg.isLog) {  // don't want a create duplicate log messages
+      infoBG(`Background received from '${newMsg.fromName}' request '${newMsg.stringyMsg}'`, 'msgListenerBG.js', 'handleMessage', "#fb8")
+   }
+   try {
+      if (await newMsg.doTasksAndFetchResponse()) {
+         if(!newMsg.isLog) {
+            infoBG(`Responding to request with '${newMsg.stringyResponse}'`, 'msgListenerBG.js', 'handleMessage', "#fb8")
+         }
+         return ({'response' : newMsg.responseMsg})
+      } else {
+         let error = new Error ('Completing task and fetching response failed on handleMessage()')
+         warnCS(error.message, 'msgListenerBG.js', 'handleMessage')
+         return error
+      }
+   } catch (error) {
+      warnBG(error, 'msgListenerBG.js', 'handleMessage')
+      return error
    }
 }

@@ -16,7 +16,7 @@ const implementUserParameters = async () => {
    * @param {any} responsiveFunction */
    const getInformation = async (dataRequest, responsiveFunction) => {
       try {
-         const response = await deliverToBackground({'getItem': dataRequest})
+         const response = await deliverToBackground({'getStorage': dataRequest})
          const isReturnTrue = response[dataRequest]
          infoCS(
             `Response to '${dataRequest}'='${isReturnTrue}'`,
@@ -34,23 +34,23 @@ const implementUserParameters = async () => {
    }
 
    // MAIN Implement User Parameters
-   await getInformation('collapseDefaultStored', isTrue => {
-      isTrue ? collapseAllSections() : expandAllSections() // in helper.js
+   await getInformation('collapseDefaultStored', doCollapse => {
+      doCollapse ? collapseAllSections() : expandAllSections() // in helper.js
    })
-   await getInformation('doShowBurnt', isTrue => {
-      doShowBurnt(isTrue) // in helper.js
+   await getInformation('doShowBurnt', doShow => {
+      showBurnt(doShow) // in helper.js
    })
-   await getInformation('showSNStored', isTrue => {
-      doShowSourceNotes(isTrue) //  in helper.js
+   await getInformation('showSNsStored', isTrue => {
+      showSourceNotes(isTrue) //  in helper.js
    })
    await getInformation('showFullWidth', isTrue => {
       setFullWidth(isTrue) // in helper.js
    })
    await getInformation('showMenuStored', isTrue => {
-      doShowMenu(isTrue) // in helper.js
+      showMenu(isTrue) // in helper.js
    })
    await getInformation('showNavStored', isTrue => {
-      doShowNav(isTrue) // in helper.js
+      showVolumeOutline(isTrue) // in helper.js
     })
    return true
 }

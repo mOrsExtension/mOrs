@@ -6,7 +6,7 @@
 const newOrUpdateOrLawLinks = async bodyMain => {
    try {
       const anchorList = getAnchorList(bodyMain)
-      const orLaw = await deliverToBackground({getStorage:"lawsReaderStorage"}) // check user form input for source of OrLaws lookup (Hein/OrLeg)
+      const orLaw = await deliverToBackground({getStorage:"lawsReaderStored"}) // check user form input for source of OrLaws lookup (Hein/OrLeg)
       switch (orLaw) {
          case 'Hein': {
             buildHeinLinks(anchorList)
