@@ -1,4 +1,4 @@
-//heading.js
+//buildHeading.js
 //@ts-check
 
 /**Find elements of heading (title, chapter, edition, notes)
@@ -13,7 +13,9 @@ const stripInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
    }
    headingInfo.miscHead.classList.add('note')
    /** splits into $1(chapter number) & $2(chapter title) */
-   const chapNameRegEx = /Chapter\s([1-9]\d{0,2}[A-C]?)\s+(?:(?:—|-)\s([^]+))/
+   const chapNameRegExp = new RegExpHandler(/Chapter\s([1-9]\d{0,2}[A-C]?)\s+(?:(?:—|-)\s([^]+))/)
+   const editionNoRegExp = new RegExpHandler(/(20\d{2})\sEDITION/)
+   let formerChapRegExp = new RegExpHandler(/Chapter\s([1-9]\d{0,2}[A-C]?)\s\(Former\sProvisions\)/)
    let /**@type {HTMLParagraphElement[]} */ removalList = []
    let /**@type {boolean} */ notDone = true
    const pElements = docBody.querySelectorAll('p')
@@ -22,14 +24,14 @@ const stripInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
    pElements.forEach((aPara, index) => {
       if (notDone) {
          const paraText = aPara.textContent + ''
-         if (/\d\s\(Former\sProvisions\)/.test(paraText)) { // identifying "former provisions" chapter
+         if (formerChapRegExp.testMe(paraText)) { // identifying "former provisions" chapter
             infoCS(
                'Former provisions chapter detected',
-               'heading.js',
-               'buildHeading'
+               'buildHeading.js',
+               'stripInfo'
             )
             headingInfo.isFormerProvisions = true
-            thisChapNum = ifRegExMatch(/Chapter\s([1-9]\d{0,2}[A-C]?)/, paraText, 0, 1) // global variable in helper.js
+            thisChapNum = formerChapRegExp.firstMatchGroupNo(paraText, 1) // global variable in helper.js
             headingInfo.thisChapName = `(Former Provisions: ${pElements[index + 1]?.textContent})`
             headingInfo.thisTitleName = pElements[index + 3].textContent
             removalList.push(
@@ -41,37 +43,40 @@ const stripInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
             <p>If "Show repealed/renumbered sections" is unchecked, the rest of the page will be blank.</p?`
             infoCS(
                `Found Title: ${headingInfo.thisTitleName} and chapter ${thisChapNum}: ${headingInfo.thisChapName}`,
-               'heading.js',
+               'buildHeading.js',
                'pElements.forEach'
             )
             notDone = false
             return
          }
 
-         if (/(20\d{2})\sEDITION/.test(paraText)) {
-            headingInfo.thisEdition = ifRegExMatch(/(20\d{2})/, paraText) // Get ORS chapter number
+         if (editionNoRegExp.testMe(paraText)) {
+            headingInfo.thisEdition = editionNoRegExp.firstMatchGroupNo(paraText, 1) // Get ORS chapter number
             removalList.push(aPara, pElements[index + 1], pElements[index + 2])
             notDone = false
             return
          }
-         if (!hasFoundChapter && chapNameRegEx.test(paraText)) {
-            thisChapNum = ifRegExMatch(chapNameRegEx, paraText, 0, 1) // Get ORS chapter number
-            headingInfo.thisChapName = ifRegExMatch(chapNameRegEx, paraText, 0, 2) // Get chapter title alone - could kill and just retrieve from .json, but this works.
-            hasFoundChapter = true
+         if (!hasFoundChapter && chapNameRegExp.testMe(paraText)) {
+            thisChapNum = chapNameRegExp.firstMatchGroupNo(paraText, 1) // Get ORS chapter number
+            headingInfo.thisChapName = chapNameRegExp.firstMatchGroupNo(paraText, 2) // Get chapter title alone
+            infoCS(
+               `Found chapter ${thisChapNum}: ${headingInfo.thisChapName} in line ${index+1}`,
+               'buildHeading.js',
+               'stripInfo'
+            )
             removalList.push(aPara)
             return
          }
          if (hasFoundChapter) {
-            //everything either gets appended or deleted until we get to
-            headingInfo.miscHead.appendChild(aPara) // will automatically remove it from body when moving
+            headingInfo.miscHead.appendChild(aPara) // moved to misc heading; leaves no copy in body
          } else {
-            removalList.push(aPara)
+            removalList.push(aPara) // deleted pieces not used anywhere
          }
       }
    })
    infoCS(
       `Deleting ${removalList.length} duplicate paragraphs from heading.`,
-      'heading.js',
+      'buildHeading.js',
       'stripInfo'
    )
    removalList.forEach(deadPara => {
@@ -116,7 +121,7 @@ const buildHeading = async headingInfo => {
    let htmlMainHead = document.createElement('div')
    htmlMainHead.id = 'mainHead'
 
-   // Append the <h1 - 3> elements to the <div> element + any misc info between headings
+   // Append the <h1 - 3> elements (+ any misc info between headings) to the heading <div>
    headingChildrenList.forEach(child => {
       htmlMainHead.appendChild(child)
    })

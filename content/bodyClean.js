@@ -40,30 +40,24 @@ function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
    ]
    docBody.querySelectorAll('p').forEach(aPara => {
       firstPassClass.forEach(([searchFor, /**@type {String} */ newClass]) => {
-         if (aRegExp(searchFor, '').test(aPara.innerHTML)) {
+         if (new RegExpHandler(searchFor).testMe(aPara.innerHTML)) {
             aPara.className=newClass
          }
       })
    })
 
    //delete extra spaces in labeled paragraphs
-   docBody.querySelectorAll(
-      'p.subSec, p.para, p.subPara, p.sectionStart, p.sourceNote, p.note'
-   ).forEach(aPara => {
-      aPara.innerHTML = replacer(
-         aPara.innerHTML,
-         `^${tabRegExp}(?:<b>)?${tabRegExp}`,
-         '',
-         ''
-      ) //search for leading tabs & delete
+   docBody.querySelectorAll('p.subSec, p.para, p.subPara, p.sectionStart, p.sourceNote, p.note').forEach(aPara => {
+      //search for leading tabs & delete
+      aPara.innerHTML = new RegExpHandler(`^${tabRegExp}(?:<b>)?${tabRegExp}`,'').replacePerFlags(aPara.innerHTML, '')
    })
 
    //figure out whether upper case (L+) is paragraph (l) or subparagraph (L)
-   let subParas = Array.from(docBody.querySelectorAll('p.subPara'))
+   let subParas = docBody.querySelectorAll('p.subPara')
    subParas.forEach((aPara, pIndex) => {
-      if (/^\(L+\)/.test(aPara?.textContent)) {
+      if (/^\(L+\)/.test(aPara.textContent)) {
          // find each upper case (L) (or (LL) or (LLL))
-         if (pIndex > 0 && !/^\(K+\)/.test(subParas[pIndex - 1]?.textContent)) {
+         if (pIndex > 0 && !/^\(K+\)/.test(subParas[pIndex - 1].textContent)) {
             // unless previous paragraph is a "(K+)"
             aPara.className = 'para' // reclass as paragraph
          }
@@ -80,7 +74,7 @@ function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
             aPara.className = 'startForm'
             infoCS(
                `Form start > '${aPara?.previousElementSibling?.textContent?.slice(0, 60)}...'`,
-               'bodyclean.js',
+               'bodyClean.js',
                'defaultParas.forEach'
             )
          } else {
@@ -129,34 +123,33 @@ function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
       }
    })
 
-   // Find leadlines & burnt sections:
-   let SectionParas = docBody.querySelectorAll('p.sectionStart')
-   SectionParas.forEach(aPara => {
-      // go through each paragraph classed as section
-      aPara.innerHTML = replacer(
+   // Find leadlines...
+   docBody.querySelectorAll('p.sectionStart').forEach(aPara => {
+      // for ORS:
+      aPara.innerHTML = new RegExpHandler(`(\\/a>${tabRegExp})([^]{2,})`).replaceAll(
          aPara.innerHTML,
-         `(\\/a>${tabRegExp})([^]{2,})`,
          '$1<span class="leadline">$2</span>'
-      ) // following new ORS section
-      aPara.innerHTML = replacer(
+      )
+      // for Session laws:
+      aPara.innerHTML = new RegExpHandler(`(Sec\\.\\s\\d{1,3}[a-f]?\\.${tabRegExp})([^]{2,})`).replaceAll(
          aPara.innerHTML,
-         `(Sec\\.\\s\\d{1,3}[a-f]?\\.${tabRegExp})([^]{2,})`,
          '$1<span class="leadline">$2</span>'
-      ) // following Sec. ##. note section.
+      )
    })
 
    /** For units that have roman numerals change paragraphs to sub-subparagraphs
    * (or subparagraphs to sub-sub-subparagraphs)
    * @param {String} changeFrom
-   * @param {String} changeTo
-   */
+   * @param {String} changeTo */
    const romanizeParagraphs = (changeFrom, changeTo) => {
 
       /**Return lower case value in the leading parenthesis as lowercase
       * E.g.: "(B) Manufactured dwellings;" ==> 'b' *
       * @param {String} theText */
-      const inFirstParenthesis = theText => {
-         return theText.replace(/^\(([^]+?)\)(?:[^]*)/, '$1').toLowerCase()
+      const inParensLowerCase = theText => {
+         let findFirstParenz = new RegExpHandler(/^\(([^]+?\))/)
+         let result = findFirstParenz.firstMatchGroupNo(theText, 1)
+         return result.toLowerCase()
       }
 
       /** Turns num (under 90) into lower case roman numeral string.
@@ -177,7 +170,7 @@ function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
       /** get list of all paragraphs (or subparagraphs) */
       const subsArray = Array.from(docBody.querySelectorAll(`p.${changeFrom}`))
       for (let i = 0; i < subsArray.length; i++) {
-         if (inFirstParenthesis(subsArray[i].textContent) == 'ii') {  //every roman numeral will have a (ii), that's what we're looking for.
+         if (inParensLowerCase(subsArray[i].textContent) == 'ii') {  //every roman numeral will have a (ii), that's what we're looking for.
             let doExit = false
             /** usually roman numerals will start with previous paragraph (i); but could be (A)(i)
              * @type {number} */ let startRomanWith = -1
@@ -193,7 +186,7 @@ function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
             }
             /**comparison for testing roman numerals, just makes index cleaner @type {number} */ let romanNumberCount = 3 // starting with what should be (iii)
             while (doExit == false) {
-               inFirstParenthesis(subsArray[i + romanNumberCount - 2]?.textContent) == romanize(romanNumberCount) ?
+               inParensLowerCase(subsArray[i + romanNumberCount - 2]?.textContent) == romanize(romanNumberCount) ?
                romanNumberCount++ :
                doExit = true
                for (let j = startRomanWith; j < romanNumberCount - 2; j++) {

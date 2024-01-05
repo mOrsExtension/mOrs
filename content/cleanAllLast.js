@@ -19,38 +19,38 @@ const regExpCleanUp = bodyHTML => {
       [/<\/b>/, '</b></p><p class="default">'] // new paragraph after bold text ends
    ]
    cleanUpList.forEach(([toReplace, replaceWith]) => {
-      bodyHTML = replacer(bodyHTML, aRegExp(toReplace), replaceWith)
+      bodyHTML = new RegExpHandler(toReplace).replaceAll(bodyHTML, replaceWith )
    })
    return bodyHTML
 }
 
 const wrapAnchorText = bodyHTML => {
    bodyHTML = anchorWrap(
-      /**wrap ORS chapters in anchor class="orsLink"*/
+      /**add links for ORS chapter references (class="orsLink") */
       bodyHTML,
       /\b[1-9]\d{0,2}[A-C]?\b\.(\d{3}\b|\b7\dA?\.\d{4})\b/,
       'orsLink'
    )
    bodyHTML = anchorWrap(
-      /**wrap "Preface to ORS text" in anchor */
+      /**add links for "Preface to ORS text" (class='preface') */
       bodyHTML,
       /Preface\sto\sOregon\sRevised\sStatutes/,
       'preface'
    )
    bodyHTML = anchorWrap(
-      /**wrap "CST" references in anchor */
+      /**and links for comparative section table references (class =' cst') */
       bodyHTML,
       /(\d{4}\sComparative\sSection\sTable\slocated\sin\sVolume\s22)/,
       'cst'
    )
    bodyHTML = anchorWrap(
-      //wrap session laws in source notes in anchor
+      //builds links for session laws in source notes
       bodyHTML,
       /((?:20|19)\d{2})(?:\W*s\.s\.\d?)?\W*c\.\W*(\d+)/, // ("e.g. 2015 c.218"; "1996 s.s.1 c.3"; "1974 s.s. c.24")
       'sessionLaw'
    )
    bodyHTML = anchorWrap(
-      // wrap session laws references in text in anchor
+      // builds links for session laws references in text
       bodyHTML,
       // (e.g. Chapter 28, Oregon Laws 2015, or "chapter 3, Oregon Laws 2020 (first special session)."
       /(?:C|c)hapter\s(\d{1,4}),\sOregon\sLaws\s((?:20|19)\d{2})(\s\(\w+\sspecial\ssession\))?/,
@@ -58,17 +58,18 @@ const wrapAnchorText = bodyHTML => {
    )
    return bodyHTML
 }
-/**wraps text found by regular expression in an anchor & gives it <a> class; helper.js
+/**wraps text found by regular expression in an anchor & gives it <a> class
 * @param {string} oldText
 * @param {RegExp|string} regExWrap
 * @param {string} anchorClass */
 const anchorWrap = (oldText, regExWrap, anchorClass) => {
-   return oldText.replace(aRegExp(regExWrap), (/** @type {string} */ match) => {
+   // uses RegExp.replace(callback to use matches to generate replacement piece)
+   return oldText.replace(RegExp(regExWrap, 'g'), (/** @type {string} */ match) => {
       return `<a class="${anchorClass}">${match}</a>`
    })
 }
 
-const removeSpanStyles = (/**@type {Node}*/ docBody) => {
+const removeSpanStyles = (/**@type {HTMLElement}*/ docBody) => {
    const spanElements = docBody.querySelectorAll('span[style]')
    spanElements.forEach(aSpan => {
       const spanParent = aSpan.parentElement
@@ -80,12 +81,12 @@ const removeSpanStyles = (/**@type {Node}*/ docBody) => {
    return docBody
 }
 
-const removeAttributesAndStylesFromPElems = (/**@type {Node}*/ docBody) => {
+const removeAttributesAndStylesFromPElems = (/**@type {HTMLElement}*/ docBody) => {
    docBody.querySelectorAll('p').forEach(pElem => {
       pElem.removeAttribute('style') // remove all style elements
       pElem.removeAttribute('align') // remove all align elements
       pElem.className = 'default' // Reclassify all <p> elements to "default"
-      if (!/[\S]+/.test(pElem.textContent)) {pElem.remove()} //delete paragraphs without text
+      if (!/[\S]+/.test(pElem?.textContent)) {pElem.remove()} //delete paragraphs without text
    })
    return docBody
 }
@@ -106,9 +107,8 @@ const errataFixes = async (/**@type {String}*/ bodyHtml) => {
    // After awaiting the retrieval of list, iterate through it and make each regExp change to text
    const errataList = await promiseErrataList
    for (var key in errataList) {
-      bodyHtml = replacer(
+      bodyHtml = new RegExpHandler(errataList[key]['old'], '').replacePerFlags(
          bodyHtml,
-         errataList[key]['old'],
          errataList[key]['new']
       )
    }

@@ -25,7 +25,7 @@ class MessageSenderCS {
 
    async sendMessage () {
       if (!this.isLog) {
-         console.info(`Sending to background scripts: ${this.msgStringy}'`)
+         infoCS(`Content script is sending to background scripts: ${this.msgStringy}'`, 'helper.js', 'sendMessage')
       }
       this.doRespond
        ? await this.sendAwait()
@@ -60,90 +60,54 @@ class MessageSenderCS {
 //Global variables (all content scripts):
 let thisChapNum // found in heading.js // TODO #10 make this part of heading object
 
-/**Converts a [string|RegExp, flags] to /RegExp/flags; helper.js
-* @param {string|RegExp} searchFor
-* @param {string} flags // defaults to "g" */
-const aRegExp = (searchFor = '', flags = 'g') => {
-   if (typeof searchFor == 'string') {
-      return new RegExp(searchFor, flags)
-   } else {
-      return new RegExp(searchFor.source, flags)
+class RegExpHandler {
+   constructor(searchFor, flags = '') {
+      this.RE = this.buildRegExp(searchFor, flags)
    }
-}
 
-/**Returns string to replace searchFor in oldText with replaceString; helper.js
-* @param {string} oldText
-* @param {string|RegExp} searchFor
-* @param {string} replaceString */
-const replacer = (
-   oldText,
-   searchFor,
-   replaceString,
-   flags = 'g',
-   doLog = false
-) => {
-   const searchRegExp = aRegExp(searchFor, flags)
-   if (doLog) {
-      infoCS(searchRegExp.toString(), 'replacer')
-      infoCS(`  => '${replaceString}'`, 'replacer')
-   }
-   return oldText.replace(searchRegExp, replaceString)
-}
-
-/** Searches for 'searchFor' in the 'initialText' and returns 'searchNum'th place result where result is matchPos from RegExp for multiple regEx groups.
-* Example 'ifRegExMatch(/(a)(\d)/, "a3 a9 ad a2 a8", 2, 1) => '2' (second parentheses of 2nd (counting from 0) 'a#')
-* Default, returns first
-* @param {string | RegExp} searchFor,
-* @param {string} initialText
-* @param {number} resultNum
-* @param {number} groupNum
-* helper.js */
-const ifRegExMatch = (searchFor, initialText, resultNum = 0, groupNum = 0) => {
-   const thisRegExp = aRegExp(searchFor, resultNum != 0 ? 'g' : '')
-   if (thisRegExp.test(initialText)) {
-      //first make sure there's at least one result
-      if (resultNum == 0 || groupNum == 0) {
-         const myIndex = resultNum > groupNum ? resultNum : groupNum //greater of index or matchPos
-         const resultsList = initialText.match(thisRegExp) // TODO: #11 Revisit and make work better as Reg Exp class handler using matchAll, etc.
-         if (resultsList && resultsList.length > resultNum) {
-            const ans = resultsList[myIndex]
-            infoCS(
-               `Search for ${searchFor} at ${resultNum}:${groupNum} returned ${ans.slice(0, 150)}`,
-               'helper.js',
-               'ifRegExMatch'
-            )
-            return ans
-         }
-
-         return ''
+   buildRegExp(searchFor, flags) {
+      if (typeof searchFor == 'string') {
+         return new RegExp(searchFor, flags)
+      } else {
+         return new RegExp(searchFor.source, flags)
       }
-      const myMatches = initialText.matchAll(thisRegExp)
-      const matchList = Array.from(myMatches) //creates array of result arrays of each group
-      const ans = matchList[resultNum][groupNum]
-      infoCS(
-         `Search for ${searchFor} at ${resultNum}:${groupNum} returned ${ans.slice(0, 60)}`,
-         'helper.js',
-         'ifRegExMatch'
-      )
-      return ans
    }
-   infoCS(
-      `Search for ${searchFor} at ${resultNum}:${groupNum} returned NO matches`,
-      'helper.js',
-      'ifRegExMatch'
-   )
-   return ''
-}
 
-/** logical xor (only a or b, but not both)
-* @param {boolean} x
-* @param {boolean} y */
-const xOR = (x, y) => {
-   return (x || y) && !(x && y)
+   replaceAll(/**@type {string} */ oldText, /** @type {string} */ replaceWith) {
+      return oldText.replace(new RegExp((this.RE.source), 'g'), replaceWith)
+   }
+
+   replacePerFlags(/**@type {string} */ oldText, /** @type {string} */ replaceWith) {
+      return oldText.replace(this.RE, replaceWith)
+   }
+
+   testMe(testedString) {
+      return (RegExp(this.RE.source, '')).test(testedString) // no flag to prevent sticky tests (searching for add'l)
+   }
+
+   /** returns entire first match ($%), if any */
+   firstMatch(testedString) {
+      return this.testMe(testedString)
+       ? testedString.match(RegExp(this.RE.source, 'g'))[0] // global flag prevents it from returning capturing groups
+       : null
+   }
+
+   // returns the index # capturing group of the first match (starting with 1, not 0)
+   firstMatchGroupNo(testedString, index) {
+      if (this.testMe(testedString)) {
+         let match = [...testedString.match(RegExp(this.RE.source, ''))] // no flag means it will return capturing groups
+         return match[index]
+      }
+      return null
+   }
 }
 
 // SET INITIAL/CHANGED VARIABLES
-//set full Width status to document & on menu button, if any
+/** toggle Full Width of ORS display from 85ch to 100% */
+const toggleFullWidth = () => {
+   setFullWidth(document.documentElement.style.getPropertyValue('--SectionWidth') == '85ch')
+}
+/**set width on document (& on the menu button, if it exists) as set by popup or at startup */
 const setFullWidth = isFull => {
    document.documentElement.style.setProperty(
       '--SectionWidth',
@@ -154,12 +118,8 @@ const setFullWidth = isFull => {
       fwButtonLabel.textContent = isFull ? 'Reading Mode' : 'Full Width'
    }
 }
-/** toggle Full Width of ORS display from 85ch to 100% */
-const toggleFullWidth = () => {
-   setFullWidth(document.documentElement.style.getPropertyValue('--SectionWidth') == '85ch')
-}
 
-/** Sets display of quert selection when changed in popup or startup*/
+/** Sets visibility of query selection as set by popup or at startup*/
 const makeVisible = (querySelection, isVisible) => {
    document.querySelectorAll(querySelection).forEach(anElement => {
       isVisible
@@ -180,9 +140,7 @@ const showSourceNotes = doShow => {
    makeVisible('p.sourceNote', doShow)
 }
 
-/** Sends "information" message to console;
-* viewable only in "inspect service worker"
-* content/helper.js
+/** Sends "information" message to service worker console.
 * @param {string} infoMsg
 * @param {string} scriptFileName
 * @param {string} functionName
@@ -226,7 +184,7 @@ const warnCS = (warnMsg, scriptFileName = 'helper.js', functionName = '') => {
          functionName = '??'
       }
    }
-   console.warn(`${scriptFileName} - ${functionName}: ${warnMsg}`)
+   console.warn(`${scriptFileName} - ${functionName}: ${warnMsg}`) // want to make sure it gets noticed in both places
    deliverToBackground({
       log: {
          warn: {
@@ -255,14 +213,14 @@ const expandSingle = expandedElem => {
 
 /**  Collapses (actually, makes invisible now) all ORS sections  */
 const collapseAllSections = () => {
-   document.querySelectorAll('div.collapsible').forEach(collapsible => {
-      collapsible.classList.add('invisibility')
+   document.querySelectorAll('div.collapsible').forEach(hidable => {
+      hidable.classList.add('invisibility')
    })
 }
 
 /**  Makes visible all ORS sections */
 const expandAllSections = () => {
-   document.querySelectorAll('div.collapsible').forEach(collapsible => {
-      collapsible.classList.remove('invisibility')
+   document.querySelectorAll('div.collapsible').forEach(hidable => {
+      hidable.classList.remove('invisibility')
    })
 }

@@ -29,20 +29,20 @@ const finalCleanUp = finalDivs => {
          case 'orsLink': {
             if (anAnchor.dataset.chapter) {
                anAnchor.href = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${anAnchor.dataset.chapter}.html`
-               anAnchor.href = replacer(anAnchor.href, /(ors)0+(\d{3})/, '$1$2') // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
+               anAnchor.href = new RegExpHandler(/(ors)0+(\d{3})/).replaceAll(anAnchor.href, '$1$2') // deletes any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
                break
             }
-            if (aRegExp(`^${thisChapNum}\.`).test(anAnchor.innerText)) {
-               // link to current chapter
-               anAnchor.href = replacer(anAnchor.innerText, /(\S+)/, '#$1')
+            // build link to current chapter
+            if (new RegExpHandler(`^${thisChapNum}\.`).testMe(anAnchor.innerText)) {
+               anAnchor.href = new RegExpHandler(/(\S+)/).replaceAll(anAnchor.innerText, '#$1')
                break
             }
-            anAnchor.href = replacer(
-               anAnchor.textContent,
-               /[^]*?(([1-9]\d{0,2}[A-C]?)\.\S*)[^]*?/,
-               'https://www.oregonlegislature.gov/bills_laws/ors/ors00$2.html#$1'
-            ) // create link to external chapter, targets the specific chapter id
-            anAnchor.href = replacer(anAnchor.href, /(ors)0+(\d{3})/, '$1$2') // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
+            // create link to external chapter, targets the specific chapter id
+            anAnchor.href = new RegExpHandler(/[^]*?(([1-9]\d{0,2}[A-C]?)\.\S*)[^]*?/).replaceAll(
+               'https://www.oregonlegislature.gov/bills_laws/ors/ors00$2.html#$1',
+               anAnchor.textContent
+            )
+            anAnchor.href = new RegExpHandler(/(ors)0+(\d{3})/).replaceAll(anAnchor.href, '$1$2') // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
          } break
 
          default:
@@ -53,7 +53,7 @@ const finalCleanUp = finalDivs => {
    // delete empty divs
    let allElements = finalBody.getElementsByTagName('*')
    Array.from(allElements).forEach(anElement => {
-      if (/^(\s|\&nbsp)+$/.test(anElement?.textContent)) {
+      if (new RegExpHandler(/^(\s|\&nbsp)+$/).testMe(anElement.textContent)) {
          infoCS(
             `Deleting ${anElement.innerHTML}`,
             'finalClean.js',

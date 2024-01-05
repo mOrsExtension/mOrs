@@ -34,7 +34,8 @@ const buildFloatingMenuDiv = async () => {
    const findOffsetUrl = async offset => {
       const offSetChap = deliverToBackground({chapInfo: { chapNum: thisChapNum, offset: offset }}, true)
       let url = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${offSetChap[0]}.html`
-      return replacer(url, /(ors)0+(\d{3})/, '$1$2') // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
+      // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html"):
+      return new RegExpHandler(/(ors)0+(\d{3})/).replaceAll(url, '$1$2')
    }
 
    /**building button functionality to navigate to url */
