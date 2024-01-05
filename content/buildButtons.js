@@ -62,7 +62,7 @@ const addButtons = () => {
 
    /**@param {string} linkText */
    const isInternalChapLink = linkText => {
-      return aRegExp(`\\b${thisChapNum}\\.`).test(linkText)
+      return new RegExpHandler(`\\b${thisChapNum}\\.`).testMe(linkText)
    }
 
    const makeLinkExpandTarget = aLink => {
