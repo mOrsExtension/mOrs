@@ -145,11 +145,7 @@ const showSourceNotes = doShow => {
 * @param {string} scriptFileName
 * @param {string} functionName
 * @param {string} color */
-const infoCS = (
-   infoMsg,
-   scriptFileName = 'helper.js',
-   functionName = '',
-   color = 'pink'
+const infoCS = (infoMsg, scriptFileName = 'helper.js', functionName = '', color = 'pink'
 ) => {
    if (functionName == '') {
       try {
@@ -160,13 +156,12 @@ const infoCS = (
    }
    deliverToBackground({
       log : {
-         info: {
-            txt: infoMsg,
-            script: scriptFileName,
-            aCaller: functionName,
-            color: color
-         }
-      },
+         doWarn: false,
+         txt: infoMsg,
+         script: scriptFileName,
+         aCaller: functionName,
+         color: color
+      }
    }, false)
 }
 
@@ -187,12 +182,11 @@ const warnCS = (warnMsg, scriptFileName = 'helper.js', functionName = '') => {
    console.warn(`${scriptFileName} - ${functionName}: ${warnMsg}`) // want to make sure it gets noticed in both places
    deliverToBackground({
       log: {
-         warn: {
-            txt: warnMsg,
-            script: scriptFileName,
-            aCaller: functionName,
-            color: 'yellow'
-         }
+         doWarn: true,
+         txt: warnMsg,
+         script: scriptFileName,
+         aCaller: functionName,
+         color: 'yellow'
       }
    }, false)
 }

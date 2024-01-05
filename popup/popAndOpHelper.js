@@ -2,46 +2,39 @@ let browser
 try {
    browser = chrome
 } catch {
-   console.info('Setting browser to Chrome triggered error')
+   console.info('Setting browser to Chrome triggered an error')
 }
 
 class MessageDispatch {
    constructor(msg, sendTo = 'background') {
       this.sendTo = (sendTo == 'tabs') ? 'toMORS' : 'message'
       this.msg = {[this.sendTo]: msg}
-      this.logThis = true
+      this.LogInMsg = false
       if (typeof(msg) == 'object') {
-         this.logThis = !('log' in msg)
+         this.LogInMsg = ('log' in msg)
          this.stringyMsg = `${JSON.stringify(msg)} ==> '${sendTo}'`
       }
-      this.response = ''
+      this.response
    }
 
+   /**sends message and returns response and stores it in this.response */
    async sendAwaitResponse () {
-      if (this.logThis) {
-            infoPopup(`Sending ${this.stringyMsg} and awaiting response.`, 'sendResponse')
-         }
+      this.logIfNotRecursive(`Sending ${this.stringyMsg} and awaiting response.`, 'sendResponse', false)
       try {
          let msgResponse = await this.sendCallback()
          if (msgResponse.response != null && msgResponse.response != undefined) {
             this.response = msgResponse.response
-         }
-         this.stringyResponse = JSON.stringify(this.response)
-         if (this.logThis) {
-            infoPopup(`Response: ${this.stringyResponse}`, 'sendResponse')
+            this.stringyResponse = JSON.stringify(this.response)
+            this.logIfNotRecursive(`Received response: ${this.stringyResponse}`, 'sendResponse', false)
          } else {
-            throw new Error(`Response from message '${this.stringyMsg}' was unexpected value: '${this.response}'`)
+            throw new Error(`Response from message '${this.stringyMsg}' was unexpected or missing value: '${this.response}'`)
          }
       } catch (error) {
-         if (this.logThis) {
-            warnPopup(`Could not send and receive response: ${error}`, 'sendResponse')
-         } else {
-            console.warn(error)
-         }
+         this.logIfNotRecursive(`Could not send and receive response: ${error}`, 'sendResponse', true)
+         this.response=''
       }
       return this.response
    }
-
    async sendCallback() {
       return await browser.runtime.sendMessage(this.msg)
    }
@@ -52,53 +45,49 @@ class MessageDispatch {
       } else {
          this.sendToBackground()
       }
-      if (this.logThis) {
-         infoPopup(`Sent ${this.stringyMsg} (no response requested).`, 'sendResponse')
-      }
+      this.logIfNotRecursive(`Sending ${this.stringyMsg} (no response requested).`, 'sendResponse', false)
    }
-
-   sendToBackground() {
-      try {
-         browser.runtime.sendMessage(this.msg)
-      } catch (error) {
-         if (this.logThis) {
-            warnPopup(`Could not send message: ${error}`, 'sendResponse')
-         }
-      }
-   }
-
    async sendToMors() {
       let orsTabIdList = []
       try {
          let getTabsList = new MessageDispatch({miscTask: 'getOrsTabIds'}, 'background')
          orsTabIdList = await getTabsList.sendAwaitResponse()
       } catch (error) {
-         warnPopup (`Error retrieving ORS tabs: ${error}`), 'sendToMors'
+         this.logIfNotRecursive (`Error retrieving ORS tabs: ${error}`, 'sendToMors', true)
       }
       try {
          orsTabIdList.forEach(tabId => {
             browser.tabs.sendMessage(tabId, this.msg)
          })
       } catch (error) {
-         warnPopup(`Could not send message: ${error}`, 'sendResponse')
+         this.logIfNotRecursive(`Could not send message: ${error}`, 'sendResponse', true)
+      }
+   }
+   sendToBackground() {
+      try {
+         browser.runtime.sendMessage(this.msg)
+      } catch (error) {
+         this.logIfNotRecursive(`Could not send message: ${error}`, 'sendResponse', true)
       }
    }
 
-   logIfNotRecursive (msg, scriptName, warn = false) {
-      let log = {}
-      let msg = new MessageDispatch({
-         log: {
-            info: {
-               txt: infoMsg,
-               script: 'options.js',
+   /** if this is not already a message, log information about sending & receiving*/
+   logIfNotRecursive (logMsg, functionName='', warn = false) {
+      if (this.LogInMsg == false) {
+         let msg = new MessageDispatch({
+            log: {
+               doWarn: warn,
+               txt: (warn ? logMsg : logMsg.slice(0, 100)),
+               script: 'popAndOpHelper.js',
                aCaller: functionName,
-               color: '#db8' //pinkish
+               color: (warn ? 'yellow' : '#af9') // green
             }
-         }
-      })
-      msg.sendOneWay()
-   }
-
+         })
+         msg.sendOneWay()
+      }
+      if (warn) {
+         console.warn(logMsg) // want to make sure this gets seen somehow
+      }
    }
 }
 

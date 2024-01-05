@@ -13,9 +13,7 @@ const launchNewTab = (url) => {
  * @param {string} [calledBy]*/
 const infoPopup = (infoTxt, calledBy = '??') => {
    let msg = new MessageDispatch({
-      log : {
-         info: {txt: infoTxt, aCaller: calledBy, script: 'popup.js', color: 'cyan'}
-         }
+      log : {doWarn: false, txt: infoTxt, aCaller: calledBy, script: 'popup.js', color: 'cyan'}
       })
    msg.sendOneWay()
 }
@@ -25,9 +23,7 @@ const infoPopup = (infoTxt, calledBy = '??') => {
  * @param {string} calledBy */
 const warnPopup = (warnTxt, calledBy = '??') => {
    let msg = new MessageDispatch({
-      log :{
-         warn: {script: 'popup.js', txt: warnTxt, aCaller: calledBy}
-      }
+      log : {doWarn: true, txt: warnTxt, script: 'popup.js', aCaller: calledBy}
    })
    msg.sendOneWay()
 }
@@ -64,9 +60,7 @@ const updateCssForPopup = async () => {
 const displayExistingUserOptions = async () => {
    try {
       await displayPaletteDropdownList()
-      console.log('going to fetch data: \n************')
       const storedData = await fetchAllStoredData()
-      console.log (storedData)
       showBurntCheck.checked = storedData.doShowBurnt
       showSNsCheck.checked = storedData.showSNsStored
       showFWCheck.checked = storedData.showFullWidth

@@ -82,17 +82,14 @@ class MessageHandlerBG {
 
    logMessage() {
       let log = this.receivedMsg.log
-      if (log.info) {
-         const infoMsg = log.info
-         infoBG(infoMsg.txt, infoMsg.script, infoMsg.aCaller, infoMsg.color) // helperBG.js
-         return true // ought to be unnecessary, but otherwise may time out waiting for response
-      } else if (log.warn) {
-         const warnMsg = log.warn
-         warnBG(warnMsg.txt, warnMsg.script, warnMsg.aCaller, 'yellow') // helperBG.js
-         return true // ought to be unnecessary, but otherwise may time out waiting for response
+      if (log.doWarn) {
+         warnBG(log.txt, log.script, log.aCaller, log.color) // helperBG.js
+      } else if (log.doWarn==false) {
+         infoBG(log.txt, log.script, log.aCaller, log.color) // helperBG.js
       } else {
          return new Error('unidentified log message requested')
       }
+      return true // ought to be unnecessary, but otherwise may time out waiting for response
    }
 
    async fetchJson() {
