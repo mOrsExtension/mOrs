@@ -116,7 +116,6 @@ window.addEventListener('load', async () => {
 
    /** set up button functionality on optionsFrame (save, reset, color change) */
    /**COLOR SELECTORS */
-
    /**color change input buttons */
       const buildColorChangeListener = aSelector => {
          let delayAfterChange // create timer
@@ -235,12 +234,11 @@ window.addEventListener('load', async () => {
    const infoOptions = (infoMsg, functionName = '??') => {
       let msg = new MessageDispatch({
          log: {
-            info: {
-               txt: infoMsg,
-               script: 'options.js',
-               aCaller: functionName,
-               color: '#db8' //pinkish
-            }
+            doWarn: false,
+            txt: infoMsg,
+            script: 'options.js',
+            aCaller: functionName,
+            color: '#db8' //pinkish
          }
       })
       msg.sendOneWay()
@@ -252,12 +250,11 @@ window.addEventListener('load', async () => {
    const warnOptions = (warnMsg, functionName = '??') => {
       let msg = new MessageDispatch({
          log: {
-            warn: {
-               txt: warnMsg,
-               script: 'options.js',
-               aCaller: functionName,
-               color: 'yellow'
-            }
+            doWarn: false,
+            txt: warnMsg,
+            script: 'options.js',
+            aCaller: functionName,
+            color: 'yellow'
          }
       })
       msg.sendOneWay()
