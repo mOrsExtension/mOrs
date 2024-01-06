@@ -131,7 +131,7 @@ const buildH3 = () => {
    return []
 }
 
-const addToDocHead = () => {
+const addToHead = () => {
    //builds document <head> (includes title for the tab)
    let docHead = document.head
    let meta = document.createElement('meta')

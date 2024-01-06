@@ -56,7 +56,6 @@ const updateCssForPopup = async () => {
    }
 }
 
-/**TODO #19 this displayUserOptions mess has to have a better way to operate, especially in conjunction with updating background listener to accept objects with multiple commands (issue #1)*/
 const displayExistingUserOptions = async () => {
    try {
       await displayPaletteDropdownList()
