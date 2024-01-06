@@ -30,8 +30,6 @@ const promiseGetFromStorage = async objKey => {
    }
 }
 
-//TODO #4 Create "add to storage" class and make background handle storing through messaging
-
 const getTabIdsFromTabQuery = async queryObj => {
    const tabList = await browser.tabs.query(queryObj)
    let idList = []

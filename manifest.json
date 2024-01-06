@@ -69,7 +69,8 @@
       }
    ],
    "host_permissions": [
-      "*://www.oregonLegislature.gov/bills_laws/ors/ors*.html*"
+      "*://www.oregonLegislature.gov/bills_laws/ors/ors*.html*",
+      "*://www.oregonLegislature.gov/bills_laws/ors/ano*.html*"
    ],
    "minimum_chrome_version": "92"
 }

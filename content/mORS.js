@@ -4,16 +4,15 @@
 const runMain = async () => {
    let docBody = document.body.cloneNode(true)
    docBody = await firstClean(docBody)
+   addToHead() // buildHeading.js
    const extractHeadingInfo = extractChapterInfo(docBody) // heading.js
-   docBody = extractHeadingInfo.bodyComponent // firstClean.js //TODO, make object for whole body, build new heading without using original
+   docBody = extractHeadingInfo.bodyComponent // firstClean.js
    const tocDiv = (chapterInfo.isFormerProvisions) ? null : buildTOC(docBody) // buildTOC.js - not needed if former provisions section
    let mainDiv = document.createElement('div') // moving remaining body into its own separate "main" div
    mainDiv.id = 'main'
    mainDiv.innerHTML = docBody.innerHTML
    mainDiv = bodyCleanUp(mainDiv) // bodyclean.js
    mainDiv = buildBodyDivs(mainDiv) // createDivs.js
-   addToDocHead() // buildHeading.js
-   //TODO, can these by done together with Promise.All?:
    const finishedPromiseList = await Promise.all([
       buildFloatingMenuDiv(), // newDivs.js building floating menu
       VolNavConstructor.buildDiv(), //newDivs.js building new menu for navigating through volumes
@@ -27,11 +26,13 @@ const runMain = async () => {
    finalCleanUp([headingDiv, volumeNav, tocDiv, mainDiv, floatMenuDiv]) // finalClean.js : puts together pieces, does post html rendering cleanup
    addButtons() // buttons.js : add buttons for collapsable sections, expanding links & button listeners
 
-   //TO
+   //TODO #34 Move implementing user parameters to earlier in process to avoid issues with scroll stops in the wrong place?
    if (await implementUserParameters()) { // storedData.js : implement remaining stored data (other than OrLaw lookup/menu)
       navigateToTag() // navToTag.js : navigate to tag (#) in url, if any
    }
 }
+
+//TODO #35 Fetch annotations and display as dropdown for sections.
 
 //Startup
 window.addEventListener('load', () => {

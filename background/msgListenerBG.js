@@ -98,7 +98,8 @@ class MessageHandlerBG {
 
    async buildOrLawLink () {
       let oL = this.receivedMsg.buildOrLawLink
-      return await promiseGetOrLegUrl(oL.year, oL.chap, oL.reader)  // buildOrLaws.js TODO - does this still work with short sessions or does it need extended?
+      /** TODO #33 - check if buildOrLawLink in msgListener works with special sessions or needs extended? */
+      return await promiseGetOrLegUrl(oL.year, oL.chap, oL.reader)  // buildOrLaws.js
    }
 
    async getChapInfo() {
