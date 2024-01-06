@@ -8,7 +8,7 @@ let retrievalObject = {}
 const promiseReadJsonFile = async filename => {
    if (retrievalObject.fileName) {
       infoBG(
-         `Retrieving cached ${jsonFile}`,
+         `Retrieving cached ${filename}`,
          'webResources.js',
          'promiseReadJsonFile'
       )
@@ -79,7 +79,7 @@ const getChapterList = async () => {
    return chapter
 }
 
-/** returns chapter info from chapter List [number, title, volume, chapterName, titleName]
+/** returns chapter info based on json file for 'volume>title>chap' info;
 * based on matching chapter number (or offset to allow return of previous or next chapter)*/
 const promiseGetChapterInfo = async ({ chapNum, offset = 0 }) => {
    const myList = await getChapterList()
@@ -92,7 +92,14 @@ const promiseGetChapterInfo = async ({ chapNum, offset = 0 }) => {
       }
       return ans.length == 0 // keeps going while true; stops as soon as we find it
    })
-   return (ans.length == 0
+   const ansArray = (ans.length == 0
    ? [chapNum, 0, 0, 'chapter not found', 'title not found']
    : ans)
+   return {
+      'chapNo' : ansArray[0],
+      'titleNo' : ansArray[1],
+      'volNo' : ansArray[2],
+      'chapName' : ansArray[3],
+      'titleName' : ansArray[4]
+   }
 }

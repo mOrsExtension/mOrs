@@ -32,8 +32,8 @@ const buildFloatingMenuDiv = async () => {
 
    /**calculating next/prev chapter number & returning chapter url */
    const findOffsetUrl = async offset => {
-      const offSetChap = deliverToBackground({chapInfo: { chapNum: thisChapNum, offset: offset }}, true)
-      let url = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${offSetChap[0]}.html`
+      const fetchOffsetChapInfo = sendAwait({'getChapInfo': { chapNum: chapterInfo.chapNo, offset: offset }}, true)
+      let url = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${fetchOffsetChapInfo.chapNo}.html`
       // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html"):
       return new RegExpHandler(/(ors)0+(\d{3})/).replaceAll(url, '$1$2')
    }
@@ -43,7 +43,7 @@ const buildFloatingMenuDiv = async () => {
       const offsetUrl = await findOffsetUrl(offset)
       infoCS(
          `Navigating +${offset} chap to ${offsetUrl}`,
-         'newDivs.js',
+         'buildNewMenus.js',
          'navToOffsetChap',
          '#4f4'
       )
@@ -73,10 +73,20 @@ const buildFloatingMenuDiv = async () => {
    return menuPanel
 }
 
-const buildVolumeNav = async () => {
+const VolNavConstructor = {
+   async buildDiv () {
+      let volumeOutlineDiv = document.createElement('div')
+      volumeOutlineDiv.id = 'volumeOutline'
+      let volJson =  await sendAwait({'fetchJson': 'VolumeOutline'}, true)
+      volumeOutlineDiv.innerHTML = this.getHtmlFromVolOutline(volJson)
+      volumeOutlineDiv.querySelectorAll('details').forEach(detailElem => {
+         this.highlightIfMatches(detailElem)
+      })
+      return this.volumeOutlineDiv
+   },
 
-   /**  Convert the JSON data into nested HTML lists*/
-   const VolOutlineJsonToHtml = data => {
+   /**  Convert the JSON data into nested HTML lists using builtin CSS "summary/details" to form dropdowns*/
+   getHtmlFromVolOutline (data) {
       let mainList = ''
       for (const volumeKey in data.Volumes) {
          const volume = data.Volumes[volumeKey]
@@ -96,41 +106,25 @@ const buildVolumeNav = async () => {
          mainList += '</ul></details>' // Close the volume's <details>
       }
       return mainList
-   }
+   },
 
-   let volumeOutlineDiv = document.createElement('div')
-   volumeOutlineDiv.id = 'volumeOutline'
-   let volOutline = ''
-   try {
-      const volJson = await deliverToBackground({'fetchJson': 'VolumeOutline'}, true)
-      volOutline = VolOutlineJsonToHtml(volJson)
-   } catch (error) {
-      warnCS(`Could not fetch volume outline, error: ${error}`, 'buildNewMenus.js', 'buildVolumeNav')
-   }
-   volumeOutlineDiv.innerHTML = volOutline
-
-   //open to current chapter & highlight:
-   const chapInfo = await deliverToBackground({getChapInfo: { chapNum: thisChapNum }}, true)
-   volumeOutlineDiv.querySelectorAll('details').forEach(aDetail => {
-      if (aDetail.dataset.volume == chapInfo[2]) {
-         (Boolean(aDetail.firstElementChild)
-         ? aDetail.firstElementChild?.classList.add('highlight')
-         : infoCS('Volume was not highlighted', 'newDivs.js', 'buildVolumeNav'))
-         aDetail.open = true
+   highlightIfMatches (/** @type {HTMLDetailsElement}*/ detailElem) {
+      if (detailElem.dataset.volume == chapterInfo.volNo) {
+         (Boolean(detailElem.firstElementChild)
+          ? detailElem.firstElementChild?.classList.add('highlight')
+          : infoCS('No volume child to highlight', 'buildNewMenus.js', 'checkDetailForHighlighting'))
+         detailElem.open = true
       }
-      if (aDetail.dataset.title == chapInfo[1]) {
-         aDetail.open = true
-         Boolean(aDetail.firstElementChild)
-         ? aDetail.firstElementChild?.classList.add('highlight')
-         : infoCS('Title was not highlighted', 'newDivs.js', 'buildVolumeNav')
-
-         aDetail.querySelectorAll('span').forEach(aSpan => {
-            if (aSpan.dataset.chapter == thisChapNum) {
+      if (detailElem.dataset.title == chapterInfo.titleNo) {
+         detailElem.open = true
+         Boolean(detailElem.firstElementChild)
+          ? detailElem.firstElementChild?.classList.add('highlight')
+          : infoCS('No title child to highlight', 'buildNewMenus.js', 'checkDetailForHighlighting')
+         detailElem.querySelectorAll('span').forEach(aSpan => {
+            if (aSpan.dataset.chapter == chapterInfo.chapNo) {
                aSpan.classList.add('highlight')
             }
          })
       }
-   })
-
-   return volumeOutlineDiv
+   },
 }

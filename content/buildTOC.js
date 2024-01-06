@@ -1,4 +1,4 @@
-//toc.js
+//buildTOC.js
 //@ts-check
 
 /** Returns Div of table of contents, formatted */

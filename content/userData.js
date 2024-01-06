@@ -16,7 +16,7 @@ const implementUserParameters = async () => {
    * @param {any} responsiveFunction */
    const getInformation = async (dataRequest, responsiveFunction) => {
       try {
-         const response = await deliverToBackground({'getStorage': dataRequest})
+         const response = await sendAwait({'getStorage': dataRequest})
          const isReturnTrue = response[dataRequest]
          infoCS(
             `Response to '${dataRequest}'='${isReturnTrue}'`,
@@ -98,7 +98,7 @@ class TagHandler {
    }
 
    async scrollBrowserToTarget() {
-      await newDelay(1800) // delay in miliseconds before starting scroll. Seems to reduce issues with scrolling and then needing html redrawn.
+      await newDelay(1800) // delay in milliseconds before starting scroll. Seems to reduce issues with scrolling and then needing html redrawn.
       if (!this.hasTarget || this.targetDocElement == null) {
          return
       }
@@ -119,7 +119,7 @@ class TagHandler {
 const userStylesRefresh = async () => {
    const theRootStyle = document.documentElement.style
    try {
-      const replacementSheet = await deliverToBackground({miscTask: 'buildColorData'}) // calls /background/style.js
+      const replacementSheet = await sendAwait({miscTask: 'buildColorData'}) // calls /background/style.js
       for (let key in replacementSheet) {
          theRootStyle.setProperty(`--${key}`, replacementSheet[key])
       }
