@@ -8,10 +8,39 @@ try {
    console.warn(`Assignment of chrome to browser failed:'${error}'`) // using warn rather than warnCS, because browser isn't registering right
 }
 
-const deliverToBackground = async (messageItem, doAwaitResponse = true)  => {
-   let msg = new MessageSenderCS(messageItem, doAwaitResponse)
-   if (await msg.sendMessage() == "success") {
-      return doAwaitResponse ? msg.respond() : true
+class RegExpHandler {
+   constructor(searchFor, flags = '') {
+      this.RE = this.buildRegExp(searchFor, flags)
+   }
+   buildRegExp(searchFor, flags) {
+      if (typeof searchFor == 'string') {
+         return new RegExp(searchFor, flags)
+      } else {
+         return new RegExp(searchFor.source, flags)
+      }
+   }
+   replaceAll(/**@type {string} */ oldText, /** @type {string} */ replaceWith) {
+      return oldText.replace(new RegExp((this.RE.source), 'g'), replaceWith)
+   }
+   replacePerFlags(/**@type {string} */ oldText, /** @type {string} */ replaceWith) {
+      return oldText.replace(this.RE, replaceWith)
+   }
+   testMe(testedString) {
+      return (RegExp(this.RE.source, '')).test(testedString) // no flag to prevent sticky tests (searching for add'l)
+   }
+   /** returns entire first match ($%), if any */
+   firstMatch(testedString) {
+      return this.testMe(testedString)
+       ? testedString.match(RegExp(this.RE.source, 'g'))[0] // global flag prevents it from returning capturing groups
+       : null
+   }
+   // returns the index # capturing group of the first match (starting with 1, not 0)
+   firstMatchGroupNo(testedString, index) {
+      if (this.testMe(testedString)) {
+         let match = [...testedString.match(RegExp(this.RE.source, ''))] // no flag means it will return capturing groups
+         return match[index]
+      }
+      return null
    }
 }
 
@@ -46,59 +75,17 @@ class MessageSenderCS {
          }
       }
    }
-
    sendOneWay() {
       browser.runtime.sendMessage({ message: this.message })
    }
-
-
    respond () {
       return this.response
    }
 }
-
-//Global variables (all content scripts):
-let thisChapNum // found in heading.js // TODO #10 make this part of heading object
-
-class RegExpHandler {
-   constructor(searchFor, flags = '') {
-      this.RE = this.buildRegExp(searchFor, flags)
-   }
-
-   buildRegExp(searchFor, flags) {
-      if (typeof searchFor == 'string') {
-         return new RegExp(searchFor, flags)
-      } else {
-         return new RegExp(searchFor.source, flags)
-      }
-   }
-
-   replaceAll(/**@type {string} */ oldText, /** @type {string} */ replaceWith) {
-      return oldText.replace(new RegExp((this.RE.source), 'g'), replaceWith)
-   }
-
-   replacePerFlags(/**@type {string} */ oldText, /** @type {string} */ replaceWith) {
-      return oldText.replace(this.RE, replaceWith)
-   }
-
-   testMe(testedString) {
-      return (RegExp(this.RE.source, '')).test(testedString) // no flag to prevent sticky tests (searching for add'l)
-   }
-
-   /** returns entire first match ($%), if any */
-   firstMatch(testedString) {
-      return this.testMe(testedString)
-       ? testedString.match(RegExp(this.RE.source, 'g'))[0] // global flag prevents it from returning capturing groups
-       : null
-   }
-
-   // returns the index # capturing group of the first match (starting with 1, not 0)
-   firstMatchGroupNo(testedString, index) {
-      if (this.testMe(testedString)) {
-         let match = [...testedString.match(RegExp(this.RE.source, ''))] // no flag means it will return capturing groups
-         return match[index]
-      }
-      return null
+const sendAwait = async (messageItem, doAwaitResponse = true)  => {
+   let msg = new MessageSenderCS(messageItem, doAwaitResponse)
+   if (await msg.sendMessage() == "success") {
+      return doAwaitResponse ? msg.respond() : true
    }
 }
 
@@ -154,7 +141,7 @@ const infoCS = (infoMsg, scriptFileName = 'helper.js', functionName = '', color 
          functionName = '??'
       }
    }
-   deliverToBackground({
+   sendAwait({
       log : {
          doWarn: false,
          txt: infoMsg,
@@ -180,7 +167,7 @@ const warnCS = (warnMsg, scriptFileName = 'helper.js', functionName = '') => {
       }
    }
    console.warn(`${scriptFileName} - ${functionName}: ${warnMsg}`) // want to make sure it gets noticed in both places
-   deliverToBackground({
+   sendAwait({
       log: {
          doWarn: true,
          txt: warnMsg,
@@ -191,7 +178,7 @@ const warnCS = (warnMsg, scriptFileName = 'helper.js', functionName = '') => {
    }, false)
 }
 
-/** expands single ORS section (internal links or pincite link in url)
+/** expands single ORS section (internal links or pin cite link in url)
 * @param {Element} expandedElem  */
 const expandSingle = expandedElem => {
    if (expandedElem && expandedElem.classList.contains('section')) {

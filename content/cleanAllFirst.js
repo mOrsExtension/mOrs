@@ -33,7 +33,7 @@ const finalCleanUp = finalDivs => {
                break
             }
             // build link to current chapter
-            if (new RegExpHandler(`^${thisChapNum}\.`).testMe(anAnchor.innerText)) {
+            if (new RegExpHandler(`^${chapterInfo.chapNo}\.`).testMe(anAnchor.innerText)) {
                anAnchor.href = new RegExpHandler(/(\S+)/).replaceAll(anAnchor.innerText, '#$1')
                break
             }

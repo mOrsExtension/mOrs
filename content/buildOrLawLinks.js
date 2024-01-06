@@ -6,7 +6,7 @@
 const newOrUpdateOrLawLinks = async bodyMain => {
    try {
       const anchorList = getAnchorList(bodyMain)
-      const orLaw = await deliverToBackground({getStorage:"lawsReaderStored"}) // check user form input for source of OrLaws lookup (Hein/OrLeg)
+      const orLaw = await sendAwait({getStorage:"lawsReaderStored"}) // check user form input for source of OrLaws lookup (Hein/OrLeg)
       switch (orLaw) {
          case 'Hein': {
             buildHeinLinks(anchorList)
@@ -86,7 +86,7 @@ const setShortSession = (text, isLong) => {
    return /s\.s\./.test(text) ? text.replace(/[^]*s\.s\.(\d)[^]*/, '$1') : null
 }
 
-/** building links for HeinOnline through SOLL for each anchor (session law reference) in chapter
+/** building links for HeinOnline through State of Oregon Law Library for each anchor (session law reference) in chapter
 * @param {any} sessionLawAnchors // will be list of anchors */
 const buildHeinLinks = sessionLawAnchors => {
    infoCS('Building HeinOnline Links', 'buildOrLawLinks.js', 'buildHeinLinks')
@@ -110,7 +110,7 @@ const sortByDate = anchors => {
    return {"oldList": oldList, "newList": newList}
 }
 
-/**builds links for oregonlegislature.gov session laws for each anchor (session law reference) in chapter */
+/**builds links for oregonLegislature.gov session laws for each anchor (session law reference) in chapter */
 const buildOrLegLinks = (anchors) => {
    infoCS('building OrLeg links', 'buildOrLawLinks.js', 'buildOrLegLinks')
    anchors.forEach(async (anAnchor) => {
@@ -144,7 +144,7 @@ let oreLegLookupJson = null // cashing global object
 const getOrLegLookupJson = async () => {
    if (oreLegLookupJson == null) {
       infoBG('retrieving OrLegLookup', 'buildOrLawLinks.js', 'getOrLegLookupJson')
-      oreLegLookupJson = await deliverToBackground({'fetchJson':'OrLawLegLookup'}, true)
+      oreLegLookupJson = await sendAwait({'fetchJson':'OrLawLegLookup'}, true)
    } return oreLegLookupJson
 }
 
