@@ -103,3 +103,96 @@ const promiseGetChapterInfo = async ({ chapNum, offset = 0 }) => {
       'titleName' : ansArray[4]
    }
 }
+
+const emptyDoc = () => {
+   let parser = new DOMParser()
+   return parser.parseFromString(
+      `<!DOCTYPE html><html><head></head><body></body></html>`,
+      'text/html'
+   )
+}
+const getDocFromUrl = async (/**@type {string} */ url) => {
+   try {
+      let response = await fetch(url)
+      if (!response.ok && !response.redirected) {
+         throw new Error(`Unable to fetch from ${url}. Document is empty. `)
+      }
+      let text = await response.text()
+      let parser = new DOMParser()
+      return parser.parseFromString(text, 'text/html')
+   } catch (error) {
+      warnBG(error)
+      return emptyDoc()
+   }
+}
+
+//GLOBAL CONSTANTS FOR ANNO HANDLER
+const orsRegExp = /\b0*([1-9]\d{0,2}[a-c]?)(\.\d{3,4})?/ // finds "chapter" or "chapter.section", e.g. "459A"
+const tabRegExp = /(&nbsp;|\s)*/
+
+class AnnoHandler {
+
+   constructor(chapNo) {
+      this.chapter = '0'
+      this.url = `https://www.oregonlegislature.gov/bills_laws/ors/ano${this.chapter}.html`
+      this.#validateAndCleanChapter(chapNo)
+      this.response = false
+      this.fetchStart = false
+      this.doc= emptyDoc()
+      if (this.chapter != '0') {
+         this.#fetchData()
+      }
+   }
+   #validateAndCleanChapter(chapNo) {
+      if (orsRegExp.test(chapNo)) {
+         this.chapter =  [...chapNo.match(RegExp(AnnoHandler.orsRegExp.source, ''))][1]
+      }
+   }
+   async #fetchData() {
+      if (this.fetchStart) {
+         return
+      }
+      else {
+         this.fetchStart = true
+         this.doc = await getDocFromUrl(this.url)
+         this.response = true
+      }
+   }
+
+   docTagOne () {
+      if(!this.response) {
+         while(this.response = false) {
+            this.#fetchData()
+         }
+      }
+      this.doc.body.querySelectorAll('p').forEach(p => {
+         p.className = this.getClass(p)
+         if (p.className = 'remove') {
+            p.remove
+         }
+      })
+   }
+
+   getClass(pElem) {
+      if(RegExp(`^${tabRegExp}${this.chapter}\\.\d{3,4}`).test(pElem.textContent)) {
+         return 'sectionHead'
+      }
+      if (/^NOTES\sOF\sDECISION/.test(pElem.textContent)) {
+         return 'decisionHead'
+      }
+      if ((/^ATTY.\sGEN.\sOPINION/).test(pElem.textContent)) {
+         return 'agHeading'
+      }
+      if ((/^LAW\sREVIEW\sCITATION/).test(pElem.textContent)) {
+         return 'lawReviewHeading'
+      }
+      if (RegExp(`^${tabRegExp}$`).test(pElem.textContent)) {
+         return 'remove'
+      }
+      if (RegExp(`${tabRegExp}<b>`).test(pElem.innerHTML)) {
+         return 'remove'
+      }
+      return 'default'
+   }
+
+}
