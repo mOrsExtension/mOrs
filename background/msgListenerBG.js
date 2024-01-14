@@ -30,6 +30,8 @@ class MessageHandlerBG {
          ? await this.miscTasks()  // returns any
          : ('newOrsTabs' in this.receivedMsg)
          ? this.newOrsTabs()  // returns true (launches new tabs)
+         : ('startAnnos' in this.receivedMsg)
+         ? this.startAnnos() // returns true (starts background loading annotations)
          : ('log' in this.receivedMsg)
          ? this.logMessage()   // returns true (displays message on background service worker)
          : new Error (`message type not identified for request:/n${this.stringyMsg}`)
@@ -76,7 +78,10 @@ class MessageHandlerBG {
          ? await promiseGenerateCss() // styles.js returns object (list of user prefs)
          : (task == 'getPaletteList')
          ? await promiseGetPalletteList() // webResources.js returns object
+         : (task == 'finishAnnoRetrieval')
+         ? await finishAnnoRetrieval() // webResources.js returns object
          : new Error ('unidentified misc task requested')
+
       )
    }
 
@@ -105,6 +110,11 @@ class MessageHandlerBG {
    async getChapInfo() {
       // retrieve volume, title and chapter/title names from json file
       return await promiseGetChapterInfo(this.receivedMsg.getChapInfo)
+   }
+
+   startAnnos() {
+      startAnnoRetrieval(this.receivedMsg.startAnnos)   // webResources.js
+      return true
    }
 
    newOrsTabs () {
@@ -139,7 +149,7 @@ const handleMessage = async (message, sender) => {
          return ({'response' : newMsg.responseMsg})
       } else {
          let error = new Error ('Completing task and fetching response failed on handleMessage()')
-         warnCS(error.message, 'msgListenerBG.js', 'handleMessage')
+         warnBG(error.message, 'msgListenerBG.js', 'handleMessage')
          return error
       }
    } catch (error) {

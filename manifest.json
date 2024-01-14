@@ -57,7 +57,8 @@
       "storage",
       "activeTab",
       "tabs",
-      "scripting"
+      "scripting",
+      "offscreen"
    ],
    "web_accessible_resources": [
       {
@@ -72,5 +73,5 @@
       "*://www.oregonLegislature.gov/bills_laws/ors/ors*.html*",
       "*://www.oregonLegislature.gov/bills_laws/ors/ano*.html*"
    ],
-   "minimum_chrome_version": "92"
+   "minimum_chrome_version": "109"
 }

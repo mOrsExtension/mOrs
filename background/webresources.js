@@ -104,48 +104,58 @@ const promiseGetChapterInfo = async ({ chapNum, offset = 0 }) => {
    }
 }
 
-const emptyDoc = () => {
-   let parser = new DOMParser()
-   return parser.parseFromString(
-      `<!DOCTYPE html><html><head></head><body></body></html>`,
-      'text/html'
-   )
-}
-const getDocFromUrl = async (/**@type {string} */ url) => {
-   try {
-      let response = await fetch(url)
-      if (!response.ok && !response.redirected) {
-         throw new Error(`Unable to fetch from ${url}. Document is empty. `)
-      }
-      let text = await response.text()
-      let parser = new DOMParser()
-      return parser.parseFromString(text, 'text/html')
-   } catch (error) {
-      warnBG(error)
-      return emptyDoc()
-   }
-}
+
+/////////////////////
+
 
 //GLOBAL CONSTANTS FOR ANNO HANDLER
 const orsRegExp = /\b0*([1-9]\d{0,2}[a-c]?)(\.\d{3,4})?/ // finds "chapter" or "chapter.section", e.g. "459A"
-const tabRegExp = /(&nbsp;|\s)*/
+let annoBuild
+
+const startAnnoRetrieval = (chapter) => {
+   console.log(chapter)
+   annoBuild = new AnnoHandler(chapter)
+   console.log(annoBuild)
+}
+
+const finishAnnoRetrieval = async () => {
+   console.log('finishAnnoRetrieval')
+   console.log(annoBuild)
+   let a
+   try {
+      a = annoBuild.loopAwaitingData()
+   } catch (error) {
+      console.log(`Nope ${error}`)
+      a = true
+   }
+   console.log(a)
+   if (a) {
+      return annoBuild.sections
+   }
+   return new Error ('failed to retrieve annotations in 10 seconds')
+}
+
 
 class AnnoHandler {
 
    constructor(chapNo) {
       this.chapter = '0'
-      this.url = `https://www.oregonlegislature.gov/bills_laws/ors/ano${this.chapter}.html`
       this.#validateAndCleanChapter(chapNo)
-      this.response = false
+      this.url = `https://www.oregonlegislature.gov/bills_laws/ors/ano00${this.chapter}.html`.replace(/0*(\d{3})/, '$1')
+      this.doc = ' '
+      this.paragraphList = []
       this.fetchStart = false
-      this.doc= emptyDoc()
+      this.annoList = [{'name': chapNo, 'children': []}]
+      this.sections = {}
       if (this.chapter != '0') {
          this.#fetchData()
       }
    }
    #validateAndCleanChapter(chapNo) {
       if (orsRegExp.test(chapNo)) {
-         this.chapter =  [...chapNo.match(RegExp(AnnoHandler.orsRegExp.source, ''))][1]
+         this.chapter =  [...chapNo.match(RegExp(orsRegExp.source, ''))][1]
+      } else {
+         console.log('hmmm....')
       }
    }
    async #fetchData() {
@@ -154,45 +164,94 @@ class AnnoHandler {
       }
       else {
          this.fetchStart = true
-         this.doc = await getDocFromUrl(this.url)
-         this.response = true
+         console.log('fetching')
+         this.doc = await this.#getDocFromUrl()
+         console.log('fetched')
+         this.docDomParsing()
+      }
+   }
+   async #getDocFromUrl () {
+      try {
+         const urlResponse = await fetch(this.url)
+         if (!urlResponse.ok && !urlResponse.redirected) {
+            throw new Error(`Unable to fetch from ${this.url}. Document is empty. `)
+         }
+         const bufferResponse = await urlResponse.arrayBuffer()
+         const decoderMSWord = new TextDecoder('windows-1251')  // because anno file is just uploaded from Word, not typical utf-8 for websites
+         return decoderMSWord.decode(bufferResponse)
+      } catch (error) {
+         warnBG(`${error}`, 'webResources.js', 'getDocFromUrl')
+         return ' '
       }
    }
 
-   docTagOne () {
-      if(!this.response) {
-         while(this.response = false) {
-            this.#fetchData()
+   loopAwaitingData() {
+      let i = 0
+      let isSuccess = false
+      let newLoop = setInterval(() => {
+         if (i > 20) {
+            isSuccess = false
+            clearInterval(newLoop)
+         }
+         if (this.doc) {
+            isSuccess = true
+            clearInterval(newLoop)
+         }
+         this.#fetchData()
+         console.log(`${i}, ${isSuccess}`)
+         i++
+      }, 500)
+      return isSuccess
+   }
+
+   async docDomParsing () {
+      if(!this.doc) {
+         if (!this.loopAwaitingData()) {
+            return
          }
       }
-      this.doc.body.querySelectorAll('p').forEach(p => {
-         p.className = this.getClass(p)
-         if (p.className = 'remove') {
-            p.remove
-         }
+      this.sections = await offScreenText2DOM2JSON(this.doc, this.chapter)
+   }
+}
+
+let creating  // A global promise to avoid concurrency issues
+const offScreenText2DOM2JSON = async (/**@type {string} */ htmlText, /**@type {string} */ chapter) => {
+   await setupOffscreenDocument('../offscreen/offscreen.html')
+   try {
+      let sections = await chrome.runtime.sendMessage({
+         'target': 'offscreen',
+         'data': htmlText,
+         'chapter': chapter
+      }, result => {
+         return result
       })
+      return sections
+   } catch (error) {
+      warnBG(`fetching from offscreen failure ${error}`, 'webResources.js', 'offscreenUrl')
+      return false
+   }
+}
+const setupOffscreenDocument = async (/**@type {string} */ localPath) => {
+   // Check all windows controlled by service worker to see if one is offscreen document with path
+   const offscreenUrl = chrome.runtime.getURL(localPath)
+   const existingContexts = await chrome.runtime.getContexts({
+      contextTypes: ['OFFSCREEN_DOCUMENT'],
+      documentUrls: [offscreenUrl]
+   })
+   if (await existingContexts.length > 0) {
+      return
    }
 
-   getClass(pElem) {
-      if(RegExp(`^${tabRegExp}${this.chapter}\\.\d{3,4}`).test(pElem.textContent)) {
-         return 'sectionHead'
-      }
-      if (/^NOTES\sOF\sDECISION/.test(pElem.textContent)) {
-         return 'decisionHead'
-      }
-      if ((/^ATTY.\sGEN.\sOPINION/).test(pElem.textContent)) {
-         return 'agHeading'
-      }
-      if ((/^LAW\sREVIEW\sCITATION/).test(pElem.textContent)) {
-         return 'lawReviewHeading'
-      }
-      if (RegExp(`^${tabRegExp}$`).test(pElem.textContent)) {
-         return 'remove'
-      }
-      if (RegExp(`${tabRegExp}<b>`).test(pElem.innerHTML)) {
-         return 'remove'
-      }
-      return 'default'
+// create offscreen document
+   if (creating) {
+      await creating;
+   } else {
+      creating = chrome.offscreen.createDocument({
+         url: localPath,
+         reasons: [chrome.offscreen.Reason.DOM_PARSER],
+         justification: 'Send text to convert to html and parse',
+      })
+      await creating
+      creating = null
    }
-
 }

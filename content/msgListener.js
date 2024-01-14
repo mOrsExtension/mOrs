@@ -5,7 +5,7 @@
 const listenToPopup = () => {
    /*** NOTE ***
    * onMessage.addListener *needs* to make it's response to promise through a callback. Don't use async/await */
-   browser.runtime.onMessage.addListener((msg, _sender, _reponse) => {
+   browser.runtime.onMessage.addListener((msg, _sender, _response) => {
       const msgText = msg.toMORS
       try {
          infoCS(
