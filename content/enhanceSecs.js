@@ -1,15 +1,18 @@
-//buttons.js
+//enhanceSecs.js
 //@ts-check
 
-/**Adds buttons for collapsible divs;
-
- * Goes through each section & adds collapsing button out of heading & makes body of section collapsable */
 let annoList
 const sectionAdjustments = async () => {
-   annoList = await getAnnoList()
    document.body.querySelectorAll('div.section').forEach(aDiv => { // cycle through div w/ class of 'section'
       labelBurnt(aDiv)
       addIds(aDiv)
+   })
+   annoList = await getAnnoList()
+   for (const anno in annoList) {
+      annoList[anno]['div'] = addDivToAnnoList(anno)
+   }
+   console.log(`${JSON.stringify(annoList)}`)
+   document.body.querySelectorAll('div.section').forEach(aDiv => { // cycle through div w/ class of 'section'
       addAnnos(aDiv)
       addButtonsToSections(aDiv)
    })
@@ -23,9 +26,25 @@ const sectionAdjustments = async () => {
       makeLinkExpandTarget(aLink)
    })
 }
+
 const getAnnoList = async () => {
-   return sendAwait({'miscTask': 'finishAnnoRetrieval'})
+   return await sendAwait({'miscTask': 'finishAnnoRetrieval'})
 }
+
+const addDivToAnnoList = anno => {
+   let newDiv = document.createElement('details')
+   newDiv.classList.add('annotations')
+   const firstParagraph = document.createElement('summary')
+   firstParagraph.innerHTML = `<b>ANNOTATIONS</b>`
+   newDiv.appendChild(firstParagraph)
+   anno.children.forEach(child => {
+      let newParagraph = document.createElement('p')
+      newParagraph.innerHTML = child
+      newDiv.appendChild(newParagraph)
+   })
+   return newDiv
+}
+
 
 /**labels burnt sections as former ORS provisions */
 const labelBurnt = (aDiv) => {
@@ -47,9 +66,8 @@ const addIds = (aDiv) => {
 
 /** adds section annotations from /ano###.html/ */
 const addAnnos = (aDiv) => {
-   console.log(annoList)
-   if(aDiv.id in annoList.sections) {
-      aDiv.appendChild(annoList.sections[aDiv.id])
+   if (aDiv.id in annoList) {
+      aDiv.appendChild(annoList[aDiv.id].div)
    }
 }
 
@@ -69,7 +87,6 @@ const addButtonsToSections = (aDiv) => {
    aDiv.appendChild(newButton) // adding button to current div
    aDiv.appendChild(collapsibleDiv) // and collapsible to current div
 }
-
 
 /** Adds functionality for each section leadline button to toggle expand/collapse following section */
 const addCollapseToggleButtons = () => {
@@ -107,8 +124,8 @@ const makeLinkExpandTarget = aLink => {
          expandSingle(target)
          infoCS(
             `scrolling to ${aLink.anchor.innerHTML}`,
-            'buttons.js',
-            'buildORSLinkButton'
+            'enhanceSecs.js',
+            'makeLinkExpandTarget'
          )
       })
    }
@@ -123,8 +140,8 @@ const getCollapsibleTarget = linkText => {
    warnCS(
       `Link target: '${linkText}' does not exist; or lacks collapsible children:\n Target is '${
          targetSection?.tagName}'. Child is '${collapsible?.tagName}'.`,
-      'buttons.js',
-      'buildOrsLinkButton'
+      'enhanceSecs.js',
+      'getCollapsibleTarget'
    )
    return null
 }
