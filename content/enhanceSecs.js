@@ -4,14 +4,13 @@
 let annoList
 const sectionAdjustments = async () => {
    document.body.querySelectorAll('div.section').forEach(aDiv => { // cycle through div w/ class of 'section'
-      labelBurnt(aDiv)
       addIds(aDiv)
+      labelBurnt(aDiv)
    })
    annoList = await getAnnoList()
    for (const anno in annoList) {
-      annoList[anno]['div'] = addDivToAnnoList(anno)
+      annoList[anno]['div'] = addDivToAnnoList(annoList[anno])
    }
-   console.log(`${JSON.stringify(annoList)}`)
    document.body.querySelectorAll('div.section').forEach(aDiv => { // cycle through div w/ class of 'section'
       addAnnos(aDiv)
       addButtonsToSections(aDiv)
@@ -32,15 +31,19 @@ const getAnnoList = async () => {
 }
 
 const addDivToAnnoList = anno => {
-   let newDiv = document.createElement('details')
+   const newDiv = document.createElement('div')
    newDiv.classList.add('annotations')
-   const firstParagraph = document.createElement('summary')
-   firstParagraph.innerHTML = `<b>ANNOTATIONS</b>`
-   newDiv.appendChild(firstParagraph)
+   const details = document.createElement('details')
+   const summary = document.createElement('summary')
+   summary.innerHTML = `<b>ANNOTATIONS</b>`
+   newDiv.appendChild(details)
+   details.appendChild(summary)
+   const uList = document.createElement('ul')
+   details.appendChild(uList)
    anno.children.forEach(child => {
-      let newParagraph = document.createElement('p')
-      newParagraph.innerHTML = child
-      newDiv.appendChild(newParagraph)
+      let listItem = document.createElement('li')
+      listItem.innerHTML = child
+      uList.appendChild(listItem)
    })
    return newDiv
 }

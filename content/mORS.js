@@ -4,8 +4,8 @@
 const runMain = async () => {
    let docBody = document.body.cloneNode(true)
    docBody = await firstClean(docBody)
-   addToHead() // buildHeading.js
    const extractHeadingInfo = extractChapterInfo(docBody) // buildHeading.js
+   addToHead() // buildHeading.js
    callStartAnnos() // buildHeading.js
    docBody = extractHeadingInfo.bodyComponent // firstClean.js
    const tocDiv = (chapterInfo.isFormerProvisions) ? null : buildTOC(docBody) // buildTOC.js - not needed if former provisions section

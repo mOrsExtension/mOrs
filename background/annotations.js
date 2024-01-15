@@ -19,7 +19,6 @@ class AnnoHandler {
             this.#docDomParsing()
          }
       }
-      infoBG(`returning:\n ${JSON.stringify(this.annoSecList)}`, 'annotations.js', 'getSections', '#ffbbff')
       return this.annoSecList
    }
 
@@ -31,10 +30,7 @@ class AnnoHandler {
       }
    }
    async #fetchData() {
-      if (this.fetchStart) {
-         console.log('no need to refetch')
-         return
-      } // keep from accidentally running 2x
+      if (this.fetchStart) {return} // keep from accidentally running 2x+
       this.fetchStart = true
       infoBG('fetching annotations', 'annotations.js', 'fetchData')
       this.doc = await getTextFromHtml(this.url, 'windows-1251')  // webResources.js
@@ -43,6 +39,8 @@ class AnnoHandler {
 
    #loopAwaitData() {
       this.#fetchData()
+      const msWait = 95
+      const maxAttempt = 50
       return new Promise(async resolve => {
          let i = 0
          let dataFetchLoop = setInterval(() => {
@@ -50,61 +48,66 @@ class AnnoHandler {
                clearInterval(dataFetchLoop)
                resolve(true)
             }
-            if (i > 80) {
+            if (i > 50) {
                clearInterval(dataFetchLoop)
+               warnBG(`timed out after ${maxAttempt} attempts (${maxAttempt * msWait}ms)`)
                resolve(false)
             }
+            infoBG(`Annotation retrieval; attempt: #${i} (${i*msWait}ms)`, 'annotations.js', '#loopAwaitData')
             i++
-            console.log(i)
-         }
-            , 125
-         )
+         } , msWait)
       })
    }
 
    async #docDomParsing () {
-      if(this.annoSecList.length > 1) {
-         return
-      } // keep from accidentally running 2x
+      if (this.annoSecList.length > 1) {return} // keep from accidentally running 2x
       this.#regExpCleanup()
       this.#getParagraphList()
       this.#classifyParagraphs()
       this.#deleteEmptyParagraphs()
       this.#buildSections()
       this.#deleteParentsWithNoChildren()
-      console.log(this.annoSecList)
    }
 
    #regExpCleanup() {
       this.doc = this.doc.replace(/[^]*?<div/,'')
       this.doc = this.doc.replace(/\s*[\n\r]\s*/g, ' ') // replace newlines with space
-      console.log(this.doc)
       let /** capturing groups $1:volume, $2:page, $3:year */ casesCoA = [...this.doc.matchAll(/(\d{1,3})\sOr\.?\s?App\.?\s(\d{1,3})[,Pd\d\s]*\((\d{4})\)/g)]
       let /** capturing groups $1:volume, $2:page, $3:year */ casesOSC = [...this.doc.matchAll(/(\d{1,3})\sOr\.?\s(\d{1,3})/g)]
       let /** capturing groups $1:volume, $2:page, $3:year */ orLawRev = [...this.doc.matchAll(/(\d{1,3})\sOLR\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
-      let /** capturing groups $1:volume, $2:page, $3:year */ wLawRev = [...this.doc.matchAll(/(\d{1,3})\sWL(R|J)\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
+      let /** capturing groups $1:volume, $2:page, $3:year */ wLawRev = [...this.doc.matchAll(/(\d{1,3})\sWL(?:R|J)\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
       let /** capturing groups $1:volume, $2:page, $3:year */ EnvLRev = [...this.doc.matchAll(/(\d{1,3})\sELR?\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
-      console.log(` ***\n${casesCoA}\n ${casesOSC}\n ${orLawRev}\n ${wLawRev}\n ${EnvLRev}\n ***`)
+      console.log(` ***\n${casesCoA.join('||')}\n\n ${casesOSC}\n\n ${orLawRev}\n\n ${wLawRev}\n\n ${EnvLRev}\n ***`)
       casesCoA.forEach(CoACase => {
-         this.doc = this.anchorWrap(this.doc, CoACase[0], 'case-COA', `https://scholar.google.com/scholar?hl=en&as_sdt=4%2C38&q=${CoACase[1]}+or+app+${CoACase[2]}}`)
+         this.doc = this.anchorWrap(
+            this.doc,
+            CoACase[0],
+            'case-COA', `https://scholar.google.com/scholar?hl=en&as_sdt=4%2C38&q=${CoACase[1]}+or+app+${CoACase[2]}`
+         )
       })
       casesOSC.forEach(OSCCase => {
-         this.doc = this.anchorWrap(this.doc, OSCCase[0], 'case-OSC', `https://scholar.google.com/scholar?hl=en&as_sdt=4%2C38&q=${OSCCase[1]}+or+${OSCCase[2]}}`)
+         this.doc = this.anchorWrap(
+            this.doc,
+            OSCCase[0],
+            'case-OSC',
+            `https://scholar.google.com/scholar?hl=en&as_sdt=4%2C38&q=${OSCCase[1]}+or+${OSCCase[2]}`
+         )
       })
       orLawRev.forEach(article => {
          this.doc = this.anchorWrap(
             this.doc,
             article[0],
             'oregonLaw',
-            `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${article[3].number-1}&as_yhi=${article[3].number+1}&q=${article[1]}+%22Or.+L.+Rev.%22+${article[2]}&btnG=`
+            `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${Number(article[3]) - 1}&as_yhi=${Number(article[3]) + 1}&q=${article[1]}+%22Or.+L.+Rev.%22+${article[2]}&btnG=`
          )
       })
       wLawRev.forEach(article => {
+         console.log(article[3])
          this.doc = this.anchorWrap(
             this.doc,
             article[0],
             'willametteLaw',
-            `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${article[3].number-1}&as_yhi=${article[3].number+1}&q=${article[1]}+Willamette+Law+Review%7CJournal+${article[2]}&btnG=`
+            `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${Number(article[3]) - 1}&as_yhi=${Number(article[3]) + 1}&q=${article[1]}+%22Willamette+L.+Rev.%7CJournal%22+${article[2]}&btnG=`
          )
       })
       EnvLRev.forEach(article => {
@@ -112,10 +115,9 @@ class AnnoHandler {
             this.doc,
             article[0],
             'envLaw',
-            `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${article[3].number-1}&as_yhi=${article[3].number+1}&q=${article[1]}+%22Envtl.+L.%22+${article[2]}&btnG=`
+            `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${Number(article[3]) - 1}&as_yhi=${Number(article[3]) + 1}&q=${article[1]}+%22Envtl.+L.%22+${article[2]}&btnG=`
          )
       })
-      console.log(this.doc)
       return this.doc
    }
    /**wraps text found by regular expression in an anchor & gives it <a> class*/
@@ -124,15 +126,16 @@ class AnnoHandler {
       /** @type {string|RegExp} */ regExWrap,
       /**@type {string} */ anchorClass, href
    ){
-   // uses RegExp.replace(callback to use matches to generate replacement piece)
-      return oldText.replace(RegExp(regExWrap, 'g'), (/** @type {string} */ match) => {
+   // uses RegExp.replace (callback to use matches to generate replacement piece)
+   let cleanRegExp = regExWrap.replace(/\(/g, '\\(').replace(/\)/g, '\\)')
+   let searchRegExp = RegExp(cleanRegExp, 'g')
+         return oldText.replace(searchRegExp, (/** @type {string} */ match) => {
          return `<a class="${anchorClass}" href="${href}" rel='noopener'>${match}</a>`
       })
    }
 
    #getParagraphList() {
       let paragraphMatchList = [...this.doc.matchAll(/<span[^>]*>([^]*?)<\/span>/g)] // $1: paragraph body
-      console.log(paragraphMatchList)
       if (paragraphMatchList && paragraphMatchList.length) {
          paragraphMatchList.forEach(match => {
             this.paragraphList.push({'text': match[1].trim()})
@@ -141,10 +144,8 @@ class AnnoHandler {
    }
 
    #classifyParagraphs() {
-      console.log(`parsing commenced for chapter ${this.chapter}`)
       let secRegExp = RegExp(`\\s*${this.chapter}\\.\\d{3,4}`)
       let chapRegExp = RegExp(`Chapter\\s0*${this.chapter}`, 'm')
-      console.log(`${secRegExp}, ${chapRegExp}`)
       this.paragraphList.forEach(p => {
          p['classIs'] = (assignClass(p.text))
       })
@@ -170,10 +171,11 @@ class AnnoHandler {
 
    #deleteEmptyParagraphs() {
       this.paragraphList = this.paragraphList.filter(p => {
-         console.log(p)
+         if (p.classIs=='sectionHead') {
+            console.log(p)
+         }
          return (p.classIs !== 'remove')
       })
-      console.log(`${JSON.stringify(this.paragraphList)}`)
    }
 
    #buildSections() {
@@ -207,7 +209,6 @@ class AnnoHandler {
             delete this.annoSecList[key]
          }
       }
-      console.log(this.annoSecList)
    }
 }
 
