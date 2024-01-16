@@ -5,8 +5,9 @@ class AnnoHandler {
       this.url = `https://www.oregonlegislature.gov/bills_laws/ors/ano00${this.chapter}.html`.replace(/0*(\d{3})/, '$1')
       this.doc = ''
       this.paragraphList = []
-      this.annoSecList = {[chapNo]: {'type': 'start', 'children': []}}
-      this.current = this.annoSecList[chapNo]
+      let chapName = `Chapter ${this.chapter}`
+      this.annoSecList = {'chapter' : {[chapName] : []}}
+      this.current = this.annoSecList.chapter[chapName]
       if (this.chapter != '0') {
          this.#fetchData()
       }
@@ -64,7 +65,7 @@ class AnnoHandler {
       this.#regExpCleanup()
       this.#getParagraphList()
       this.#classifyParagraphs()
-      this.#deleteEmptyParagraphs()
+      this.#filterParagraphs()
       this.#buildSections()
       this.#deleteParentsWithNoChildren()
    }
@@ -130,7 +131,7 @@ class AnnoHandler {
    let cleanRegExp = regExWrap.replace(/\(/g, '\\(').replace(/\)/g, '\\)')
    let searchRegExp = RegExp(cleanRegExp, 'g')
          return oldText.replace(searchRegExp, (/** @type {string} */ match) => {
-         return `<a class="${anchorClass}" href="${href}" rel='noopener'>${match}</a>`
+         return `<a class="${anchorClass}" href="${href}" rel="noopener">${match}</a>`
       })
    }
 
@@ -144,8 +145,8 @@ class AnnoHandler {
    }
 
    #classifyParagraphs() {
-      let secRegExp = RegExp(`\\s*${this.chapter}\\.\\d{3,4}`)
-      let chapRegExp = RegExp(`Chapter\\s0*${this.chapter}`, 'm')
+      let secRegExp = RegExp(`^${tabRegExp}${this.chapter}\\.\\d{3,4}`)
+      let chapRegExp = RegExp(`Chapter\\s0*${this.chapter}`)
       this.paragraphList.forEach(p => {
          p['classIs'] = (assignClass(p.text))
       })
@@ -153,23 +154,19 @@ class AnnoHandler {
          if(secRegExp.test(text)) {
             return 'sectionHead'
          }
-         if(chapRegExp.test(text)) {
-            return 'chapterHead'
-         }
-         if (/^NOTES\sOF\sDECISION/m.test(text)) {
-            return 'remove'
-         }
-         if (RegExp(`^${tabRegExp}$`).test(text)) {
-            return 'remove'
-         }
-         if (RegExp(`^${tabRegExp}*<b>`).test(text)) {
+         if (
+            (chapRegExp.test(text)) ||
+            (/^NOTES\sOF\sDECISION/m.test(text)) ||
+            (RegExp(`^${tabRegExp}$`).test(text)) ||
+            (RegExp(`^${tabRegExp}*<b>`).test(text))
+         ) {
             return 'remove'
          }
          return 'default'
       }
    }
 
-   #deleteEmptyParagraphs() {
+   #filterParagraphs() {
       this.paragraphList = this.paragraphList.filter(p => {
          if (p.classIs=='sectionHead') {
             console.log(p)
@@ -179,48 +176,64 @@ class AnnoHandler {
    }
 
    #buildSections() {
+      const seriesRegExp = RegExp(`${this.chapter}\\.\\d{3,4}\\sto\\s${this.chapter}\\.\\d{3,4}`)
+      const secRegExp = RegExp(`${this.chapter}\\.\\d{3,4}`)
       this.paragraphList.forEach(p => {
-         switch (p['classIs']) {
-            case 'sectionHead': {
-               this.#buildAnnoSection(p.text, 'section')
-            } break
-            case 'chapterHead': {
-               this.#buildAnnoSection(p.text, 'chapter')
-            } break
-            default: {
-               this.#addToCurrent(p.text)
-            } break
+         if (p.classIs == 'sectionHead') {
+            const section = [...p.text.match(secRegExp)][0]
+            const build = seriesRegExp.test(p.text)
+             ? `Series ORS ${[...p.text.match(seriesRegExp)][0]}`
+             : `ORS ${section}`
+            this.#buildAnnoSection(section, build)
+            return
          }
+         this.#addToCurrent(p.text)
       })
    }
 
    #buildAnnoSection(name, type) {
-      this.annoSecList[name] = {'type': type, 'children': []}
-      this.current = this.annoSecList[name]
+      {
+         if (!(name in this.annoSecList)) {
+            this.annoSecList[name] = {}
+         }
+         this.annoSecList[name][type] = []
+         this.current = this.annoSecList[name][type]
+      }
    }
 
    #addToCurrent(newPara) {
-      this.current.children.push(newPara)
+      try {
+         this.current.push(newPara)
+      } catch (error) {
+         console.warn(`${error}\n${newPara}\n${JSON.stringify(this.current)}`)
+      }
    }
 
    #deleteParentsWithNoChildren() {
-      for (const key in this.annoSecList) {
-         if (this.annoSecList[key].children.length < 1) {
-            delete this.annoSecList[key]
+      for (const aName in this.annoSecList) {
+         for (const aType in aName) {
+            if (aType.length < 1) {
+               delete this.annoSecList[aName][aType]
+            }
+         }
+         if (Object.keys(aName).length < 1) {
+            delete this.annoSecList[aName]
          }
       }
+      console.log(JSON.stringify(this.annoSecList))
    }
 }
 
 //GLOBAL CONSTANTS FOR ANNO HANDLER
 const orsRegExp = /\b0*([1-9]\d{0,2}[a-c]?)(\.\d{3,4})?/ // finds "chapter" or "chapter.section", e.g. "459A"
+const tabRegExp = '(?:(?:&nbsp;|\\s)*)'
 let annoBuild
 
 /** Starts getting Annos (will not be done by time rest of script runs) from msgListenerBG.js */
 const startAnnoRetrieval = (chapter) => {
    console.log(`Getting annotations for ${chapter}`)
    annoBuild = new AnnoHandler(chapter)
-   console.log(annoBuild.doc)
+   return true
 }
 
 /** Finishes getting Annos, returns list of section Objects {name; type; children:{text}}; from msgListenerBG.js */
@@ -231,5 +244,3 @@ const finishAnnoRetrieval = async () => {
       warnBG(`Retrieving annotations error: ${error}`, 'annotations.js', 'finishAnnoRetrieval')
    }
 }
-
-const tabRegExp = '(?:(?:&nbsp;|\\s)*)'

@@ -8,6 +8,18 @@ const sectionAdjustments = async () => {
       labelBurnt(aDiv)
    })
    annoList = await getAnnoList()
+   if ('chapter' in annoList) {
+      const firstORS = document.body.querySelector('div.ors')
+      if (firstORS !=null) {
+         const firstId = firstORS.id
+         console.log(`First ORS Section = ${firstId}`)
+         if (!(firstId in annoList)) {
+            annoList[firstId] = {}
+         }
+         annoList[firstId] = annoList.chapter
+         delete annoList.chapter
+      }
+   }
    for (const anno in annoList) {
       annoList[anno]['div'] = addDivToAnnoList(annoList[anno])
    }
@@ -38,13 +50,22 @@ const addDivToAnnoList = anno => {
    summary.innerHTML = `<b>ANNOTATIONS</b>`
    newDiv.appendChild(details)
    details.appendChild(summary)
-   const uList = document.createElement('ul')
-   details.appendChild(uList)
-   anno.children.forEach(child => {
-      let listItem = document.createElement('li')
-      listItem.innerHTML = child
-      uList.appendChild(listItem)
-   })
+   for (const type in anno) {
+      const typePara = document.createElement('p')
+      typePara.textContent = type
+      const uList = document.createElement('ul')
+      details.appendChild(typePara)
+      details.appendChild(uList)
+      try {
+         anno[type].forEach(child => {
+            let listItem = document.createElement('li')
+            listItem.innerHTML = child
+            uList.appendChild(listItem)
+         })
+      } catch (error) {
+         console.log(`${error}\n${JSON.stringify(anno[type])}`)
+      }
+   }
    return newDiv
 }
 
