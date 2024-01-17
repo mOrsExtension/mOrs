@@ -10,7 +10,8 @@ const scriptList = [
    '/background/navigate.js',
    '/background/styles.js',
    '/background/userStorage.js',
-   '/background/webResources.js'
+   '/background/webResources.js',
+   '/background/annotations.js'
 ]
 
 //attempt to load; success/error logged to service worker

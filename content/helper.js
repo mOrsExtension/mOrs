@@ -57,11 +57,11 @@ class MessageSenderCS {
          infoCS(`Content script is sending to background scripts: ${this.msgStringy}'`, 'helper.js', 'sendMessage')
       }
       this.doRespond
-       ? await this.sendAwait()
-       : this.sendOneWay()
+       ? await this.#sendAwait()
+       : this.#sendOneWay()
       return 'success'
    }
-   async sendAwait() {
+   async #sendAwait() {
       try {
          let response = await browser.runtime.sendMessage({ message: this.message })
          if ('response' in response) {
@@ -75,17 +75,19 @@ class MessageSenderCS {
          }
       }
    }
-   sendOneWay() {
+   #sendOneWay() {
       browser.runtime.sendMessage({ message: this.message })
    }
    respond () {
       return this.response
    }
 }
+
+//sendAwait default
 const sendAwait = async (messageItem, doAwaitResponse = true)  => {
    let msg = new MessageSenderCS(messageItem, doAwaitResponse)
    if (await msg.sendMessage() == "success") {
-      return doAwaitResponse ? msg.respond() : true
+      return msg.respond()
    }
 }
 

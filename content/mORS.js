@@ -4,8 +4,9 @@
 const runMain = async () => {
    let docBody = document.body.cloneNode(true)
    docBody = await firstClean(docBody)
+   const extractHeadingInfo = extractChapterInfo(docBody) // buildHeading.js
    addToHead() // buildHeading.js
-   const extractHeadingInfo = extractChapterInfo(docBody) // heading.js
+   callStartAnnos() // buildHeading.js
    docBody = extractHeadingInfo.bodyComponent // firstClean.js
    const tocDiv = (chapterInfo.isFormerProvisions) ? null : buildTOC(docBody) // buildTOC.js - not needed if former provisions section
    let mainDiv = document.createElement('div') // moving remaining body into its own separate "main" div
@@ -24,7 +25,7 @@ const runMain = async () => {
    mainDiv = finishedPromiseList[2] // orLawLink.js : add links for OrLaws based on \data\orLawLegLookup.json
    const headingDiv = finishedPromiseList[3] // heading.js based on \data\volumeOutline.json
    finalCleanUp([headingDiv, volumeNav, tocDiv, mainDiv, floatMenuDiv]) // finalClean.js : puts together pieces, does post html rendering cleanup
-   addButtons() // buttons.js : add buttons for collapsable sections, expanding links & button listeners
+   sectionAdjustments() // buttons.js : add buttons for collapsable sections, expanding links & button listeners
 
    //TODO #34 Move implementing user parameters to earlier in process to avoid issues with scroll stops in the wrong place?
    if (await implementUserParameters()) { // storedData.js : implement remaining stored data (other than OrLaw lookup/menu)

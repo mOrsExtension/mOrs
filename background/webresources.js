@@ -103,3 +103,21 @@ const promiseGetChapterInfo = async ({ chapNum, offset = 0 }) => {
       'titleName' : ansArray[4]
    }
 }
+
+const getTextFromHtml = async (
+   /** @type {string} */ url,
+   /** @type {string} */ encoding = 'utf-8'
+) => {
+   try {
+      const urlResponse = await fetch(url)
+      if (!urlResponse.ok && !urlResponse.redirected) {
+         throw new Error(`Unable to fetch from ${url}. Document is empty. `)
+      }
+      const bufferResponse = await urlResponse.arrayBuffer()
+      const urlDecoder = new TextDecoder(encoding)  // if anno file is not typical utf-8 for websites
+      return urlDecoder.decode(bufferResponse)
+   } catch (error) {
+      warnBG(`${error}`, 'webResources.js', 'getDocFromUrl')
+      return ' '
+   }
+}

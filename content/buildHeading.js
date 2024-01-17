@@ -142,3 +142,7 @@ const addToHead = () => {
    headTitle.textContent = `${chapterInfo.chapNo}-${chapterInfo.chapName}`
    docHead.appendChild(headTitle)
 }
+
+const callStartAnnos = () => {
+   sendAwait({startAnnos: chapterInfo.chapNo}, false)
+}

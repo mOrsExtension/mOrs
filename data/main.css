@@ -306,7 +306,6 @@ h3 {
    color:var(--note);
 }
 
-
 /* Notes: */
 .note {
    font: .85rem Arial, sans-serif;
@@ -318,10 +317,22 @@ h3 {
    background-color: var(--altBack);
 }
 
+.annotations {
+   width: 95%;
+   margin: auto;
+   border: var(--heading);
+   border: 2px solid var(--note);
+   background-color: var(--altBack);
+   summary {
+      color: var(--subheading);
+      font: .85rem 'Times New Roman', times;
+   }
+}
 /* Section Subunits */
 .default {
    margin-block: 0.2rem auto 0 auto;
 }
+
 
 .subSec,
 .para,
@@ -404,31 +415,33 @@ input {
 }
 
 /*popup.html specific pieces */
-body.popup {
-   margin-top: 10px;
-   min-width: 315px;
-   width: 315px;
-}
-div.popup {
-   border-bottom: 3px double var(--buttonColor);
-}
-p.popupOption {
-   text-align: left !important;
-   margin-left: 8px
-}
-.popup>p {
-   text-align: center;
-}
-.popup>h2 {
-   margin-bottom: 2pt;
-}
-.popup>h3 {
-   margin-top: 6pt;
-   margin-bottom: 5px;
-}
-.userMsg {
-   font:1rem 'Times New Roman', Times;
-   color: var(--heading)
+#popup {
+   body {
+      margin-top: 10px;
+      min-width: 315px;
+      width: 315px;
+   }
+   div {
+      border-bottom: 3px double var(--buttonColor);
+   }
+   p.popupOption {
+      text-align: left !important;
+      margin-left: 8px
+   }
+   p {
+      text-align: center;
+   }
+   h2 {
+      margin-bottom: 2pt;
+   }
+   h3 {
+      margin-top: 6pt;
+      margin-bottom: 5px;
+   }
+   .userMsg {
+      font:1rem 'Times New Roman', Times;
+      color: var(--heading)
+   }
 }
 
 html {
