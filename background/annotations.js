@@ -30,6 +30,7 @@ class AnnoHandler {
          warnBG(`Can't find chapter`, 'annotations.js', 'validateAndCleanChapter')
       }
    }
+
    async #fetchData() {
       if (this.fetchStart) {return} // keep from accidentally running 2x+
       this.fetchStart = true
@@ -60,6 +61,7 @@ class AnnoHandler {
       })
    }
 
+   /**RegExp to substitute for actual DOM parsing, which required creating outside dummy page */
    async #docDomParsing () {
       if (this.annoSecList.length > 1) {return} // keep from accidentally running 2x
       this.#regExpCleanup()
@@ -68,6 +70,7 @@ class AnnoHandler {
       this.#filterParagraphs()
       this.#buildSections()
       this.#deleteParentsWithNoChildren()
+      infoBG(`Created anno list for ${Object.keys(this.annoSecList).length} sections`, 'annotations.js', '#docDomParsing')
    }
 
    #regExpCleanup() {
@@ -78,7 +81,6 @@ class AnnoHandler {
       let /** capturing groups $1:volume, $2:page, $3:year */ orLawRev = [...this.doc.matchAll(/(\d{1,3})\sOLR\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
       let /** capturing groups $1:volume, $2:page, $3:year */ wLawRev = [...this.doc.matchAll(/(\d{1,3})\sWL(?:R|J)\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
       let /** capturing groups $1:volume, $2:page, $3:year */ EnvLRev = [...this.doc.matchAll(/(\d{1,3})\sELR?\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
-      console.log(` ***\n${casesCoA.join('||')}\n\n ${casesOSC}\n\n ${orLawRev}\n\n ${wLawRev}\n\n ${EnvLRev}\n ***`)
       casesCoA.forEach(CoACase => {
          this.doc = this.anchorWrap(
             this.doc,
@@ -103,7 +105,6 @@ class AnnoHandler {
          )
       })
       wLawRev.forEach(article => {
-         console.log(article[3])
          this.doc = this.anchorWrap(
             this.doc,
             article[0],
@@ -168,9 +169,6 @@ class AnnoHandler {
 
    #filterParagraphs() {
       this.paragraphList = this.paragraphList.filter(p => {
-         if (p.classIs=='sectionHead') {
-            console.log(p)
-         }
          return (p.classIs !== 'remove')
       })
    }
@@ -205,7 +203,7 @@ class AnnoHandler {
       try {
          this.current.push(newPara)
       } catch (error) {
-         console.warn(`${error}\n${newPara}\n${JSON.stringify(this.current)}`)
+         warnBG(`Could not add paragraph ${newPara}; error: ${error}`, 'annotations.js', '#addToCurrent')
       }
    }
 
@@ -220,7 +218,6 @@ class AnnoHandler {
             delete this.annoSecList[aName]
          }
       }
-      console.log(JSON.stringify(this.annoSecList))
    }
 }
 
@@ -231,7 +228,7 @@ let annoBuild
 
 /** Starts getting Annos (will not be done by time rest of script runs) from msgListenerBG.js */
 const startAnnoRetrieval = (chapter) => {
-   console.log(`Getting annotations for ${chapter}`)
+   infoBG(`Getting annotations for ${chapter}`, 'annotations.js', 'startAnnoRetrieval')
    annoBuild = new AnnoHandler(chapter)
    return true
 }
@@ -239,6 +236,7 @@ const startAnnoRetrieval = (chapter) => {
 /** Finishes getting Annos, returns list of section Objects {name; type; children:{text}}; from msgListenerBG.js */
 const finishAnnoRetrieval = async () => {
    try {
+      infoBG('Finishing retrieval', 'annotations.js', 'finishAnnoRetrieval')
       return await annoBuild.getSections()
    } catch (error) {
       warnBG(`Retrieving annotations error: ${error}`, 'annotations.js', 'finishAnnoRetrieval')

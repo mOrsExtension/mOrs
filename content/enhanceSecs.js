@@ -2,27 +2,17 @@
 //@ts-check
 
 let annoList
+let annoUrl
+
+/**main program: adds #ids; updates burnt sec text; appends annotations to sections; builds buttons to collapse secs */
 const sectionAdjustments = async () => {
    document.body.querySelectorAll('div.section').forEach(aDiv => { // cycle through div w/ class of 'section'
       addIds(aDiv)
       labelBurnt(aDiv)
    })
    annoList = await getAnnoList()
-   if ('chapter' in annoList) {
-      const firstORS = document.body.querySelector('div.ors')
-      if (firstORS !=null) {
-         const firstId = firstORS.id
-         console.log(`First ORS Section = ${firstId}`)
-         if (!(firstId in annoList)) {
-            annoList[firstId] = {}
-         }
-         annoList[firstId] = annoList.chapter
-         delete annoList.chapter
-      }
-   }
-   for (const anno in annoList) {
-      annoList[anno]['div'] = addDivToAnnoList(annoList[anno])
-   }
+   annoUrl = `https://www.oregonlegislature.gov/bills_laws/ors/ano00${chapterInfo.chapNo}.html`.replace(/0+(\d{3})/, '$1')
+   annoList = buildAnnoDivs(annoList)
    document.body.querySelectorAll('div.section').forEach(aDiv => { // cycle through div w/ class of 'section'
       addAnnos(aDiv)
       addButtonsToSections(aDiv)
@@ -38,45 +28,6 @@ const sectionAdjustments = async () => {
    })
 }
 
-const getAnnoList = async () => {
-   return await sendAwait({'miscTask': 'finishAnnoRetrieval'})
-}
-
-const addDivToAnnoList = anno => {
-   const newDiv = document.createElement('div')
-   newDiv.classList.add('annotations')
-   const details = document.createElement('details')
-   const summary = document.createElement('summary')
-   summary.innerHTML = `<b>ANNOTATIONS</b>`
-   newDiv.appendChild(details)
-   details.appendChild(summary)
-   for (const type in anno) {
-      const typePara = document.createElement('p')
-      typePara.textContent = type
-      const uList = document.createElement('ul')
-      details.appendChild(typePara)
-      details.appendChild(uList)
-      try {
-         anno[type].forEach(child => {
-            let listItem = document.createElement('li')
-            listItem.innerHTML = child
-            uList.appendChild(listItem)
-         })
-      } catch (error) {
-         console.log(`${error}\n${JSON.stringify(anno[type])}`)
-      }
-   }
-   return newDiv
-}
-
-
-/**labels burnt sections as former ORS provisions */
-const labelBurnt = (aDiv) => {
-   if (aDiv.classList.contains('burnt')) {
-      aDiv.children[0].textContent = `[Former ORS ${aDiv.children[0].textContent}]`
-   }
-}
-
 /** Adds id# to guide expansion when internal links are used (in addCollapseButtons below) */
 const addIds = (aDiv) => {
    if (aDiv.classList.contains('ors') || aDiv.classList.contains('burnt')) {
@@ -88,7 +39,66 @@ const addIds = (aDiv) => {
    }
 }
 
-/** adds section annotations from /ano###.html/ */
+/**labels burnt sections as former ORS provisions */
+const labelBurnt = (aDiv) => {
+   if (aDiv.classList.contains('burnt')) {
+      aDiv.children[0].textContent = `[Former ORS ${aDiv.children[0].textContent}]`
+   }
+}
+
+//retrieves annotations from background service worker's retrieval of URL
+const getAnnoList = async () => {
+   return await sendAwait({'miscTask': 'finishAnnoRetrieval'})
+}
+
+/**pre-processing of annotation file; builds each section div */
+const buildAnnoDivs = (annoList) => {
+   if ('chapter' in annoList) { // adds chapter annos to first section
+      const firstORS = document.body.querySelector('div.ors')
+      if (firstORS != null) {
+         const firstId = firstORS.id
+         infoCS(`Adding chapter annos to first ORS: '${firstId}'`, 'enhanceSecs.js', 'buildAnnoDivs')
+         if (!(firstId in annoList)) {
+            annoList[firstId] = {}
+         }
+         annoList[firstId] = annoList.chapter
+         delete annoList.chapter
+      }
+   }
+   for (const anno in annoList) {
+      annoList[anno]['div'] = addDivToAnnoList(annoList[anno])
+   }
+   return annoList
+}
+/**builds each section div using "summary/detail to create collapsing div*/
+const addDivToAnnoList = anno => {
+   const newDiv = document.createElement('div')
+   newDiv.classList.add('annotations')
+   const details = document.createElement('details')
+   const summary = document.createElement('summary')
+   summary.innerHTML = `<a href="${annoUrl}" class="annoHeading" rel="noopener">ANNOTATIONS</a></b>`
+   newDiv.appendChild(details)
+   details.appendChild(summary)
+   for (const type in anno) {
+      const typePara = document.createElement('p')
+      typePara.textContent = type
+      const uList = document.createElement('ul')
+      details.appendChild(typePara)
+      details.appendChild(uList)
+      try {
+         anno[type].forEach(child => {  // TODO: reorder from most recent to least?
+            let listItem = document.createElement('li')
+            listItem.innerHTML = child
+            uList.appendChild(listItem)
+         })
+      } catch (error) {
+         warnCS(`${error} : ${JSON.stringify(anno[type])}`, 'enhanceSecs.js', 'addDivToAnnoList')
+      }
+   }
+   return newDiv
+}
+
+/** adds section annotations div to the end of appropriate section div */
 const addAnnos = (aDiv) => {
    if (aDiv.id in annoList) {
       aDiv.appendChild(annoList[aDiv.id].div)
