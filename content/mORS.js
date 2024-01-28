@@ -33,8 +33,6 @@ const runMain = async () => {
    }
 }
 
-//TODO #35 Fetch annotations and display as dropdown for sections.
-
 //Startup
 window.addEventListener('load', () => {
    infoCS(
