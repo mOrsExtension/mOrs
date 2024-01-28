@@ -22,8 +22,6 @@ class MessageHandlerBG {
          ? await this.getFromStorage()   // returns object(s)
          : ('fetchJson' in this.receivedMsg)
          ? await this.fetchJson() // returns jsonItem
-         : ('buildOrLawLink' in this.receivedMsg)
-         ? await this.buildOrLawLink()  // returns link
          : ('getChapInfo' in this.receivedMsg)
          ? await this.getChapInfo()  // returns obj(vol, title, chp)
          : ('miscTask' in this.receivedMsg)
@@ -99,12 +97,6 @@ class MessageHandlerBG {
 
    async fetchJson() {
       return await promiseReadJsonFile(`${this.receivedMsg.fetchJson}.json`)  // webResources.js - just returns json file as JS object
-   }
-
-   async buildOrLawLink () {
-      let oL = this.receivedMsg.buildOrLawLink
-      /** TODO #33 - check if buildOrLawLink in msgListener works with special sessions or needs extended? */
-      return await promiseGetOrLegUrl(oL.year, oL.chap, oL.reader)  // buildOrLaws.js
    }
 
    async getChapInfo() {
