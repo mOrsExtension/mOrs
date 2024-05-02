@@ -28,18 +28,26 @@ const warnPopup = (warnTxt, calledBy = '??') => {
    msg.sendOneWay()
 }
 
+//TODO #41 - implement try/catch/warn for each module
+//try catch or warn
+const tryCatchWarn = (attemptedFunction, warningMsg='') => {
+   try {
+      attemptedFunction
+   } catch (error) {
+      warnPopup(error, warningMsg)
+   }
+}
+
 //main functions
 const popupMain = async () => {
    try {
       updateCssForPopup()
       displayExistingUserOptions()
-      setNavForm()
       addListenerHelp()
-      addListenerExample()
       addListenerOptions()
       addListenerCheckboxes()
    } catch (error) {
-      warnPopup(error)
+      warnPopup(error, 'popUpMain')
    }
 }
 
@@ -81,7 +89,7 @@ const displayExistingUserOptions = async () => {
       let manifest = browser.runtime.getManifest()
       versionID.innerHTML = `v.${manifest.version}`
    } catch (error) {
-      warnPopup(error)
+      warnPopup(error, 'displayExistingUserOptions')
    }
 }
 const fetchAllStoredData = async () => {
@@ -98,26 +106,10 @@ const fetchAllStoredData = async () => {
    return await msg.sendAwaitResponse()
 }
 
-const setNavForm = () => {
-   searchForm?.addEventListener('submit', () => {
-      infoPopup(`Search ran for '${morsSearch.value}'`)
-      searchOrs(morsSearch.value)
-   })
-}
-const searchOrs = (search) => {
-   let msg = new MessageDispatch({ navToOrs: search})
-   msg.sendOneWay()
-}
-
 // User clicks "Help" button
 const addListenerHelp = () => {
    helpButton?.addEventListener('click', () => {
       launchNewTab('https://github.com/mOrsExtension/mOrs/blob/master/mORSerror.md')
-   })
-}
-const addListenerExample = () => {
-   exampleButton?.addEventListener('click', () => {
-      userMsg('No examples (yet)!', 'pink')
    })
 }
 
@@ -128,7 +120,7 @@ const addListenerOptions = () => {
    })
 }
 
-/** sends message in popup text field to user*/
+/** sends message in popup text field to user - NOTE: currently unused */
 const userMsg = (/**@type {string} */ msgText, /**@type {string} */ color = 'default') => {
 htmlMsgBox.innerHTML = `<span style='color:${color}'>${msgText}</span>`
 }
@@ -171,7 +163,7 @@ const storeAndUpdateTabs = async (newValue, storeTo, msgToTabs) => {
          newMsg.sendOneWay()
       }
    } catch (error) {
-      warnPopup(`error storing ${newValue} to ${storeTo}: ${error}`)
+      warnPopup(`error storing ${newValue} to ${storeTo}: ${error}`, 'storeAndUpdateTabs')
    }
 }
 
@@ -191,12 +183,9 @@ const promiseStoreKey = async keyValueObj => {
 
 // Constant global variables for popup.js
 // set variables to match elements on popup.html
-const htmlMsgBox = document.getElementById('userMsg')
-const searchForm = document.getElementById('navigate')
-const morsSearch = document.getElementById('mORSnavigate')
-const launchButton = document.getElementById('launchButton')
 const helpButton = document.getElementById('helpButton')
-const exampleButton = document.getElementById('exampleButton')
+const htmlMsgBox = document.getElementById('userMsg')
+const launchButton = document.getElementById('launchButton')
 const cssDropDown = document.getElementById('cssSelector')
 const colorOptionsButton = document.getElementById('colorOptions')
 const orLawDropDown = document.getElementById('OrLaws')

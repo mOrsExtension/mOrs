@@ -1,6 +1,6 @@
 # Search Help
 
-Something went wrong when you tried to use the omnibox (search bar) or mORS popup to search with mORS (for Oregon Revised Statutes), so you ended up here.
+Either you pressed the help button, or something went wrong when you tried to use the omnibox (search bar) to search with mORS (for Oregon Revised Statutes), so you ended up here.
 
 ## Valid Searches
 
@@ -43,8 +43,6 @@ Something went wrong when you tried to use the omnibox (search bar) or mORS popu
   > ors `9.460 ; 701 / 2019 c.444, hein 1989 658`
   > Will pull up four tabs =>
   >`ORS 9.460`|`ORS chapter 701`|`chapter 444, Oregon Laws 2019`|`chapter 658, Oregon Laws 1989` (in HeinOnline)
-
-* Everything that can be typed into the omnibox can also be typed into the popup for the browser app (no need to use the `ors` prefix for search).
 
 If something seems broken, email <mOrs.Extension@gmail.com> or post an issue to [GitHub](https://github.com/mOrsExtension/mOrs/issues)
 
