@@ -1,5 +1,4 @@
 //backgroundLoader.js
-//@ts-check
 
 const browser = chrome
 
@@ -16,16 +15,16 @@ const scriptList = [
 
 //attempt to load; success/error logged to service worker
 scriptList.forEach(aScript => {
-   try {
-      importScripts(aScript) //javaScript command to load script into background (service worker)
-      infoBG(
-         `'${aScript}' successfully loaded.`,
-         'helperBG.js',
-         'importScripts',
-         '#afa'
-      ) // helperBG.js (why it needs to load first)
-   } catch (e) {
-      /** using console warn for script import issues, rather than warnBG in helper.js, because it might not have imported */
-      console.warn(`'${aScript}' loading error: ${e}`)
-   }
+    try {
+        importScripts(aScript) // javaScript command to load script into background (service worker)
+        infoBG(
+            `'${aScript}' successfully loaded.`,
+            'helperBG.js',
+            'importScripts',
+            '#afa'
+        ) // helperBG.js (why it needs to load first)
+    } catch (e) {
+        /** using console warn for script import issues, rather than warnBG in helper.js, because it might not have imported */
+        console.warn(`'${aScript}' loading error: ${e}`)
+    }
 })
