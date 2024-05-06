@@ -131,6 +131,7 @@ const buildH3 = () => {
    return []
 }
 
+/** @function addToHead */
 const addToHead = () => {
    //builds document <head> (includes title for the tab)
    let docHead = document.head
@@ -141,8 +142,4 @@ const addToHead = () => {
    let headTitle = document.createElement('title')
    headTitle.textContent = `${chapterInfo.chapNo}-${chapterInfo.chapName}`
    docHead.appendChild(headTitle)
-}
-
-const callStartAnnos = () => {
-   sendAwait({startAnnos: chapterInfo.chapNo}, false)
 }
