@@ -72,20 +72,31 @@ const buildFloatingMenuDiv = async () => {
     return menuPanel
 }
 
-const VolNavConstructor = {
+class VolNavConstructor {
+    constructor() {}
+    async init () {
+        console.log('init')
+        this.finishedDiv = await this.buildDiv()
+        return this.finishedDiv
+    }
+
     async buildDiv () {
+        console.log('build')
         let volumeOutlineDiv = document.createElement('div')
         volumeOutlineDiv.id = 'volumeOutline'
         let volJson =  await sendAwait({'fetchJson': 'VolumeOutline'}, true)
         volumeOutlineDiv.innerHTML = this.getHtmlFromVolOutline(volJson)
+        console.log(volumeOutlineDiv)
         volumeOutlineDiv.querySelectorAll('details').forEach(detailElem => {
             this.highlightIfMatches(detailElem)
         })
-        return this.volumeOutlineDiv
-    },
+        console.log(volumeOutlineDiv)
+        return volumeOutlineDiv
+    }
 
     /**  Convert the JSON data into nested HTML lists using builtin CSS "summary/details" to form dropdowns*/
     getHtmlFromVolOutline (data) {
+        console.log('get Html')
         let mainList = ''
         for (const volumeKey in data.Volumes) {
             const volume = data.Volumes[volumeKey]
@@ -105,7 +116,7 @@ const VolNavConstructor = {
             mainList += '</ul></details>' // Close the volume's <details>
         }
         return mainList
-    },
+    }
 
     highlightIfMatches (/** @type {HTMLDetailsElement}*/ detailElem) {
         if (detailElem.dataset.volume == chapterInfo.volNo) {
@@ -114,6 +125,8 @@ const VolNavConstructor = {
                 : infoCS('No volume child to highlight', 'buildNewMenus.js', 'checkDetailForHighlighting'))
             detailElem.open = true
         }
+        console.log(detailElem.dataset.title)
+        console.log(chapterInfo.titleNo)
         if (detailElem.dataset.title == chapterInfo.titleNo) {
             detailElem.open = true
             detailElem.firstElementChild
@@ -125,5 +138,5 @@ const VolNavConstructor = {
                 }
             })
         }
-    },
+    }
 }
