@@ -49,7 +49,7 @@ const buildTOC = (/**@type {HTMLBodyElement}*/ docBody) => {
             aPara.className = 'tempHead'
         } else if
         /** Leading parens with at least 4 characters (E.g. "(Disputes)" */
-        (/^\([^/(\([^]{4,}\)/.test(paraText)) {  // TODO: #46 Uh, this doesn't seem like it should work, now that I'm looking at it again. Maybe I'm wrong?
+        (/^\([^/(\\[^]{4,}\)/.test(paraText)) {
             aPara.className = 'subHead'
         } else if
         /**  Heading (4+ non-lower case letters) (E.g., "PENALTIES") */

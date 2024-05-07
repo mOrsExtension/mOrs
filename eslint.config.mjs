@@ -13,9 +13,6 @@ export default [
         languageOptions: {
             globals: {
                 ...globals.browser,
-                sendAwait: "writeable",
-                infoCS: "writeable",
-                warnCS: "writeable"
             }
         }
 
