@@ -72,7 +72,13 @@ const buildFloatingMenuDiv = async () => {
     return menuPanel
 }
 
-const VolNavConstructor = {
+class VolNavConstructor {
+    constructor() {}
+    async init () {
+        this.finishedDiv = await this.buildDiv()
+        return this.finishedDiv
+    }
+
     async buildDiv () {
         let volumeOutlineDiv = document.createElement('div')
         volumeOutlineDiv.id = 'volumeOutline'
@@ -81,8 +87,8 @@ const VolNavConstructor = {
         volumeOutlineDiv.querySelectorAll('details').forEach(detailElem => {
             this.highlightIfMatches(detailElem)
         })
-        return this.volumeOutlineDiv
-    },
+        return volumeOutlineDiv
+    }
 
     /**  Convert the JSON data into nested HTML lists using builtin CSS "summary/details" to form dropdowns*/
     getHtmlFromVolOutline (data) {
@@ -105,7 +111,7 @@ const VolNavConstructor = {
             mainList += '</ul></details>' // Close the volume's <details>
         }
         return mainList
-    },
+    }
 
     highlightIfMatches (/** @type {HTMLDetailsElement}*/ detailElem) {
         if (detailElem.dataset.volume == chapterInfo.volNo) {
@@ -125,5 +131,5 @@ const VolNavConstructor = {
                 }
             })
         }
-    },
+    }
 }

@@ -13,16 +13,17 @@ const runMain = async () => {
     mainDiv.innerHTML = docBody.innerHTML
     mainDiv = bodyCleanUp(mainDiv) // bodyClean.js
     mainDiv = buildBodyDivs(mainDiv) // createDivs.js
-    const finishedPromiseList = await Promise.all([
+    const navConstructor = new VolNavConstructor()
+    const headingDiv = await buildHeading()
+    const finishedPromises = await Promise.all([
         buildFloatingMenuDiv(), // newDivs.js building floating menu
-        VolNavConstructor.buildDiv(), //newDivs.js building new menu for navigating through volumes
-        newOrUpdateOrLawLinks(mainDiv),
-        buildHeading()
+        navConstructor.init(), //newDivs.js building new menu for navigating through volumes
+        newOrUpdateOrLawLinks(mainDiv), //buildOrLawLinks.js adds links for session laws
     ])
-    const floatMenuDiv = finishedPromiseList[0]
-    const volumeNav = finishedPromiseList[1]
-    mainDiv = finishedPromiseList[2] // orLawLink.js : add links for OrLaws based on \data\orLawLegLookup.json
-    const headingDiv = finishedPromiseList[3] // heading.js based on \data\volumeOutline.json
+    const floatMenuDiv = finishedPromises[0]
+    const volumeNav = finishedPromises[1]
+    mainDiv = finishedPromises[2] // orLawLink.js : add links for OrLaws based on \data\orLawLegLookup.json
+
     finalCleanUp([headingDiv, volumeNav, tocDiv, mainDiv, floatMenuDiv]) // finalClean.js : puts together pieces, does post html rendering cleanup
     sectionAdjustments() // buttons.js : add buttons for collapsable sections, expanding links & button listeners
     if (await implementUserParameters()) { // userData.js : implement remaining stored data (other than OrLaw lookup/menu)

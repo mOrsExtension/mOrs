@@ -40,10 +40,8 @@ const finalCleanUp = finalDivs => {
                 }
 
                 // create link to external chapter, targets the specific chapter id
-                console.log(`'${anAnchor.textContent}' is outside chapter`)
                 const chapAndSecRegExp = new RegExpHandler(/[^]*?(([1-9]\d{0,2}[A-C]?)\.\S*)[^]*?/)
                 anAnchor.href = chapAndSecRegExp.replaceAll(anAnchor.textContent, `https://www.oregonlegislature.gov/bills_laws/ors/ors00$2.html#$1`)
-                console.log (anAnchor.href)
                 anAnchor.href = new RegExpHandler(/(ors)0+(\d{3})/).replaceAll(anAnchor.href, '$1$2') // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
             } break
 

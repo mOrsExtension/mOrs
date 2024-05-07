@@ -1,5 +1,4 @@
 //buildHeading.js
-//@ts-check
 
 const chapterInfo = {
    isFormerProvisions: false,
