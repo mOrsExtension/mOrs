@@ -1,6 +1,6 @@
 # mORS
 
-Extension (Google Chrome/Edge) that alters appearance of Oregon Revised Statutes on Oregon State Legislature website and allows for easier retrieval of Oregon session law from the Oregon Legislative Assembly. The Oregon Revised Statutes are the codified laws of the State of Oregon.
+Chromium browser (Google Chrome/Edge) extension that alters appearance of Oregon Revised Statutes on Oregon State Legislature website and allows for easier retrieval of Oregon session law from the Oregon Legislative Assembly. The Oregon Revised Statutes are the codified laws of the State of Oregon.
 
 ## Installation instructions (Chrome/Edge)
 

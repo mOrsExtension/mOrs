@@ -1,7 +1,8 @@
 //background/navigate.js
 
 /** constants for OrsSearch*/
-const errorUrl = 'https://github.com/mOrsExtension/mOrs/blob/master/mORSerror.md'  // TODO #2 create wiki and link to specific page on navigation error
+const errorUrl = 'https://github.com/mOrsExtension/mOrs/wiki/Help-Using-Omnibox'
+
 //const orsRegExp = /\b0*([1-9]\d{0,2}[a-c]?)(\.\d{3,4})?/ // finds "chapter" or "chapter.section", e.g. "459A"
 const yearRegExp = /\b(?:19|20)\d{2,}\b/
 const chpRegExp = /(?:-|(?:19|20)\d{2}\s|c\.\s?)([1-9]\d{0,3}\b)/
