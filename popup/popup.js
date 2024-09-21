@@ -107,7 +107,7 @@ const fetchAllStoredData = async () => {
 // User clicks "Help" button
 const addListenerHelp = () => {
     helpButton?.addEventListener('click', () => {
-        launchNewTab('https://github.com/mOrsExtension/mOrs/blob/master/mORSerror.md')
+        launchNewTab('https://github.com/mOrsExtension/mOrs/wiki/Help-Using-Omnibox')
     })
 }
 

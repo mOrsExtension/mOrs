@@ -1,0 +1,57 @@
+{
+    "Root":{
+    "Files": "C:\file_list.txt",
+    "Mors": {
+        "Files":{
+            "1":".gitignore",
+            "2":"backgroundLoader.js",
+            "3":"eslint.config.mjs",
+            "4":"LICENSE.md"
+C:\mOrs\manifest.json
+C:\mOrs\mORSerror.md
+C:\mOrs\package-lock.json
+C:\mOrs\package.json
+C:\mOrs\README.md
+C:\mOrs\background\annotations.js
+C:\mOrs\background\helperBG.js
+C:\mOrs\background\msgListenerBG.js
+C:\mOrs\background\navigate.js
+C:\mOrs\background\styles.js
+C:\mOrs\background\userStorage.js
+C:\mOrs\background\webresources.js
+C:\mOrs\content\bodyClean.js
+C:\mOrs\content\buildBodyDivs.js
+C:\mOrs\content\buildButtons.js
+C:\mOrs\content\buildHeading.js
+C:\mOrs\content\buildNewMenus.js
+C:\mOrs\content\buildOrLawLinks.js
+C:\mOrs\content\buildTOC.js
+C:\mOrs\content\cleanAllFirst.js
+C:\mOrs\content\cleanAllLast.js
+C:\mOrs\content\enhanceSecs.js
+C:\mOrs\content\helper.js
+C:\mOrs\content\mORS.js
+C:\mOrs\content\msgListener.js
+C:\mOrs\content\userData.js
+C:\mOrs\data\cssPresetColors.json
+C:\mOrs\data\errataList.json
+C:\mOrs\data\main.css
+C:\mOrs\data\orLawLegLookup.json
+C:\mOrs\data\userInitialData.json
+C:\mOrs\data\volumeOutline.json
+C:\mOrs\debug\testChecklist.md
+C:\mOrs\images\icon128.png
+C:\mOrs\images\icon16.png
+C:\mOrs\images\icon24.pdn
+C:\mOrs\images\icon24.png
+C:\mOrs\images\icon32.pdn
+C:\mOrs\images\icon32.png
+C:\mOrs\images\icon48.png
+C:\mOrs\images\mORS128.pdn
+C:\mOrs\options\example.html
+C:\mOrs\options\menu.html
+C:\mOrs\options\options.html
+C:\mOrs\options\options.js
+C:\mOrs\popup\popAndOpHelper.js
+C:\mOrs\popup\popup.html
+C:\mOrs\popup\popup.js
