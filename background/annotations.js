@@ -1,7 +1,7 @@
 class AnnoHandler {
     constructor(chapNo) {
         this.chapter = '0'
-        this.#validateAndCleanChapter(chapNo)
+        this.#validateAndCleanChapter(chapNo) // private class must be function, not answer
         this.url = `https://www.oregonlegislature.gov/bills_laws/ors/ano00${this.chapter}.html`.replace(/0*(\d{3})/, '$1')
         this.doc = ''
         this.paragraphList = []
@@ -13,9 +13,10 @@ class AnnoHandler {
         }
     }
 
-    async getSections() {
-        infoBG(`getting Sections`, 'annotations.js', 'getSections', '#ffbbff')
-        if(!this.annoSecList.length < 2) {
+    // public Class method to return annotation as javascript object
+    async getAnnoSections() {
+        infoBG(`retrieving annotation sections`, 'annotations.js', 'getAnnoSections', '#ffbbff')
+        if (!this.annoSecList.length < 2) {
             if (await this.#loopAwaitData()) {
                 this.#docDomParsing()
             }
@@ -39,29 +40,34 @@ class AnnoHandler {
         infoBG('fetched annotations', 'annotations.js', 'fetchData')
     }
 
+    /** loops back to see if webpage has been retrieved over fixed duration*/
     #loopAwaitData() {
         this.#fetchData()
-        const msWait = 95
+        const msWait = 18
         const maxAttempt = 50
-        return new Promise(async resolve => {   // TODO: #48 Debug - does this actually work or is it just not been throwing problems lately?
-            let i = 0
+        return new Promise(async resolve => {
+            let i = 1
+            done = false
             let dataFetchLoop = setInterval(() => {
                 if (this.doc) {
                     clearInterval(dataFetchLoop)
-                    resolve(true)
+                    done = true
+                    resolve(done)
                 }
                 if (i > 50) {
                     clearInterval(dataFetchLoop)
                     warnBG(`timed out after ${maxAttempt} attempts (${maxAttempt * msWait}ms)`)
-                    resolve(false)
+                    resolve(done)
                 }
-                infoBG(`Annotation retrieval; attempt: #${i} (${i*msWait}ms)`, 'annotations.js', '#loopAwaitData')
+                if (!done) {
+                    infoBG(`Annotation retrieval unsuccessful; attempt: #${i} of ${maxAttempt} (${i*msWait}ms)`, 'annotations.js', '#loopAwaitData')
+                }
                 i++
             } , msWait)
         })
     }
 
-    /**RegExp to substitute for actual DOM parsing, which required creating outside dummy page */
+    /** FYI, ended up just using RegExp rather than actual DOM parsing, because DOM would have required creating outside dummy page of temp html */
     async #docDomParsing () {
         if (this.annoSecList.length > 1) {return} // keep from accidentally running 2x
         this.#regExpCleanup()
@@ -77,7 +83,7 @@ class AnnoHandler {
         this.doc = this.doc.replace(/[^]*?<div/,'')
         this.doc = this.doc.replace(/\s*[\n\r]\s*/g, ' ') // replace newlines with space
         let /** capturing groups $1:volume, $2:page, $3:year */ casesCoA = [...this.doc.matchAll(/(\d{1,3})\sOr\.?\s?App\.?\s(\d{1,3})[,Pd\d\s]*\((\d{4})\)/g)]
-        let /** capturing groups $1:volume, $2:page, $3:year */ casesOSC = [...this.doc.matchAll(/(\d{1,3})\sOr\.?\s(\d{1,3})/g)]
+        let /** capturing groups $1:volume, $2:page, $3:year */ casesOSC = [...this.doc.matchAll(/(\d{1,3})\sOr\.?\s(\d{1,3})/g)] //TODO #57 capture date for Or. annos.
         let /** capturing groups $1:volume, $2:page, $3:year */ orLawRev = [...this.doc.matchAll(/(\d{1,3})\sOLR\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
         let /** capturing groups $1:volume, $2:page, $3:year */ wLawRev = [...this.doc.matchAll(/(\d{1,3})\sWL(?:R|J)\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
         let /** capturing groups $1:volume, $2:page, $3:year */ EnvLRev = [...this.doc.matchAll(/(\d{1,3})\sELR?\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
@@ -236,7 +242,7 @@ const startAnnoRetrieval = (chapter) => {
 /** Finishes getting Annos, returns list of section Objects {name; type; children:{text}}; from msgListenerBG.js */
 const finishAnnoRetrieval = async () => {
     try {
-        infoBG('Finishing retrieval', 'annotations.js', 'finishAnnoRetrieval')
+        infoBG('Finishing annotations retrieval', 'annotations.js', 'finishAnnoRetrieval')
         return await annoBuild.getSections()
     } catch (error) {
         warnBG(`Retrieving annotations error: ${error}`, 'annotations.js', 'finishAnnoRetrieval')
