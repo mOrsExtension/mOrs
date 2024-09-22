@@ -1,5 +1,8 @@
 # Search Help
 
+(FYI DEPRECIATED)
+Use current version at <https://github.com/mOrsExtension/mOrs/wiki/Help-Using-Omnibox>
+
 Either you pressed the help button, or something went wrong when you tried to use the omnibox (search bar) to search with mORS (for Oregon Revised Statutes), so you ended up here.
 
 ## Valid Searches

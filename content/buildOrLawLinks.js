@@ -1,12 +1,13 @@
 //buildOrLawLinks.js
 
+
 /** Returns #main id of body of document with updated links to Oregon Session Laws for HeinOnline or oregonLegislature.gov
  * @param {Node} bodyMain // already tagged with anchors classed as 'sessionLaw' */
 const newOrUpdateOrLawLinks = async bodyMain => {
     try {
         const anchorList = getAnchorList(bodyMain)
         const orLaw = await sendAwait({getStorage:"lawsReaderStored"}) // check user form input for source of OrLaws lookup (Hein/OrLeg)
-        switch (orLaw) {
+        switch (orLaw.lawsReaderStored) {
             case 'Hein': {
                 buildHeinLinks(anchorList)
             } break
@@ -21,6 +22,7 @@ const newOrUpdateOrLawLinks = async bodyMain => {
                 buildOrLegLinks(sortedAnchors.newList)
             } break
             default: {
+                infoCS('Removing any links', 'buildOrLawLinks.js', 'newOrUpdateOrLawLinks')
                 deleteAllLinks(anchorList)
             } break
         }
@@ -30,6 +32,17 @@ const newOrUpdateOrLawLinks = async bodyMain => {
         warnCS(warning, 'navigate.js', 'OrLawLinking')
     }
 }
+const sortByDate = anchors => {
+    let newList = []
+    let oldList = []
+    anchors.forEach(anAnchor => {
+        anAnchor.dataset.year > 1998
+        ? newList.push(anAnchor)
+        : oldList.push(anAnchor)
+    })
+    return {"oldList": oldList, "newList": newList}
+}
+
 
 /**TODO: #45 Build into Class for Anchor Handling? */
 /** put info into anchors (data-year, data-chapter, data-ss) to keep data gathering & link building separate */
@@ -64,7 +77,7 @@ const addTagsToAllAnchors = anchorList => {
     return anchorList
 }
 const setYear = text => {
-    text.replace(/[^]*((?:20|19)\d{2})[^]*/, '$1')
+    return text.replace(/[^]*((?:20|19)\d{2})[^]*/, '$1')
 }
 const setChapter = (text, isLong) => {
     return isLong
@@ -94,17 +107,6 @@ const buildHeinLinks = sessionLawAnchors => {
 }
 const buildHeinURL = (year, chapter) => {
     return `https://heinonline-org.soll.idm.oclc.org/HOL/SSLSearchCitation?journal=ssor&yearhi=${year}&chapter=${chapter}&sgo=Search&collection=ssl&search=go`
-}
-
-const sortByDate = anchors => {
-    let newList = []
-    let oldList = []
-    anchors.forEach(anAnchor => {
-        anAnchor.dataset.year > 1998
-        ? newList.push(anAnchor)
-        : oldList.push(anAnchor)
-    })
-    return {"oldList": oldList, "newList": newList}
 }
 
 /**builds links for oregonLegislature.gov session laws for each anchor (session law reference) in chapter */
@@ -137,6 +139,7 @@ const buildOrLegUrl = async (year, chapter, specialSession) => {
         return ''
     }
 }
+
 let oreLegLookupJson = null // cashing global object
 const getOrLegLookupJson = async () => {
     if (oreLegLookupJson == null) {
@@ -150,6 +153,12 @@ const deleteAllLinks = (anchors) => {
         removeLinkData(anAnchor)
     })
 }
+const removeLinkData = anchor => {
+    anchor.classList.add('linkOff')
+    anchor.removeAttribute('rel')
+    anchor.removeAttribute('href')
+}
+
 
 const appendLinkData = (anchor, url) => {
     if (url.length > 0) {
@@ -157,9 +166,4 @@ const appendLinkData = (anchor, url) => {
         anchor.classList.remove('linkOff')
         anchor.href = url
     }
-}
-const removeLinkData = anchor => {
-    anchor.classList.add('linkOff')
-    anchor.removeAttribute('rel')
-    anchor.removeAttribute('href')
 }
