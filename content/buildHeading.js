@@ -63,7 +63,7 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
         }
         if (editionRegExp.testMe(paraText)) {
             chapterInfo.thisEdition = editionRegExp.firstMatchGroupNo(paraText, 1) // get edition year
-            addToMiscHead = false
+            chapterInfo.miscHead.appendChild(aPara)
             return
         }
         if (!addToMiscHead && chapNameAndNoRegExp.testMe(paraText)) {
@@ -71,16 +71,12 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
             addToMiscHead = true
             chapterInfo.chapNo = chapNameAndNoRegExp.firstMatchGroupNo(paraText, 1) // Get ORS chapter number
             chapterInfo.chapName = chapNameAndNoRegExp.firstMatchGroupNo(paraText, 2) // Get chapter title alone
-            chapNameRegExp.RE = RegExp(chapterInfo.chapName.toUpperCase())
-            console.log (chapNameRegExp.RE)
+            chapNameRegExp.RE = RegExp(chapterInfo.chapName.toUpperCase()) // used to find the end of the heading
             infoCS(`Found chapter ${chapterInfo.chapNo}: ${chapterInfo.chapName} in paragraph #${index+1}`, 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
-            console.log(`Found chapter ${chapterInfo.chapNo}: ${chapterInfo.chapName} in paragraph #${index+1}`, 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
             return
         }
 
-        console.log (`${chapNameRegExp.RE} : ${paraText.slice(0,50)}`)
         if (chapNameRegExp.testMe(paraText)) {  // second time we see chapter name, we're finished
-            console.log(`Found chapter name again in paragraph #${index+1}`, 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
             removalList.push(aPara, allParagraphs[index + 1]) // delete next line as well
             isDone = true
             return
