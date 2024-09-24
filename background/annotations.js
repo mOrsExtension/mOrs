@@ -47,7 +47,7 @@ class AnnoHandler {
         const maxAttempt = 50
         return new Promise(async resolve => {
             let i = 1
-            done = false
+            let done = false
             let dataFetchLoop = setInterval(() => {
                 if (this.doc) {
                     clearInterval(dataFetchLoop)
@@ -243,7 +243,7 @@ const startAnnoRetrieval = (chapter) => {
 const finishAnnoRetrieval = async () => {
     try {
         infoBG('Finishing annotations retrieval', 'annotations.js', 'finishAnnoRetrieval')
-        return await annoBuild.getSections()
+        return await annoBuild.getAnnoSections()
     } catch (error) {
         warnBG(`Retrieving annotations error: ${error}`, 'annotations.js', 'finishAnnoRetrieval')
     }

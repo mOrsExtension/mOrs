@@ -66,7 +66,7 @@ class MessageSenderCS {
             if ('response' in response) {
                 this.response = response.response
             } else {
-                console.warn(`Error, response received was ${JSON.stringify(response)}`)
+                console.warn(`Warning. Response received to ${JSON.stringify(this.message)} was ${JSON.stringify(response)}`)
             }
         } catch (error) {
             if (!this.isLog) {
