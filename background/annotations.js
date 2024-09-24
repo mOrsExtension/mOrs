@@ -82,11 +82,11 @@ class AnnoHandler {
     #regExpCleanup() {
         this.doc = this.doc.replace(/[^]*?<div/,'')
         this.doc = this.doc.replace(/\s*[\n\r]\s*/g, ' ') // replace newlines with space
-        let /** capturing groups $1:volume, $2:page, $3:year */ casesCoA = [...this.doc.matchAll(/(\d{1,3})\sOr\.?\s?App\.?\s(\d{1,3})[,Pd\d\s]*\((\d{4})\)/g)]
-        let /** capturing groups $1:volume, $2:page, $3:year */ casesOSC = [...this.doc.matchAll(/(\d{1,3})\sOr\.?\s(\d{1,3})/g)] //TODO #57 capture date for Or. annos.
-        let /** capturing groups $1:volume, $2:page, $3:year */ orLawRev = [...this.doc.matchAll(/(\d{1,3})\sOLR\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
-        let /** capturing groups $1:volume, $2:page, $3:year */ wLawRev = [...this.doc.matchAll(/(\d{1,3})\sWL(?:R|J)\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
-        let /** capturing groups $1:volume, $2:page, $3:year */ EnvLRev = [...this.doc.matchAll(/(\d{1,3})\sELR?\s(\d{1,3})\s[\d,-]*\((\d{4})\)/g)]
+        let /** capturing groups $1:volume, $2:page, $3:year */ casesCoA = [...this.doc.matchAll(/(\d{1,3})\sOr\.?\s?App\.?\s(\d{1,4})[,Pd\d\s]*\((\d{4})\)/g)]
+        let /** capturing groups $1:volume, $2:page, $3:year */ casesOSC = [...this.doc.matchAll(/(\d{1,3})\sOr\.?\s(\d{1,4})[^]*?\d\)/g)]
+        let /** capturing groups $1:volume, $2:page, $3:year */ orLawRev = [...this.doc.matchAll(/(\d{1,3})\sOLR\s(\d{1,4})\s[\d,-]*\((\d{4})\)/g)]
+        let /** capturing groups $1:volume, $2:page, $3:year */ wLawRev = [...this.doc.matchAll(/(\d{1,3})\sWL(?:R|J)\s(\d{1,4})\s[\d,-]*\((\d{4})\)/g)]
+        let /** capturing groups $1:volume, $2:page, $3:year */ EnvLRev = [...this.doc.matchAll(/(\d{1,3})\sELR?\s(\d{1,4})\s[\d,-]*\((\d{4})\)/g)]
         casesCoA.forEach(CoACase => {
             this.doc = this.anchorWrap(
                 this.doc,
