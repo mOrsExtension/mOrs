@@ -53,7 +53,7 @@ const finalCleanUp = finalDivs => {
     // delete empty divs
     let allElements = finalBody.getElementsByTagName('*')
     Array.from(allElements).forEach(anElement => {
-        if (new RegExpHandler(/^(\s|&nbsp)+$/).testMe(anElement.textContent)) {  //TODO: #47 Double check that this still works after removing backslash before ampersand
+        if (new RegExpHandler(/^(\s|&nbsp;)+$/).testMe(anElement.textContent)) {
             infoCS(
                 `Deleting ${anElement.innerHTML}`,
                 'finalClean.js',
