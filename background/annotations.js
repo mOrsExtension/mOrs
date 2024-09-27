@@ -15,7 +15,7 @@ class AnnoHandler {
 
     // public Class method to return annotation as javascript object
     async getAnnoSections() {
-        infoBG(`retrieving annotation sections`, 'annotations.js', 'getAnnoSections', '#ffbbff')
+        infoAnnos(`retrieving annotation sections`, 'getAnnoSections')
         if (!this.annoSecList.length < 2) {
             if (await this.#loopAwaitData()) {
                 this.#docDomParsing()
@@ -76,7 +76,7 @@ class AnnoHandler {
         this.#filterParagraphs()
         this.#buildSections()
         this.#deleteParentsWithNoChildren()
-        infoBG(`Created anno list for ${Object.keys(this.annoSecList).length} sections`, 'annotations.js', '#docDomParsing')
+        infoAnnos(`Created anno list for ${Object.keys(this.annoSecList).length} sections`, 'docDomParsing')
     }
 
     #regExpCleanup() {
@@ -232,9 +232,13 @@ const orsRegExp = /\b0*([1-9]\d{0,2}[a-c]?)(\.\d{3,4})?/ // finds "chapter" or "
 const tabRegExp = '(?:(?:&nbsp;|\\s)*)'
 let annoBuild
 
+const infoAnnos = (info, script) => {
+    infoBG(info, script, 'annotations.js', '#9df') // light blue
+}
+
 /** Starts getting Annos (will not be done by time rest of script runs) from msgListenerBG.js */
 const startAnnoRetrieval = (chapter) => {
-    infoBG(`Getting annotations for ${chapter}`, 'annotations.js', 'startAnnoRetrieval')
+    infoAnnos(`Getting annotations for ${chapter}`, 'startAnnoRetrieval')
     annoBuild = new AnnoHandler(chapter)
     return true
 }
@@ -242,7 +246,7 @@ const startAnnoRetrieval = (chapter) => {
 /** Finishes getting Annos, returns list of section Objects {name; type; children:{text}}; from msgListenerBG.js */
 const finishAnnoRetrieval = async () => {
     try {
-        infoBG('Finishing annotations retrieval', 'annotations.js', 'finishAnnoRetrieval')
+        infoAnnos('Finishing annotations retrieval', 'finishAnnoRetrieval')
         return await annoBuild.getAnnoSections()
     } catch (error) {
         warnBG(`Retrieving annotations error: ${error}`, 'annotations.js', 'finishAnnoRetrieval')
