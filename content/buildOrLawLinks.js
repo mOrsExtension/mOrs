@@ -129,7 +129,7 @@ const buildOrLegLinks = (anchors) => {
 const buildOrLegUrl = async (year, chapter, specialSession) => {
     const addSpecialSession = specialSession ? ` s.s.${specialSession}` : ''
     const yearAndSS = `${year}${addSpecialSession}`
-    const pdfFileCode = await getOrLegLookupJson[yearAndSS]
+    const pdfFileCode = await getOrLegLookupJson(yearAndSS)
     if (pdfFileCode != null) {
         let orLawFileName = pdfFileCode.replace(/~/, '000' + chapter)
         orLawFileName = orLawFileName.replace(/([^]*?\w)0*(\d{4}(?:\.|\w)*)/, '$1$2') /** trim excess zeros */

@@ -35,16 +35,16 @@ class AnnoHandler {
     async #fetchData() {
         if (this.fetchStart) {return} // keep from accidentally running 2x+
         this.fetchStart = true
-        infoAnnos('fetching annotations', 'fetchData')
+        infoBG('Sent to fetch annotations', 'annotations.js', 'fetchData')
         this.doc = await getTextFromHtml(this.url, 'windows-1251')  // webResources.js
-        infoAnnos('fetched all annotations', 'fetchData')
+        infoBG('Finished fetching annotations', 'annotations.js', 'fetchData')
     }
 
     /** loops back to see if webpage has been retrieved over fixed duration*/
     #loopAwaitData() {
         this.#fetchData()
-        const msWait = 18
-        const maxAttempt = 50
+        const msWait = 100
+        const maxAttempt = 45
         return new Promise(async resolve => {
             let i = 1
             let done = false
@@ -54,13 +54,13 @@ class AnnoHandler {
                     done = true
                     resolve(done)
                 }
-                if (i > 50) {
+                if (i > maxAttempt) {
                     clearInterval(dataFetchLoop)
                     warnBG(`timed out after ${maxAttempt} attempts (${maxAttempt * msWait}ms)`)
                     resolve(done)
                 }
                 if (!done) {
-                    infoAnnos(`Annotation retrieval unsuccessful; attempt: #${i} of ${maxAttempt} (${i*msWait}ms)`, 'loopAwaitData')
+                    infoBG(`Awaiting annotation retrieval; attempt #${i} of ${maxAttempt} (${i*msWait}ms)`, 'annotations.js', '#loopAwaitData')
                 }
                 i++
             } , msWait)

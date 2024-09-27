@@ -135,7 +135,7 @@ const handleMessage = async (message, sender) => {
     try {
         if (await newMsg.doTasksAndFetchResponse()) {
             if(!newMsg.isLog) {
-                infoBG(`Responding to request with '${newMsg.stringyResponse}'`, 'msgListenerBG.js', 'handleMessage', "#fb8")
+                infoBG(`Background response to request: '${newMsg.stringyResponse}'`, 'msgListenerBG.js', 'handleMessage', "#fb8")
             }
             return ({'response' : newMsg.responseMsg})
         } else {
