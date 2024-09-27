@@ -23,12 +23,11 @@ const runMain = async () => {
     const floatMenuDiv = finishedPromises[0]
     const volumeNav = finishedPromises[1]
     mainDiv = finishedPromises[2] // orLawLink.js : add links for OrLaws based on \data\orLawLegLookup.json
-
     finalCleanUp([headingDiv, volumeNav, tocDiv, mainDiv, floatMenuDiv]) // finalClean.js : puts together pieces, does post html rendering cleanup
     sectionAdjustments() // buttons.js : add buttons for collapsable sections, expanding links & button listeners
-    if (await implementUserParameters()) { // userData.js : implement remaining stored data (other than OrLaw lookup/menu)
-        navigateToTag() // navigate.js : navigate to tag (#) in url, if any
-    }
+    startObserver(6)
+    navigateToTag() // navigate.js : navigate to tag (#) in url, if any
+
 }
 
 //Startup
@@ -39,6 +38,7 @@ window.addEventListener('load', () => {
         "on 'load'"
     )
     userStylesRefresh() // stylesheet.js
+    implementUserParameters()
     runMain() // mORS.js (above) - implements changes to page
     listenToPopup() // addListeners.js - prepare to receive messages from popup.js's sendMsgToOrsTabs (or options.js)
 })
