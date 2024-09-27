@@ -105,6 +105,7 @@ const setFullWidth = isFull => {
     if (fwButtonLabel) {
         fwButtonLabel.textContent = isFull ? 'Reading Mode' : 'Full Width'
     }
+    storeKey({'showFullWidth': isFull}) // saves to user's computer. No need to await result.
 }
 
 /** Sets visibility of query selection as set by popup or at startup*/
@@ -168,7 +169,7 @@ const warnCS = (warnMsg, scriptFileName = 'helper.js', functionName = '') => {
     }
     console.warn(`${scriptFileName} - ${functionName}: ${warnMsg}`) // want to make sure it gets noticed in both places
     sendAwait({
-        log: {
+        log : {
             doWarn: true,
             txt: warnMsg,
             script: scriptFileName,
@@ -204,4 +205,18 @@ const expandAllSections = () => {
     document.querySelectorAll('div.collapsible').forEach(hidable => {
         hidable.classList.remove('invisibility')
     })
+}
+
+const storeKey = async (keyValueObj) => {
+    try {
+        await browser.storage.sync.set(keyValueObj)
+        infoCS(
+            `stored user data: ${JSON.stringify(keyValueObj)}`,
+            'helper.js',
+            'promiseStoreKey'
+        )
+        return true
+    } catch (error) {
+        warnCS(error, 'helper.js', 'promiseStoreKey')
+    }
 }

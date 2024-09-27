@@ -28,21 +28,21 @@ const implementUserParameters = async () => {
     await getInformation('collapseDefaultStored', doCollapse => {
         doCollapse ? collapseAllSections() : expandAllSections() // in helper.js
     })
+    await getInformation('showFullWidth', isTrue => {
+        setFullWidth(isTrue) // in helper.js
+    })
     await getInformation('doShowBurnt', doShow => {
         showBurnt(doShow) // in helper.js
     })
     await getInformation('showSNsStored', isTrue => {
         showSourceNotes(isTrue) //  in helper.js
     })
-    await getInformation('showFullWidth', isTrue => {
-        setFullWidth(isTrue) // in helper.js
-    })
     await getInformation('showMenuStored', isTrue => {
         showMenu(isTrue) // in helper.js
     })
     await getInformation('showNavStored', isTrue => {
         showVolumeOutline(isTrue) // in helper.js
-        })
+    })
     return true
 }
 
@@ -51,8 +51,12 @@ const implementUserParameters = async () => {
 const navigateToTag = async () => {
     let navToTag = new urlHandler (window.location.toString())
     if (navToTag.hasTarget) {
+//        await newDelay(100) // delay in milliseconds before starting scroll. Seems to reduce issues with scrolling and then needing html redrawn.
         navToTag.scrollToTarget()
     }
+}
+const newDelay = async (msecs) => {
+    setTimeout(() => {return true}, msecs)
 }
 
     /** Takes in ors URL and if there's a #tag that can be found on page, scrolls browser to it) */
@@ -87,7 +91,6 @@ const navigateToTag = async () => {
     }
 
     async scrollToTarget() {
-        await this.newDelay(1100) // delay in milliseconds before starting scroll. Seems to reduce issues with scrolling and then needing html redrawn.
         if (!this.hasTarget || this.targetDocElement == null) {
             return
         }
@@ -95,9 +98,7 @@ const navigateToTag = async () => {
         this.targetDocElement.scrollIntoView()
         this.expandTarget ()
     }
-    newDelay (msecs) {
-        setTimeout(() => {return true}, msecs)
-    }
+
     expandTarget () {
         try {
             expandSingle(this.targetDocElement) // helper.js - expands the section if collapsed
