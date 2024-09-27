@@ -141,13 +141,16 @@ function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
      * @param {String} changeTo */
     const romanizeParagraphs = (changeFrom, changeTo) => {
 
-        /**Return lower case value in the leading parenthesis as lowercase
-         * E.g.: "(B) Manufactured dwellings;" ==> 'b' *
+        let findFirstParenz = new RegExpHandler(/^\(([^]+?)\)/)
+        /**Returns lower case value in the leading parenthesis as lowercase
+         * E.g. '(B) Example text' ==> 'b'; '(ii) thing' ==> 'ii' *
          * @param {String} theText */
         const inParensLowerCase = theText => {
-            let findFirstParenz = new RegExpHandler(/^\(([^]+?\))/)
             let result = findFirstParenz.firstMatchGroupNo(theText, 1)
-            return result.toLowerCase()
+            if (typeof result == 'string') {
+                return result.toLowerCase()
+            }
+            return ''
         }
 
         /** Turns num (under 90) into lower case roman numeral string.
@@ -168,7 +171,8 @@ function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
         /** get list of all paragraphs (or subparagraphs) */
         const subsArray = Array.from(docBody.querySelectorAll(`p.${changeFrom}`))
         for (let i = 0; i < subsArray.length; i++) {
-            if (inParensLowerCase(subsArray[i].textContent) == 'ii') {  //every roman numeral will have a (ii), that's what we're looking for.
+            let parenthesisContent = inParensLowerCase(subsArray[i].textContent)
+            if (parenthesisContent == 'ii') {  //every roman numeral will have an (ii), that's what we're looking for.
                 let doExit = false
                 /** usually roman numerals will start with previous paragraph (i); but could be (A)(i)
                  * @type {number} */ let startRomanWith = -1

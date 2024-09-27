@@ -116,23 +116,32 @@ const buildOrLegLinks = (anchors) => {
         const orLegUrl  = await buildOrLegUrl(
             anAnchor.dataset.year,
             anAnchor.dataset.chapter,
-            anAnchor.dataset.ss
+            anAnchor.dataset.shortSession
         )
         appendLinkData(anAnchor, orLegUrl)
     })
 }
 
-/** Converts data in anchor into OrLeg url for session law *
+/** Converts data fields in anchor <a data=''> into OrLeg urls for session law;
+ * Based on lookup table for year & special session at ../data/OrLawLegLookup.json
  * @param {string} year
  * @param {string} chapter
  * @param {string} specialSession */
 const buildOrLegUrl = async (year, chapter, specialSession) => {
+    const getOrLegLookupJson = async (lookup) => {
+        if (oreLegLookupJson == null) {
+            infoCS('retrieving OrLegLookup', 'buildOrLawLinks.js', 'getOrLegLookupJson')
+            oreLegLookupJson = await sendAwait({'fetchJson':'OrLawLegLookup'}, true)
+        }
+        return oreLegLookupJson[lookup]
+    }
+    let oreLegLookupJson = null // cashing global object
     const addSpecialSession = specialSession ? ` s.s.${specialSession}` : ''
     const yearAndSS = `${year}${addSpecialSession}`
     const pdfFileCode = await getOrLegLookupJson(yearAndSS)
     if (pdfFileCode != null) {
         let orLawFileName = pdfFileCode.replace(/~/, '000' + chapter)
-        orLawFileName = orLawFileName.replace(/([^]*?\w)0*(\d{4}(?:\.|\w)*)/, '$1$2') /** trim excess zeros */
+        orLawFileName = orLawFileName.replace(/([^]*?\w)0*(\d{4}(?:\.|\w)*)/, '$1$2') /** trims excess zeros */
         return `https://www.oregonlegislature.gov/bills_laws/lawsstatutes/${orLawFileName}`
     } else {
         warnCS(`Cannot find [${yearAndSS}] in ORS lookup.`, 'buildOrLawLinks.js', 'buildOrLegUrl')
@@ -140,26 +149,16 @@ const buildOrLegUrl = async (year, chapter, specialSession) => {
     }
 }
 
-let oreLegLookupJson = null // cashing global object
-const getOrLegLookupJson = async () => {
-    if (oreLegLookupJson == null) {
-        infoBG('retrieving OrLegLookup', 'buildOrLawLinks.js', 'getOrLegLookupJson')
-        oreLegLookupJson = await sendAwait({'fetchJson':'OrLawLegLookup'}, true)
-    } return oreLegLookupJson
-}
-
+/** Deletes the <a> links, keeps the tags so they can be created later without recalculating */
 const deleteAllLinks = (anchors) => {
     anchors.forEach(anAnchor => {
-        removeLinkData(anAnchor)
+        anAnchor.classList.add('linkOff')
+        anAnchor.removeAttribute('rel')
+        anAnchor.removeAttribute('href')
     })
 }
-const removeLinkData = anchor => {
-    anchor.classList.add('linkOff')
-    anchor.removeAttribute('rel')
-    anchor.removeAttribute('href')
-}
 
-
+/** Adds a single <a> link from either Hein or OrLeg pathway */
 const appendLinkData = (anchor, url) => {
     if (url.length > 0) {
         anchor.rel = 'noopener'
