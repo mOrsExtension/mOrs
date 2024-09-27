@@ -10,14 +10,14 @@ const implementUserParameters = async () => {
             const response = await sendAwait({'getStorage': dataRequest})
             const isReturnTrue = response[dataRequest]
             infoCS(
-                `Response to '${dataRequest}'='${isReturnTrue}'`,
+                `Content script received response: '${dataRequest}'='${isReturnTrue}'`,
                 'storedData.js',
                 'getInformation'
             )
             responsiveFunction(isReturnTrue)
         } catch (e) {
             warnCS(
-                `Error seeking response to '${dataRequest}': ${e}`,
+                `Error awaiting response to '${dataRequest}': ${e}`,
                 'storedData.js',
                 'getInformation'
             )
