@@ -3,7 +3,7 @@
 /** constants for OrsSearch*/
 const errorUrl = 'https://github.com/mOrsExtension/mOrs/wiki/Help-Using-Omnibox'
 
-//const orsRegExp = /\b0*([1-9]\d{0,2}[a-c]?)(\.\d{3,4})?/ // finds "chapter" or "chapter.section", e.g. "459A"
+//const orsRegExp is in helperBG.js
 const yearRegExp = /\b(?:19|20)\d{2,}\b/
 const chpRegExp = /(?:-|(?:19|20)\d{2}\s|c\.\s?)([1-9]\d{0,3}\b)/
 
@@ -25,7 +25,7 @@ class OrsSearch {
             infoNav('Invalid search: ${this.search}; sending user to help page', 'getOrsUrl')
             return errorUrl
         }
-        let orsUrl = this.search.replace(orsRegExp, '00$1.html#$&') // add more than enough zeros
+        let orsUrl = this.search.replace(orsRegExp, '00$1.html#$1$3') // add more than enough zeros
         orsUrl = orsUrl.replace(/^0{1,2}(\d{3})/, '$1') // trim any excess leading 0s to 3 digits
 
         infoNav(`Creating new ORS tab for '${orsUrl}'`, 'getOrsUrl')
