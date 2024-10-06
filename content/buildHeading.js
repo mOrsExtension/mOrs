@@ -71,7 +71,7 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
             addToMiscHead = true
             chapterInfo.chapNo = chapNameAndNoRegExp.firstMatchGroupNo(paraText, 1) // Get ORS chapter number
             chapterInfo.chapName = chapNameAndNoRegExp.firstMatchGroupNo(paraText, 2) // Get chapter title alone
-            chapNameRegExp.RE = RegExp(chapterInfo.chapName.toUpperCase()) // used to find the end of the heading
+            chapNameRegExp.RE = RegExp(chapterInfo.chapName.slice(0,12).toUpperCase()) // used to find the end of the heading based on beginning of chapter title
             infoCS(`Found chapter ${chapterInfo.chapNo}: ${chapterInfo.chapName} in paragraph #${index+1}`, 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
             return
         }
