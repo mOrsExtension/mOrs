@@ -228,8 +228,6 @@ class AnnoHandler {
 }
 
 //GLOBAL CONSTANTS FOR ANNO HANDLER
-const orsRegExp = /\b0*([1-9]\d{0,2}[a-c]?)(\.\d{3,4})?/ // finds "chapter" or "chapter.section", e.g. "459A"
-const tabRegExp = '(?:(?:&nbsp;|\\s)*)'
 let annoBuild
 
 const infoAnnos = (info, script) => {
