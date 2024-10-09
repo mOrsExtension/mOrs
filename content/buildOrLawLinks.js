@@ -122,23 +122,41 @@ const buildOrLegLinks = (anchors) => {
     })
 }
 
+/** module used for json lookup, hopefully runs once*/
+let oreLegLookupJson = null; // Caching global object
+let fetchPromise = null; // Promise to track the fetching process
+let counter = 0
+
+const fetchOrLegLookupJson = async () => {
+    counter++
+    if (oreLegLookupJson) {
+        return oreLegLookupJson; // Return cached data if available
+    }
+
+    // If fetching is already in progress, wait for it to complete
+    if (!fetchPromise) {
+        fetchPromise = (async () => {
+            infoCS('retrieving OrLegLookup', 'buildOrLawLinks.js', 'getOrLegLookupJson');
+            oreLegLookupJson = await sendAwait({'fetchJson': 'OrLawLegLookup'}, true);
+            fetchPromise = null; // Reset the promise for future calls
+            return oreLegLookupJson;
+        })();
+    }
+
+    return await fetchPromise; // Wait for the promise to resolve
+};
+
+
 /** Converts data fields in anchor <a data=''> into OrLeg urls for session law;
  * Based on lookup table for year & special session at ../data/OrLawLegLookup.json
  * @param {string} year
  * @param {string} chapter
  * @param {string} specialSession */
 const buildOrLegUrl = async (year, chapter, specialSession) => {
-    const getOrLegLookupJson = async (lookup) => {
-        if (oreLegLookupJson == null) {
-            infoCS('retrieving OrLegLookup', 'buildOrLawLinks.js', 'getOrLegLookupJson')
-            oreLegLookupJson = await sendAwait({'fetchJson':'OrLawLegLookup'}, true)
-        }
-        return oreLegLookupJson[lookup]
-    }
-    let oreLegLookupJson = null // cashing global object
     const addSpecialSession = specialSession ? ` s.s.${specialSession}` : ''
     const yearAndSS = `${year}${addSpecialSession}`
-    const pdfFileCode = await getOrLegLookupJson(yearAndSS)
+    const jsonData = await fetchOrLegLookupJson()
+    const pdfFileCode = jsonData[yearAndSS]
     if (pdfFileCode != null) {
         let orLawFileName = pdfFileCode.replace(/~/, '000' + chapter)
         orLawFileName = orLawFileName.replace(/([^]*?\w)0*(\d{4}(?:\.|\w)*)/, '$1$2') /** trims excess zeros */
