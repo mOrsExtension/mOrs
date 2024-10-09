@@ -14,6 +14,7 @@ Chromium browser (Google Chrome/Edge) extension that alters appearance of Oregon
   * Turn on "Developer Mode Slider"
 * "Load Unpacked"
 * Select folder
+* (May need to restart Chrome before first use)
 
 ## To use
 
@@ -22,6 +23,8 @@ Chromium browser (Google Chrome/Edge) extension that alters appearance of Oregon
   * An ORS chapter ('659A')
   * An ORS section ('174.020')
   * An Oregon Session Law ('2015 c.614')
+  * A combination separted by pipes ('ors 96|2023 c.100|2009 c.1)
+     * Will launch three new tab for ORS chapter 96; chapter 100, Oregon Laws 2023; and chapter 1, Oregon Laws 2009
 * Use popup & options menu (button on popup or right click popup > extension options) to customize display
 
 ## Disclaimers
@@ -34,4 +37,4 @@ Chromium browser (Google Chrome/Edge) extension that alters appearance of Oregon
 
 ## Bugs
 
-* Report any issues [on Github issue page](https://github.com/mOrsExtension/mOrs/issues)
+* See known issues and report others [on Github issue page](https://github.com/mOrsExtension/mOrs/issues)

@@ -59,6 +59,7 @@ const buildFloatingMenuDiv = async () => {
     buttonRow1.appendChild(
         createButton('fullWidth', 'Reading Mode', toggleFullWidth)
     )
+/*  Depreciated. #TODO item #75, volume navigation not working; offset at fault (perhaps?)
     buttonRow2.appendChild(
         createButton('prevChap', 'Previous Chapter', async () => {
             await navToOffsetChap(-1)
@@ -68,7 +69,7 @@ const buildFloatingMenuDiv = async () => {
         createButton('nextChap', 'Next Chapter', async () => {
             await navToOffsetChap(1)
         })
-    )
+    ) */
     return menuPanel
 }
 
