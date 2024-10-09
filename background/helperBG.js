@@ -1,5 +1,9 @@
 //background/helperBG.js
 
+// background global constants used within folder
+const orsRegExp = /\b0*([1-9]\d{0,2}([a-c]|[A-C])?)(\.\d{3,4})?/ // finds "chapter" or "chapter.section", e.g. "459A"
+const tabRegExp = '(?:(?:&nbsp;|\\s)*)'
+
 /** Sends infoTxt from background script to service worker inspection console; helperBG.js
  * @param {string} infoTxt
  * @param {string} script

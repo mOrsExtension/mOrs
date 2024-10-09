@@ -3,14 +3,16 @@
 /** constants for OrsSearch*/
 const errorUrl = 'https://github.com/mOrsExtension/mOrs/wiki/Help-Using-Omnibox'
 
-//const orsRegExp = /\b0*([1-9]\d{0,2}[a-c]?)(\.\d{3,4})?/ // finds "chapter" or "chapter.section", e.g. "459A"
+//const orsRegExp is in helperBG.js
 const yearRegExp = /\b(?:19|20)\d{2,}\b/
 const chpRegExp = /(?:-|(?:19|20)\d{2}\s|c\.\s?)([1-9]\d{0,3}\b)/
 
-class OrsSearch {
+/**Builds url based on omnibox input */
+class UrlBuilderFromSearch {
     constructor(searchString) {
         this.search = searchString
         this.isOrLaw = this.setIsOrLaw()
+        this.url = ''
     }
     setIsOrLaw() {
         return Boolean(yearRegExp.test(this.search) && chpRegExp.test(this.search))
@@ -25,23 +27,24 @@ class OrsSearch {
             infoNav('Invalid search: ${this.search}; sending user to help page', 'getOrsUrl')
             return errorUrl
         }
-        let orsUrl = this.search.replace(orsRegExp, '00$1.html#$&') // add more than enough zeros
+        let orsUrl = this.search.replace(orsRegExp, '00$1.html#$1$3') // add more than enough zeros
         orsUrl = orsUrl.replace(/^0{1,2}(\d{3})/, '$1') // trim any excess leading 0s to 3 digits
 
         infoNav(`Creating new ORS tab for '${orsUrl}'`, 'getOrsUrl')
         return `https://www.oregonlegislature.gov/bills_laws/ors/ors${orsUrl}`
     }
 
+    /** Gets Url for Oregon Laws. Async function, must be awaited */
     async getOrLawUrl () {
         let year = this.search.match(yearRegExp)[0]
         let chapter = this.search.match(chpRegExp)[1]
         let orLawReader = await this.getOrLawReader(year)
-        let specialSession = ((orLawReader!='hein') ? this.getSpecialSession() : null)
+        console.log(orLawReader)
+        let specialSession = ((orLawReader!='hein') ? this.getSpecialSession() : null)  // only worry about special session if not using Hein
         let newOrLawRequest = new OrLawRequest(year, chapter, specialSession, orLawReader)
         newOrLawRequest.validateData()
         if (newOrLawRequest.isValidated) {
-            newOrLawRequest.getOrLawUrl
-            this.url = await newOrLawRequest.getOrLawUrl()
+            this.url = await newOrLawRequest.getSessionLawUrl()
         } else {
             this.url = errorUrl
         }
@@ -76,7 +79,7 @@ class OrsSearch {
 
 
 class OrLawRequest {
-    constructor(year, chapter, specialSession = null, reader='OrLeg') {
+    constructor(year, chapter, specialSession = null, reader) {
         this.year = year
         this.chapter = chapter
         this.isOrLeg = (reader.toLowerCase() != 'hein') // unless hein is requested, default to OrLeg reader
@@ -140,11 +143,11 @@ class OrLawRequest {
         }
     }
 
-    async getOrLawUrl () {
+    async getSessionLawUrl () {
         if (!this.isValidated) {
             return ''
         }
-        return this.isOrLeg ? this.heinUrl() : await this.orLegUrl()
+        return this.isOrLeg ? await this.orLegUrl() : this.heinUrl()
     }
 
     heinUrl () {
@@ -171,36 +174,38 @@ class OrLawRequest {
     }
 }
 
-
-//logs message to background service worker
+//logs message to background service worker in yellow-green
 const infoNav = (info, functionName) => {
     infoBG(info, 'navigate.js', functionName, 'yellowgreen')
 }
 
-/**sets up browser to listen for text entered after "ORS " in (chrome?) omnibox */
+/**sets up browser to listen for text entered after "ORS " in omnibox (search box)*/
 browser.omnibox.onInputEntered.addListener(async omniString => {
     infoNav('Executed search from omnibox', 'omniBox.addListener()')
     buildAndNavigateToUrls(omniString)
 })
-
 // takes in search string, opens a new tab for each unique search
 const buildAndNavigateToUrls = searchString => {
     const cleanText = sanitize(searchString)
     infoNav(`Received search request: ${cleanText}`, 'buildAndNavigateToUrls')
     let listOfSearches = searchString.split('|')
     infoNav(`Received ${listOfSearches.length} search request(s): ${listOfSearches}`, 'buildAndNavigateToUrls')
-    listOfSearches.forEach(aSearch => {
-        const search = new OrsSearch(aSearch)
-        search.isOrLaw ? search.getOrLawUrl() : search.setOrsUrl()
+    listOfSearches.forEach(async aSearch => {
+        const search = new UrlBuilderFromSearch(aSearch)
+        if (search.isOrLaw) {
+             await search.getOrLawUrl()
+        } else {
+            search.setOrsUrl()
+        }
         if (search.url && search.url?.length > 0) {
             search.execute()
         } else {
             warnBG(`URL is ${search.url}; something's wrong.`)
+            search.execute(errorUrl)
         }
     })
 }
-
-/** removes characters other than letters, numbers, hyphen, period and pipe | from user input to prevent accidental (or malicious) code injection; Lowercases text.
+/** removes most characters other than letters, numbers, hyphen, period and pipe | from user input to prevent accidental (or malicious) code injection; Lowercases text.
 * @param {string} userText */
 const sanitize = userText => {
     return userText.replace(/[-\(\)\{\}\]\[,`~$%#@!^&*_\+="'?\<\>;]/g, '|').toLowerCase()
