@@ -63,9 +63,11 @@ class UrlBuilderFromSearch {
         return (year > 1998 ? 'OrLeg' : 'Hein') // or pick one based on year
     }
     getSpecialSession() {
-        const specialSessionSearch = /s\.?s\.?\s?(\d)\s?/
+        const specialSessionSearch = /s\.?s\.?\s?(\d)\s?/ // * special session = match 1
         if (specialSessionSearch.test(this.search)) {
-            return this.search.match(specialSessionSearch)[0]
+            const ssNum =  this.search.match(specialSessionSearch)[1]
+            infoNav(`Detected special session = ${ssNum}`)
+            return ssNum
         } else {
             return null
         }
@@ -200,12 +202,14 @@ const buildAndNavigateToUrls = searchString => {
         if (search.url && search.url?.length > 0) {
             search.execute()
         } else {
-            warnBG(`URL is ${search.url}; something's wrong.`)
+            warnBG(`URL is ${search.url}; something's wrong. Navigating to ${errorUrl}`)
             search.execute(errorUrl)
         }
     })
 }
-/** removes most characters other than letters, numbers, hyphen, period and pipe | from user input to prevent accidental (or malicious) code injection; Lowercases text.
+/** removes most characters other than letters, numbers, hyphen, period and pipe | from user input;
+ *  to prevent accidental (or malicious) code injection.
+ *  Makes text lowercase
 * @param {string} userText */
 const sanitize = userText => {
     return userText.replace(/[-\(\)\{\}\]\[,`~$%#@!^&*_\+="'?\<\>;]/g, '|').toLowerCase()
