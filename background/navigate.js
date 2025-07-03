@@ -190,8 +190,8 @@ browser.omnibox.onInputEntered.addListener(async omniString => {
 const buildAndNavigateToUrls = searchString => {
     const cleanText = sanitize(searchString)
     infoNav(`Received search request: ${cleanText}`, 'buildAndNavigateToUrls')
-    let listOfSearches = searchString.split('|')
-    infoNav(`Received ${listOfSearches.length} search request(s): ${listOfSearches}`, 'buildAndNavigateToUrls')
+    let listOfSearches = cleanText.split('|')
+    infoNav(`Received ${listOfSearches.length}+1 search request(s): ${listOfSearches}`, 'buildAndNavigateToUrls')
     listOfSearches.forEach(async aSearch => {
         const search = new UrlBuilderFromSearch(aSearch)
         if (search.isOrLaw) {
@@ -207,8 +207,10 @@ const buildAndNavigateToUrls = searchString => {
         }
     })
 }
-/** removes most characters other than letters, numbers, hyphen, period and pipe | from user input;
- *  to prevent accidental (or malicious) code injection.
+/** From User input replaces with pipes most misc characters
+ *  (not letters, numbers, hyphen, period and pipes)
+ *  to prevent accidental (or malicious) code injection;
+ *  Replaces with pipes;
  *  Makes text lowercase
 * @param {string} userText */
 const sanitize = userText => {
