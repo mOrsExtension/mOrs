@@ -35,13 +35,14 @@ class AnnoHandler {
     async #fetchData() {
         if (this.fetchStart) {return} // keep from accidentally running 2x+
         this.fetchStart = true
-        infoBG('Sent to fetch annotations', 'annotations.js', 'fetchData')
+        infoAnnos('Sent to fetch annotations', 'fetchData')
         this.doc = await getTextFromHtml(this.url, 'windows-1251')  // webResources.js
-        infoBG('Finished fetching annotations', 'annotations.js', 'fetchData')
+        infoAnnos('Finished fetching annotations', 'fetchData')
     }
 
     /** loops back to see if webpage has been retrieved over fixed duration*/
     #loopAwaitData() {
+        // TODO: #85 Replace function with bridge pattern (create promise that completion can be pushed into)
         this.#fetchData()
         const msWait = 100
         const maxAttempt = 45
@@ -60,7 +61,7 @@ class AnnoHandler {
                     resolve(done)
                 }
                 if (!done) {
-                    infoBG(`Awaiting annotation retrieval; attempt #${i} of ${maxAttempt} (${i*msWait}ms)`, 'annotations.js', '#loopAwaitData')
+                    infoAnnos(`Awaiting annotation retrieval; attempt #${i} of ${maxAttempt} (${i*msWait}ms)`, '#loopAwaitData')
                 }
                 i++
             } , msWait)
@@ -231,7 +232,7 @@ class AnnoHandler {
 let annoBuild
 
 const infoAnnos = (info, script) => {
-    infoBG(info, script, 'annotations.js', '#9df') // light blue
+    infoBG(info, 'annotations.js', script, '#9df') // light blue
 }
 
 /** Starts getting Annos (will not be done by time rest of script runs) from msgListenerBG.js */
