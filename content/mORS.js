@@ -24,10 +24,9 @@ const runMain = async () => {
     const volumeNav = finishedPromises[1]
     mainDiv = finishedPromises[2] // orLawLink.js : add links for OrLaws based on \data\orLawLegLookup.json
     finalCleanUp([headingDiv, volumeNav, tocDiv, mainDiv, floatMenuDiv]) // finalClean.js : puts together pieces, does post html rendering cleanup
-    sectionAdjustments() // buttons.js : add buttons for collapsable sections, expanding links & button listeners
-    startObserver(6)
+    await sectionAdjustments() // enhancements.js : add buttons for collapsable sections; add annos; adds ids expanding links & button listeners
+    await startObserver(6)
     navigateToTag() // navigate.js : navigate to tag (#) in url, if any
-
 }
 
 //Startup
