@@ -1,7 +1,9 @@
 //enhanceSecs.js
 
-let annoList
+let /** object created by /background/annotation.js;
+{'Chapter XX : [annos] , 'xx.xxx' : [annos]} */ annoObject
 let annoUrl
+let orsList = [] // list of ORS sections with divs in order
 
 /**main program: adds #ids; updates burnt sec text; appends annotations to sections; builds buttons to collapse secs */
 const sectionAdjustments = async () => {
@@ -9,9 +11,18 @@ const sectionAdjustments = async () => {
         addIds(aDiv)
         labelBurnt(aDiv)
     })
-    annoList = await getAnnoList()
     annoUrl = `https://www.oregonlegislature.gov/bills_laws/ors/ano00${chapterInfo.chapNo}.html`.replace(/0+(\d{3})/, '$1')
-    annoList = buildAnnoDivs(annoList)
+    annoObject = await getAnnoList() // fetches annoObject from background
+    /** builds each section div and adds it to the object*/
+    annoObject.forEach(section => {
+        section['div'] = makeAnnoSectionDiv(section)
+    })
+
+    if (orsList.includes('Chapter')) {
+        if (document.body.querySelector('#main')) {
+            document.body.querySelector('#main').prepend(annoObject[0].div)
+        }
+    }
     document.body.querySelectorAll('div.section').forEach(aDiv => { // cycle through div w/ class of 'section'
         addAnnos(aDiv)
         addButtonsToSections(aDiv)
@@ -25,6 +36,11 @@ const sectionAdjustments = async () => {
         aLink.anchor.classList.add('linkInt')
         makeLinkExpandTarget(aLink)
     })
+}
+
+/* asks background service worker to retrieve annotations URL already preprocessed into list of javascript objects per section */
+const getAnnoList = async () => {
+    return await sendAwait({'miscTask': 'finishAnnoRetrieval'})
 }
 
 /** Adds id# to guide expansion when internal links are used (in addCollapseButtons below) */
@@ -45,62 +61,45 @@ const labelBurnt = (aDiv) => {
     }
 }
 
-//retrieves annotations from background service worker's retrieval of URL
-const getAnnoList = async () => {
-    return await sendAwait({'miscTask': 'finishAnnoRetrieval'})
-}
-
-/**pre-processing of annotation file; builds each section div */
-const buildAnnoDivs = (annoList) => {
-    if ('chapter' in annoList) { // adds chapter annos to first section
-        const firstORS = document.body.querySelector('div.ors')
-        if (firstORS != null) {
-            const firstId = firstORS.id
-            infoCS(`Adding chapter annos to first ORS: '${firstId}'`, 'enhanceSecs.js', 'buildAnnoDivs')
-            if (!(firstId in annoList)) {
-                annoList[firstId] = {}
-            }
-            annoList[firstId] = annoList.chapter
-            delete annoList.chapter
-        }
-    }
-    for (const anno in annoList) {
-        annoList[anno]['div'] = addDivToAnnoList(annoList[anno])
-    }
-    return annoList
-}
-/**builds each section div using "summary/detail to create collapsing div*/
-const addDivToAnnoList = anno => {
+/**returns annotation section div built by using "summary/detail" to create collapsing div;
+*/
+const makeAnnoSectionDiv = orSection => {
+    orsList.push (orSection.ors)
     const newDiv = document.createElement('div')
     newDiv.classList.add('annotations')
     const details = document.createElement('details')
     const summary = document.createElement('summary')
-    summary.innerHTML = `<a href="${annoUrl}" class="annoHeading" rel="noopener">ANNOTATIONS</a></b>`
+    summary.innerHTML = `<a href="${annoUrl}" class="annoHeading" rel="noopener">${orSection.ors} Annotations</a>`
     newDiv.appendChild(details)
     details.appendChild(summary)
-    for (const type in anno) {
-        const typePara = document.createElement('p')
-        typePara.textContent = type
-        const uList = document.createElement('ul')
-        details.appendChild(typePara)
-        details.appendChild(uList)
-        try {
-            anno[type].forEach(child => {  // TODO #43: reorder from most recent to least?
-                let listItem = document.createElement('li')
-                listItem.innerHTML = child
-                uList.appendChild(listItem)
-            })
-        } catch (error) {
-            warnCS(`${error} : ${JSON.stringify(anno[type])}`, 'enhanceSecs.js', 'addDivToAnnoList')
-        }
+    if (orSection.subheadingsList.length > 0) {
+        orSection.subheadingsList.forEach(subHead => {
+            const typePara = document.createElement('p')
+            typePara.innerHTML = subHead.subHeadTitle
+            const uList = document.createElement('ul')
+            details.appendChild(typePara)
+            details.appendChild(uList)
+            try {
+                if (subHead.childrenList.length > 0) {
+                    subHead.childrenList.forEach(child => {
+                        let listItem = document.createElement('li')
+                        listItem.innerHTML = child
+                        uList.appendChild(listItem)
+                    })
+                }
+            } catch (error) {
+                    warnCS(`${error} : ${JSON.stringify(orSection)}`, 'enhanceSecs.js', 'makeAnnoSectionDiv')
+            }
+        })
+        return newDiv
     }
-    return newDiv
 }
 
 /** adds section annotations div to the end of appropriate section div */
 const addAnnos = (aDiv) => {
-    if (aDiv.id in annoList) {
-        aDiv.appendChild(annoList[aDiv.id].div)
+    const orsPosition = orsList.indexOf(aDiv.id)
+    if (orsPosition > -1) {
+        aDiv.appendChild(annoObject[orsPosition].div)
     }
 }
 
