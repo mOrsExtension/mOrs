@@ -191,7 +191,7 @@ const buildAndNavigateToUrls = searchString => {
     const cleanText = sanitize(searchString)
     infoNav(`Received search request: ${cleanText}`, 'buildAndNavigateToUrls')
     let listOfSearches = cleanText.split('|')
-    infoNav(`Received ${listOfSearches.length}+1 search request(s): ${listOfSearches}`, 'buildAndNavigateToUrls')
+    infoNav(`Received ${listOfSearches.length} search request(s): ${listOfSearches}`, 'buildAndNavigateToUrls')
     listOfSearches.forEach(async aSearch => {
         const search = new UrlBuilderFromSearch(aSearch)
         if (search.isOrLaw) {

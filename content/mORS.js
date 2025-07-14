@@ -5,7 +5,7 @@ const runMain = async () => {
     docBody = await firstClean(docBody)
     const extractHeadingInfo = extractChapterInfo(docBody) // buildHeading.js
     addToHead() // buildHeading.js
-    sendAwait({startAnnos: chapterInfo.chapNo}, false) // launch in background
+    sendAwait({startAnnos: chapterInfo.chapNo}, false) // open annos page in background, don't await response or completion
     docBody = extractHeadingInfo.bodyComponent // firstClean.js
     const tocDiv = (chapterInfo.isFormerProvisions) ? null : buildTOC(docBody) // buildTOC.js - not needed if former provisions section
     let mainDiv = document.createElement('div') // moving remaining body into its own separate "main" div
