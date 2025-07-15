@@ -39,7 +39,6 @@ class UrlBuilderFromSearch {
         let year = this.search.match(yearRegExp)[0]
         let chapter = this.search.match(chpRegExp)[1]
         let orLawReader = await this.getOrLawReader(year)
-        console.log(orLawReader)
         let specialSession = ((orLawReader!='hein') ? this.getSpecialSession() : null)  // only worry about special session if not using Hein
         let newOrLawRequest = new OrLawRequest(year, chapter, specialSession, orLawReader)
         newOrLawRequest.validateData()

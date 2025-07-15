@@ -98,8 +98,6 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
         if (addToMiscHead) {
             chapterInfo.miscHead.appendChild(aPara.cloneNode(true))
 			infoCS(`adding to heading note: "${paraText.trim(40)}..."`, 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
-			console.log(chapterInfo.miscHead)
-			console.log(chapterInfo.miscHead.textContent)
         }
     }
 
