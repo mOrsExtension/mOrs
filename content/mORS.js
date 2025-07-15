@@ -1,7 +1,11 @@
 //mORS.js
 
 const runMain = async () => {
-    let docBody = document.body.cloneNode(true)
+    let docBody = document.createElement('body');
+    docBody.innerHTML = document.body.innerHTML;
+    Array.from(document.body.attributes).forEach(attr => {
+        docBody.setAttribute(attr.name, attr.value);
+    });
     docBody = await firstClean(docBody)
     const extractHeadingInfo = extractChapterInfo(docBody) // buildHeading.js
     addToHead() // buildHeading.js
@@ -38,7 +42,7 @@ window.addEventListener('load', () => {
         "on 'load'"
     )
     userStylesRefresh() // stylesheet.js
-    implementUserParameters()
+    implementUserParameters() // userData
     runMain() // mORS.js (above) - implements changes to page
     listenToPopup() // addListeners.js - prepare to receive messages from popup.js's sendMsgToOrsTabs (or options.js)
 })

@@ -13,7 +13,7 @@ const chapterInfo = {
 
 /**Find elements of heading (title, chapter, edition, notes)
 * Returns headingPieces object containing the info needed to build headingDiv
-* Removes existing heading elements from the main body and returns remainder */
+* And main body remainder after existing heading elements are stripped */
 const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
 
 //VARIABLES

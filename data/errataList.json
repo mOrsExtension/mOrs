@@ -1,5 +1,17 @@
 {
-   "90.582": {
+    "2.590" :{
+        "old": "(&nbsp;){5,}\\s<b>(2.590[^]*?)<\\/b>",
+        "new": "<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$2</span></b><span>"
+    },
+    "3a": {
+        "old": "(>Chapter 3)(</span>)",
+        "new": "$1 — Circuit Courts Generally$2"
+    },
+    "3b": {
+        "old": ">Circuit Courts Generally(</span>)",
+        "new": ">$1"
+    },
+    "90.582": {
       "old": "(<span [^>]*?>(?:&nbsp;){5,} 90.582[^]*?)</span>[^]*?(inspection.)",
       "new": "<b>$1 $2"
    },
@@ -11,4 +23,5 @@
       "old" : ">([>^\\[]+?285B\\.664[^\\[]+?Requirements[^\\[]+?regional[^\\[]+?solutions advisory)",
       "new" : "><b>$1"
    }
+
 }
