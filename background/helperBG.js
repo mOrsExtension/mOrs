@@ -39,3 +39,17 @@ browser.runtime.onInstalled.addListener(async details => {
         )
     }
 })
+
+/**  config = {tryFunction + (optional) warningMsg='', doLog = false, successMsg = ''} */
+const tryCatchWarnBG = async (config, ...args) => {
+    const {tryFunction, warningMsg='', doLog = false, successMsg = ''} = config
+    try {
+        let theResponse = await tryFunction(...args)
+        if(doLog) {
+            infoCS(`Success: ${successMsg}"`, 'helper', tryFunction.name,'#a8a8a8')
+        }
+        return theResponse
+    } catch (error) {
+        warnCS(`Error: ${warningMsg}: ${error}`, tryFunction.name)
+    }
+}

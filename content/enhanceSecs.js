@@ -14,8 +14,8 @@ const sectionAdjustments = async () => {
     annoUrl = `https://www.oregonlegislature.gov/bills_laws/ors/ano00${chapterInfo.chapNo}.html`.replace(/0+(\d{3})/, '$1')
     annoObject = await getAnnoList() // fetches annoObject from background
     /** builds each section div and adds it to the object*/
-    annoObject.forEach(section => {
-        section['div'] = makeAnnoSectionDiv(section)
+    await annoObject.forEach(async section => {
+        section['div'] = await makeAnnoSectionDiv(section)
     })
 
     if (orsList.includes('Chapter')) {
@@ -61,9 +61,21 @@ const labelBurnt = (aDiv) => {
     }
 }
 
+const addChildrenToDiv = (subHead) => {
+    let childList = []
+    if (subHead.childrenList.length > 0) {
+        subHead.childrenList.forEach(child => {
+            let listItem = document.createElement('li')
+            listItem.innerHTML = child
+            childList.push(listItem)
+        })
+    }
+    return childList
+}
+
 /**returns annotation section div built by using "summary/detail" to create collapsing div;
 */
-const makeAnnoSectionDiv = orSection => {
+const makeAnnoSectionDiv = async orSection => {
     orsList.push (orSection.ors)
     const newDiv = document.createElement('div')
     newDiv.classList.add('annotations')
@@ -73,30 +85,26 @@ const makeAnnoSectionDiv = orSection => {
     newDiv.appendChild(details)
     details.appendChild(summary)
     if (orSection.subheadingsList.length > 0) {
-        orSection.subheadingsList.forEach(subHead => {
+        orSection.subheadingsList.forEach(async subHead => {
             const typePara = document.createElement('p')
             typePara.innerHTML = subHead.subHeadTitle
             const uList = document.createElement('ul')
             details.appendChild(typePara)
             details.appendChild(uList)
-            try {
-                if (subHead.childrenList.length > 0) {
-                    subHead.childrenList.forEach(child => {
-                        let listItem = document.createElement('li')
-                        listItem.innerHTML = child
-                        uList.appendChild(listItem)
-                    })
-                }
-            } catch (error) {
-                    warnCS(`${error} : ${JSON.stringify(orSection)}`, 'enhanceSecs.js', 'makeAnnoSectionDiv')
-            }
+            const addChildList = await tryCatchWarnCS({
+                tryFunction : addChildrenToDiv,
+                warningMsg : `JSON = ${JSON.stringify(orSection)}`,
+            }, subHead)
+            addChildList.forEach((kid) => {
+                uList.appendChild(kid)
+            })
         })
         return newDiv
     }
 }
 
 /** adds section annotations div to the end of appropriate section div */
-const addAnnos = (aDiv) => {
+const addAnnos = async aDiv => {
     const orsPosition = orsList.indexOf(aDiv.id)
     if (orsPosition > -1) {
         aDiv.appendChild(annoObject[orsPosition].div)

@@ -1,6 +1,5 @@
 //buildOrLawLinks.js
 
-
 /** Returns #main id of body of document with updated links to Oregon Session Laws for HeinOnline or oregonLegislature.gov
  * @param {Node} bodyMain // already tagged with anchors classed as 'sessionLaw' */
 const newOrUpdateOrLawLinks = async bodyMain => {
@@ -42,7 +41,6 @@ const sortByDate = anchors => {
     })
     return {"oldList": oldList, "newList": newList}
 }
-
 
 /**TODO: #45 Build into Class for Anchor Handling? */
 /** put info into anchors (data-year, data-chapter, data-ss) to keep data gathering & link building separate */
@@ -110,9 +108,9 @@ const buildHeinURL = (year, chapter) => {
 }
 
 /**builds links for oregonLegislature.gov session laws for each anchor (session law reference) in chapter */
-const buildOrLegLinks = (anchors) => {
+const buildOrLegLinks = (anchorList) => {
     infoCS('building OrLeg links', 'buildOrLawLinks.js', 'buildOrLegLinks')
-    anchors.forEach(async (anAnchor) => {
+    anchorList.forEach(async (anAnchor) => {
         const orLegUrl  = await buildOrLegUrl(
             anAnchor.dataset.year,
             anAnchor.dataset.chapter,
