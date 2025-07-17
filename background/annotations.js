@@ -244,14 +244,18 @@ const startAnnoRetrieval = async (chapterNo) => {
 }
 
 /** Finishes getting Annos, returns list of section Objects {name; type; children:{text}}; from msgListenerBG.js */
-const finishAnnoRetrieval = async () => {
-    infoAnnos(`Awaiting download & initial parsing`, 'finishAnnoRetrieval')
-    try {
+
+const retrieveWhenFinished = async () => {
         await hasAnnoFinished
         const sendObject = annoCollection.sectionList
-        infoAnnos(`Finished anno pre-processing. Sending '${JSON.stringify(sendObject).slice(0,100)}' to content.`, 'finishAnnoRetrieval')
-        return sendObject // sent to enhanceSecs.js -> getAnnoList()
-    } catch (error) {
-        warnBG(`Retrieving annotations failed with error: ${error}`, 'annotations.js', 'finishAnnoRetrieval')
-    }
+        infoAnnos(`Finished anno pre-processing. Sending '${JSON.stringify(sendObject).slice(0,100)} ...' to content.`, 'finishAnnoRetrieval')
+        return sendObject
+}
+
+const finishAnnoRetrieval = async () => {
+    infoAnnos(`Awaiting download & initial parsing`, 'finishAnnoRetrieval')
+    return await tryCatchWarnBG({
+        tryFunction: retrieveWhenFinished,      // no arguments & nothing returned
+        warningMsg : `Retrieving finished annotations Object failed`
+    }) // sent to enhanceSecs.js -> getAnnoList()
 }

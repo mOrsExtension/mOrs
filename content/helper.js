@@ -85,7 +85,7 @@ class MessageSenderCS {
 //sendAwait default
 const sendAwait = async (messageItem, doAwaitResponse = true)  => {
     let msg = new MessageSenderCS(messageItem, doAwaitResponse)
-    if (await msg.sendMessage() == "success") {
+    if (await msg.sendMessage() == "success" && doAwaitResponse) {
         return msg.respond()
     }
 }
@@ -190,6 +190,22 @@ const expandSingle = expandedElem => {
             'helper.js',
             'expandSingle'
         )
+    }
+}
+
+// try/catch/warn for each module
+
+/**  config = {tryFunction + (optional) warningMsg='', doLog = false, successMsg = ''} */
+const tryCatchWarnCS = async (config, ...args) => {
+    const {tryFunction, warningMsg='', doLog = false, successMsg = ''} = config
+    try {
+        let theResponse = await tryFunction(...args)
+        if(doLog) {
+            infoCS(`Success: ${successMsg}"`, 'helper', tryFunction.name,'#a8a8a8')
+        }
+        return theResponse
+    } catch (error) {
+        warnCS(`Error: ${warningMsg}: ${error}`, tryFunction.name)
     }
 }
 

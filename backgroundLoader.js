@@ -13,7 +13,7 @@ const scriptList = [
    '/background/annotations.js'
 ]
 
-//attempt to load; success/error logged to service worker
+/** attempt to load; success/error logged to service worker */
 scriptList.forEach(aScript => {
     try {
         importScripts(aScript) // javaScript command to load script into background (service worker)
