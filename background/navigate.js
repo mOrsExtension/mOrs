@@ -4,8 +4,8 @@
 const errorUrl = 'https://github.com/mOrsExtension/mOrs/wiki/Help-Using-Omnibox'
 
 //const orsRegExp is in helperBG.js
-const yearRegExp = /\b(?:19|20)\d{2,}\b/
-const chpRegExp = /(?:-|(?:19|20)\d{2}\s|c\.\s?)([1-9]\d{0,3}\b)/
+const yearRegExp = /\b(?:19|20)\d{2}(?=[\D\b])/
+const chpRegExp = /(?:(?:19|20)\d{2}|ch?p?\.?)([1-9]\d{0,3})(?:[\D\b]|$)/   // works with "c" "ch" or "chp" for chapter w/
 
 /**Builds url based on omnibox input */
 class UrlBuilderFromSearch {
@@ -24,7 +24,7 @@ class UrlBuilderFromSearch {
     getOrsUrl() {
         this.isOrs = orsRegExp.test(this.search)
         if (!this.isOrs) {
-            infoNav('Invalid search: ${this.search}; sending user to help page', 'getOrsUrl')
+            infoNav(`Invalid search: ${this.search}; sending user to help page`, 'getOrsUrl')
             return errorUrl
         }
         let orsUrl = this.search.replace(orsRegExp, '00$1.html#$1$3') // add more than enough zeros
@@ -39,7 +39,6 @@ class UrlBuilderFromSearch {
         let year = this.search.match(yearRegExp)[0]
         let chapter = this.search.match(chpRegExp)[1]
         let orLawReader = await this.getOrLawReader(year)
-        console.log(orLawReader)
         let specialSession = ((orLawReader!='hein') ? this.getSpecialSession() : null)  // only worry about special session if not using Hein
         let newOrLawRequest = new OrLawRequest(year, chapter, specialSession, orLawReader)
         newOrLawRequest.validateData()
@@ -53,7 +52,7 @@ class UrlBuilderFromSearch {
         if (/hein/.test(this.search)) {
             return 'Hein'
         }
-        if (/ore?(\s?|\.)*leg/.test(this.search)) {
+        if (/ore?\.?leg/.test(this.search)) {
             return 'OrLeg'
         }
         const reader = await promiseGetFromStorage('lawsReaderStored') // userStorage.js - if user didn't request reader, use stored default
@@ -63,9 +62,11 @@ class UrlBuilderFromSearch {
         return (year > 1998 ? 'OrLeg' : 'Hein') // or pick one based on year
     }
     getSpecialSession() {
-        const specialSessionSearch = /s\.?s\.?\s?(\d)\s?/
+        const specialSessionSearch = /s\.?s\.?(\d)/ // * special session = match 1
         if (specialSessionSearch.test(this.search)) {
-            return this.search.match(specialSessionSearch)[0]
+            const ssNum =  this.search.match(specialSessionSearch)[1]
+            infoNav(`Detected special session = ${ssNum}`)
+            return ssNum
         } else {
             return null
         }
@@ -188,7 +189,7 @@ browser.omnibox.onInputEntered.addListener(async omniString => {
 const buildAndNavigateToUrls = searchString => {
     const cleanText = sanitize(searchString)
     infoNav(`Received search request: ${cleanText}`, 'buildAndNavigateToUrls')
-    let listOfSearches = searchString.split('|')
+    let listOfSearches = cleanText.split('|')
     infoNav(`Received ${listOfSearches.length} search request(s): ${listOfSearches}`, 'buildAndNavigateToUrls')
     listOfSearches.forEach(async aSearch => {
         const search = new UrlBuilderFromSearch(aSearch)
@@ -200,13 +201,19 @@ const buildAndNavigateToUrls = searchString => {
         if (search.url && search.url?.length > 0) {
             search.execute()
         } else {
-            warnBG(`URL is ${search.url}; something's wrong.`)
+            warnBG(`URL is ${search.url}; something's wrong. Navigating to ${errorUrl}`)
             search.execute(errorUrl)
         }
     })
 }
-/** removes most characters other than letters, numbers, hyphen, period and pipe | from user input to prevent accidental (or malicious) code injection; Lowercases text.
+/** From User input replaces with pipes most misc characters
+ *  (not letters, numbers, hyphen, period and pipes)
+ *  to prevent accidental (or malicious) code injection;
+ *  Replaces with pipes;
+ *  Makes text lowercase
 * @param {string} userText */
 const sanitize = userText => {
-    return userText.replace(/[-\(\)\{\}\]\[,`~$%#@!^&*_\+="'?\<\>;]/g, '|').toLowerCase()
+    let noSpaces = userText.replace(/[\s\n\r\v\f\0]/g, '')
+    let sanitized = noSpaces.replace(/[\]\\\-(){}[+*?<>/,`~$%#@!&_="';]/g, '|').toLowerCase()
+    return sanitized
 }

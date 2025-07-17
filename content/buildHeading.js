@@ -13,27 +13,32 @@ const chapterInfo = {
 
 /**Find elements of heading (title, chapter, edition, notes)
 * Returns headingPieces object containing the info needed to build headingDiv
-* Removes existing heading elements from the main body and returns remainder */
+* And main body remainder after existing heading elements are stripped */
 const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
 
 //VARIABLES
     const /** capGroups $1:chapNo, $2:chapName */chapNameAndNoRegExp = new RegExpHandler(/Chapter\s([1-9]\d{0,2}[A-C]?)\s+(?:(?:—|-)\s([^]+))/)
+    const chapNoOnlyRegExp = new RegExpHandler(/Chapter\s([1-9]\d{0,2}[A-C]?)/)
     const /** capGroup $1:editionYear */ editionRegExp = new RegExpHandler(/(20\d{2})\sEDITION/)
-    const /** capGroup $1:chapNo */ formerChapRegExp = new RegExpHandler(/Chapter\s([1-9]\d{0,2}[A-C]?)\s\(Former\sProvisions\)/)
-    const /** RegExp to be built after we know chapter number */ chapNameRegExp = new RegExpHandler(/\?\?\?\?/)
+    const /** capGroup $2:chapNo */ formerChapRegExp = new RegExpHandler(/(Chapter\s([1-9]\d{0,2}[A-C]?)\s)?\(Former\sProvisions\)/)
+
+	const titleRegExp = new RegExpHandler(/TITLE\s[1-9]/)
+	const horizontalLineRegExp = new RegExpHandler(/_{15}/)
     const /**@type {HTMLParagraphElement[]} */ removalList = []
     let /**@type {boolean} */ addToMiscHead = false
     let /**@type {boolean} */ isDone = false
     const allParagraphs = docBody.querySelectorAll('p')
+	let endIndex = 1000
 
 //FUNCTIONS
+	/** extracts data from heading; deletes heading & misc junk  and returns document body */
     const main = () => {
-        allParagraphs.forEach((aPara, index) => {
-            if (!isDone) {
-                getChapInfoAndBodyRemovalList(aPara, index)
-            }
-        })
-        infoCS(`Deleting ${removalList.length} duplicate paragraph(s) from heading.`, 'buildHeading.js', 'main')
+		allParagraphs.forEach((aPara, index) => {
+			if (index <= endIndex) {
+				getChapInfoAndBodyRemovalList(aPara, index)
+			}
+		})
+        infoCS(`Deleting ${removalList.length} paragraphs from heading.`, 'buildHeading.js', 'main')
         removalList.forEach(deadPara => {
             deadPara.remove()
         })
@@ -41,68 +46,79 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
             bodyComponent: docBody
         }
     }
+	/** iterate through paragraphs until > endIndex */
     const getChapInfoAndBodyRemovalList = (/**@type {HTMLParagraphElement} */aPara, /**@type {Number} */ index) => {
         const paraText = aPara.textContent + ''
-        if (formerChapRegExp.testMe(paraText)) { // identifying "former provisions" chapter
-            infoCS('Former provisions chapter detected', 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
-            chapterInfo.isFormerProvisions = true
-            chapterInfo.chapNo = formerChapRegExp.firstMatchGroupNo(paraText, 1)
-            chapterInfo.chapName = `(Former Provisions: ${allParagraphs[index + 1]?.textContent})`
-            let titleCandidate = allParagraphs[index + 3].textContent
-            chapterInfo.titleName = (titleCandidate != null) ? titleCandidate : ''
-            removalList.push(
-                allParagraphs[index + 1],
-                allParagraphs[index + 2],
-                allParagraphs[index + 3]
-            )
-            chapterInfo.miscHead.innerHTML = `<p><b>Note:</b> All former sections in chapter have been repealed or renumbered.</p>
-            <p>If "Show repealed/renumbered sections" is unchecked, the rest of the page will be blank.</p?`
-            infoCS(`Found Title: ${chapterInfo.titleName} and chapter ${chapterInfo.chapNo}: ${chapterInfo.chapName}`, 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
-            isDone = true
-            return
-        }
+		removalList.push(aPara)
+
+		if (formerChapRegExp.testMe(paraText)) {
+			infoCS('Former provisions chapter detected', 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
+			chapterInfo.isFormerProvisions = true
+			if (chapterInfo.chapNo == 0 && Boolean(formerChapRegExp.firstMatchGroupNo(paraText, 2))) {
+                chapterInfo.chapNo = formerChapRegExp.firstMatchGroupNo(paraText, 2)
+            }
+            chapterInfo.chapName = `(Former Provisions: ${allParagraphs[index + 1]?.textContent})` // chapter name is on following line
+			titleCandidate = allParagraphs[index + 3].textContent
+			chapterInfo.titleName = (titleCandidate != null) ? titleCandidate : ''
+			endIndex = index + 3
+			chapterInfo.miscHead.innerHTML = `<p><b>Note:</b> All former sections in chapter have been repealed or renumbered.</p>
+			<p>If "Show repealed/renumbered sections" is unchecked, the rest of the page will be blank.</p>`
+			infoCS(`Found Title: ${chapterInfo.titleName} and chapter ${chapterInfo.chapNo}: ${chapterInfo.chapName}`, 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
+		}
+
         if (editionRegExp.testMe(paraText)) {
             chapterInfo.thisEdition = editionRegExp.firstMatchGroupNo(paraText, 1) // get edition year
-            chapterInfo.miscHead.appendChild(aPara)
-            return
+			endIndex = index + 2 // TOC will start in 3 lines, unless we run into "TITLE ##"
+			addToMiscHead = false
         }
+
+		if (titleRegExp.testMe(paraText)) {
+			infoCS('Beginning of title detected', 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
+			endIndex = 1000
+			addToMiscHead = false
+		}
+
+		if (horizontalLineRegExp.testMe(paraText)) {
+			endIndex = index + 2 // end of title list; TOC will start in 2 lines unless chapter starts
+		}
+
         if (!addToMiscHead && chapNameAndNoRegExp.testMe(paraText)) {
-            removalList.push(aPara) // deleted pieces not used anywhere (will build new heading from scratch below)
             addToMiscHead = true
             chapterInfo.chapNo = chapNameAndNoRegExp.firstMatchGroupNo(paraText, 1) // Get ORS chapter number
             chapterInfo.chapName = chapNameAndNoRegExp.firstMatchGroupNo(paraText, 2) // Get chapter title alone
-            chapNameRegExp.RE = RegExp(chapterInfo.chapName.slice(0,12).toUpperCase()) // used to find the end of the heading based on beginning of chapter title
             infoCS(`Found chapter ${chapterInfo.chapNo}: ${chapterInfo.chapName} in paragraph #${index+1}`, 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
+			endIndex = 1000
             return
+        } else if (chapNoOnlyRegExp.testMe(paraText)) {
+            chapterInfo.chapNo = chapNoOnlyRegExp.firstMatchGroupNo(paraText, 1) // Get ORS chapter number
+            infoCS(`Found chapter ${chapterInfo.chapNo} only in paragraph #${index+1}`, 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
         }
 
-        if (chapNameRegExp.testMe(paraText)) {  // second time we see chapter name, we're finished
-            removalList.push(aPara, allParagraphs[index + 1]) // delete next line as well
-            isDone = true
-            return
-        }
-        /**paragraphs after the chapter and before edition are moved to misc heading; leaves no copy in body*/
+        /**paragraphs after the chapter and before edition are copied to misc heading; everything deleted from body*/
         if (addToMiscHead) {
-            chapterInfo.miscHead.appendChild(aPara)
-        } else {
-            removalList.push(aPara) // before the chapter, these are deleted pieces not used anywhere
+            chapterInfo.miscHead.appendChild(aPara.cloneNode(true))
+			infoCS(`adding to heading note: "${paraText.trim(40)}..."`, 'buildHeading.js', 'getChapInfoAndBodyRemovalList')
         }
     }
+
 
 // EXECUTE
     return main()
 }
 
-/**Create the <h1 - 3> elements and set their text content */
+/**Create the <h1 - 3> elements and set their text content
+ * H1 = Chapter Number (comes third)
+ * H2 = Volume & title
+ * H3 = ORS Edition*/
 const buildHeading = async () => {
     let headingChildrenList = [...await buildH2()]
     headingChildrenList.push(buildH1())
     headingChildrenList.concat([...buildH3()])
-    if (Boolean(chapterInfo.miscHead.textContent)) {   // must be non-falsy
-        chapterInfo.miscHead.classList.add('note')
-        headingChildrenList.push(chapterInfo.miscHead)
-    }
     let htmlMainHead = document.createElement('div')
+	if (Boolean(chapterInfo.miscHead.textContent)) {   // must be non-falsy content
+		chapterInfo.miscHead.classList.add('note')
+		headingChildrenList.push(chapterInfo.miscHead)
+	}
     htmlMainHead.id = 'mainHead'
     // Append the <h1 - 3> elements (+ any misc info between headings) to the heading <div>
     headingChildrenList.forEach(child => {
@@ -118,9 +134,10 @@ const buildH2 = async () => {
         chapterInfo.titleNo = extraChapInfo.titleNo
         chapterInfo.volNo = extraChapInfo.volNo
         chapterInfo.titleName = extraChapInfo.titleName
-        h2Title.textContent = `Title ${chapterInfo.volNo}: ${chapterInfo.titleName},`
+        h2Title.textContent = `Title ${chapterInfo.titleNo}: ${chapterInfo.titleName},`
         h2Volume.textContent = `Volume ${extraChapInfo.volNo},`
-        return [h2Volume, h2Title]
+
+		return [h2Volume, h2Title]
     } else {
         return []
     }

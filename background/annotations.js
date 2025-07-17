@@ -1,252 +1,260 @@
-class AnnoHandler {
-    constructor(chapNo) {
-        this.chapter = '0'
-        this.#validateAndCleanChapter(chapNo) // private class must be function, not answer
-        this.url = `https://www.oregonlegislature.gov/bills_laws/ors/ano00${this.chapter}.html`.replace(/0*(\d{3})/, '$1')
-        this.doc = ''
-        this.paragraphList = []
-        let chapName = `Chapter ${this.chapter}`
-        this.annoSecList = {'chapter' : {[chapName] : []}}
-        this.current = this.annoSecList.chapter[chapName]
-        if (this.chapter != '0') {
-            this.#fetchData()
-        }
-    }
-
-    // public Class method to return annotation as javascript object
-    async getAnnoSections() {
-        infoAnnos(`retrieving annotation sections`, 'getAnnoSections')
-        if (!this.annoSecList.length < 2) {
-            if (await this.#loopAwaitData()) {
-                this.#docDomParsing()
-            }
-        }
-        return this.annoSecList
-    }
-
-    #validateAndCleanChapter(chapNo) {
-        if (orsRegExp.test(chapNo)) {
-            this.chapter =  [...chapNo.match(RegExp(orsRegExp.source, ''))][1]
-        } else {
-            warnBG(`Can't find chapter`, 'annotations.js', 'validateAndCleanChapter')
-        }
-    }
-
-    async #fetchData() {
-        if (this.fetchStart) {return} // keep from accidentally running 2x+
-        this.fetchStart = true
-        infoBG('Sent to fetch annotations', 'annotations.js', 'fetchData')
-        this.doc = await getTextFromHtml(this.url, 'windows-1251')  // webResources.js
-        infoBG('Finished fetching annotations', 'annotations.js', 'fetchData')
-    }
-
-    /** loops back to see if webpage has been retrieved over fixed duration*/
-    #loopAwaitData() {
-        this.#fetchData()
-        const msWait = 100
-        const maxAttempt = 45
-        return new Promise(async resolve => {
-            let i = 1
-            let done = false
-            let dataFetchLoop = setInterval(() => {
-                if (this.doc) {
-                    clearInterval(dataFetchLoop)
-                    done = true
-                    resolve(done)
-                }
-                if (i > maxAttempt) {
-                    clearInterval(dataFetchLoop)
-                    warnBG(`timed out after ${maxAttempt} attempts (${maxAttempt * msWait}ms)`)
-                    resolve(done)
-                }
-                if (!done) {
-                    infoBG(`Awaiting annotation retrieval; attempt #${i} of ${maxAttempt} (${i*msWait}ms)`, 'annotations.js', '#loopAwaitData')
-                }
-                i++
-            } , msWait)
-        })
-    }
-
-    /** FYI, ended up just using RegExp rather than actual DOM parsing, because DOM would have required creating outside dummy page of temp html */
-    async #docDomParsing () {
-        if (this.annoSecList.length > 1) {return} // keep from accidentally running 2x
+/** Cleans up annoSecList using RegExp
+ *  (instead of DOM parsing, because DOM required creating outside dummy page of temp html) */
+class AnnoCleaner {
+    constructor(chapterNo, rawHtml) {
+        this.chapterNo = chapterNo
+        this.cleanHtml = rawHtml
+        this.sectionList = []
         this.#regExpCleanup()
-        this.#getParagraphList()
-        this.#classifyParagraphs()
-        this.#filterParagraphs()
-        this.#buildSections()
-        this.#deleteParentsWithNoChildren()
-        infoAnnos(`Created anno list for ${Object.keys(this.annoSecList).length} sections`, 'docDomParsing')
+        this.#buildCitations()
+        this.rawParaList = this.#splitParagraphs()
+        infoAnnos(`Split anno doc into ${this.rawParaList.length} paragraphs.`, 'docDomParsing')
     }
 
+    /** deletes html junk & extra line breaks; */
     #regExpCleanup() {
-        this.doc = this.doc.replace(/[^]*?<div/,'')
-        this.doc = this.doc.replace(/\s*[\n\r]\s*/g, ' ') // replace newlines with space
-        let /** capturing groups $1:volume, $2:page, $3:year */ casesCoA = [...this.doc.matchAll(/(\d{1,3})\sOr\.?\s?App\.?\s(\d{1,4})[,Pd\d\s]*\((\d{4})\)/g)]
-        let /** capturing groups $1:volume, $2:page, $3:year */ casesOSC = [...this.doc.matchAll(/(\d{1,3})\sOr\.?\s(\d{1,4})[^]*?\d\)/g)]
-        let /** capturing groups $1:volume, $2:page, $3:year */ orLawRev = [...this.doc.matchAll(/(\d{1,3})\sOLR\s(\d{1,4})\s[\d,-]*\((\d{4})\)/g)]
-        let /** capturing groups $1:volume, $2:page, $3:year */ wLawRev = [...this.doc.matchAll(/(\d{1,3})\sWL(?:R|J)\s(\d{1,4})\s[\d,-]*\((\d{4})\)/g)]
-        let /** capturing groups $1:volume, $2:page, $3:year */ EnvLRev = [...this.doc.matchAll(/(\d{1,3})\sELR?\s(\d{1,4})\s[\d,-]*\((\d{4})\)/g)]
-        casesCoA.forEach(CoACase => {
-            this.doc = this.anchorWrap(
-                this.doc,
-                CoACase[0],
-                'case-COA', `https://scholar.google.com/scholar?hl=en&as_sdt=4%2C38&q=${CoACase[1]}+or+app+${CoACase[2]}`
-            )
-        })
-        casesOSC.forEach(OSCCase => {
-            this.doc = this.anchorWrap(
-                this.doc,
-                OSCCase[0],
-                'case-OSC',
-                `https://scholar.google.com/scholar?hl=en&as_sdt=4%2C38&q=${OSCCase[1]}+or+${OSCCase[2]}`
-            )
-        })
-        orLawRev.forEach(article => {
-            this.doc = this.anchorWrap(
-                this.doc,
-                article[0],
-                'oregonLaw',
-                `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${Number(article[3]) - 1}&as_yhi=${Number(article[3]) + 1}&q=${article[1]}+%22Or.+L.+Rev.%22+${article[2]}&btnG=`
-            )
-        })
-        wLawRev.forEach(article => {
-            this.doc = this.anchorWrap(
-                this.doc,
-                article[0],
-                'willametteLaw',
-                `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${Number(article[3]) - 1}&as_yhi=${Number(article[3]) + 1}&q=${article[1]}+%22Willamette+L.+Rev.%7CJournal%22+${article[2]}&btnG=`
-            )
-        })
-        EnvLRev.forEach(article => {
-            this.doc = this.anchorWrap(
-                this.doc,
-                article[0],
-                'envLaw',
-                `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${Number(article[3]) - 1}&as_yhi=${Number(article[3]) + 1}&q=${article[1]}+%22Envtl.+L.%22+${article[2]}&btnG=`
-            )
-        })
-        return this.doc
+        this.cleanHtml = this.cleanHtml.replace(/[^]*?<div/,'') // delete junk before first div
+        this.cleanHtml = this.cleanHtml.replace(/\s*[\n\r]\s*/g, ' ') // replace newlines with space
+        this.cleanHtml = this.cleanHtml.replace(/<b>(<span[^]*?>)([^]*?)(<\/span>)/g, '$1<b>$2</b>$3') // moves bold tags within span
     }
-    /**wraps text found by regular expression in an anchor & gives it <a> class*/
-    anchorWrap (
+
+    /** replaces raw data with reporter links */
+    #buildCitations() {
+        /** Regular expressions list */
+        const /** $1:vol, $2:page, $3:year */coaRegExp = /(\d{1,3})\sOr\.?\s?App\.?\s(\d{1,4})[,Pd\d\s]*\((\d{4})\)/g
+        const /** $1:vol, $2:page, $3:year */ oscRegExp = /(\d{1,3})\sOr\.?\s(\d{1,4})[^]*?\d\)/g
+        const /** $1:vol, $2:page, $3:year */ olrRegExp = /(\d{1,3})\sOLR\s(\d{1,4})\s[\d,-]*\((\d{4})\)/g
+        const /** $1:vol, $2:page, $3:year */wlrRegExp = /(\d{1,3})\sWL(?:R|J)\s(\d{1,4})\s[\d,-]*\((\d{4})\)/g
+        const /** $1:vol, $2:page, $3:year */ elrRegExp = /(\d{1,3})\sELR?\s(\d{1,4})\s[\d,-]*\((\d{4})\)/g
+
+        /** finding matches for citations */
+        let searchCasesCoA = [...this.cleanHtml.matchAll(coaRegExp)]
+        let searchCasesOSC = [...this.cleanHtml.matchAll(oscRegExp)]
+        let searchOrLawRev = [...this.cleanHtml.matchAll(olrRegExp)]
+        let searchWLawRev = [...this.cleanHtml.matchAll(wlrRegExp)]
+        let searchEnvLRev = [...this.cleanHtml.matchAll(elrRegExp)]
+
+        /** building list of replacement objects from unique matches */
+
+        let replacementList = this.#uniqueMatchesToCiteList(searchCasesCoA, 'case-COA')
+        replacementList = replacementList.concat(this.#uniqueMatchesToCiteList(searchCasesOSC, 'case-OSC'))
+        replacementList = replacementList.concat(this.#uniqueMatchesToCiteList(searchOrLawRev, 'OrLRev'))
+        replacementList = replacementList.concat(this.#uniqueMatchesToCiteList(searchWLawRev, 'willametteLRev'))
+        replacementList = replacementList.concat(this.#uniqueMatchesToCiteList(searchEnvLRev, 'envLRev'))
+
+        /** wrapping citations in hyperlink */
+        replacementList.forEach(cite => {
+            switch(cite.type) {
+                case'case-COA':
+                   cite.url = `https://scholar.google.com/scholar?hl=en&as_sdt=4%2C38&q=${cite.vol}+or+app+${cite.page}`
+                    break
+                case 'case-OSC':
+                    cite.url = `https://scholar.google.com/scholar?hl=en&as_sdt=4%2C38&q=${cite.vol}+or+${cite.page}`
+                    break
+                case 'OrLRev':
+                    cite.url = `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${Number(cite.year) - 1}&as_yhi=${Number(cite.year) + 1}&q=${cite.vol}+%22Or.+L.+Rev.%22+${cite.page}&btnG=`
+                    break
+                case 'willametteLRev':
+                    cite.url = `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${Number(cite.year) - 1}&as_yhi=${Number(cite.year) + 1}&q=${cite.vol}+%22Willamette+L.+Rev.%7CJournal%22+${cite.page}&btnG=`
+                    break
+                case 'envLRev':
+                    cite.url = `https://scholar.google.com/scholar?hl=en&as_sdt=0%2C38&as_ylo=${Number(cite.year) - 1}&as_yhi=${Number(cite.year) + 1}&q=${cite.vol}+%22Envtl.+L.%22+${cite.page}&btnG=`
+                    break
+                default:
+                    cite.url = ''
+            }
+            this.cleanHtml = this.#anchorWrap(this.cleanHtml, cite.citation, cite.type, cite.url)
+        })
+    }
+
+    /**takes in old text; uses regular expression to add anchor url & gives it <a> class;
+     * returns updated text */
+    #anchorWrap (
         /**@type {string} */ oldText,
-        /** @type {string|RegExp} */ regExWrap,
-        /**@type {string} */ anchorClass, href
+        /** @type {string|RegExp} */ regExpToWrap,
+        /**@type {string} */ anchorClass,
+        /**@type {string} */ href
     ){
-    // uses RegExp.replace (callback to use matches to generate replacement piece)
-    let cleanRegExp = regExWrap.replace(/\(/g, '\\(').replace(/\)/g, '\\)')
-    let searchRegExp = RegExp(cleanRegExp, 'g')
-            return oldText.replace(searchRegExp, (/** @type {string} */ match) => {
+        // prevents "()" from being viewed as regExp groups by converting to "\(" or "\("
+        let regExpToWrapCleaned = regExpToWrap.replace(/\(/g, '\\(').replace(/\)/g, '\\)')
+        regExpToWrapCleaned = RegExp(regExpToWrapCleaned, 'g')
+        //uses callback function on each match generates the full replacement piece
+        return oldText.replace(regExpToWrapCleaned, (/** @type {string} */ match) => {
             return `<a class="${anchorClass}" href="${href}" rel="noopener">${match}</a>`
         })
     }
 
-    #getParagraphList() {
-        let paragraphMatchList = [...this.doc.matchAll(/<span[^>]*>([^]*?)<\/span>/g)] // $1: paragraph body
-        if (paragraphMatchList && paragraphMatchList.length) {
+    /** finds only unique RegExp matches & convert to list of objects */
+    #uniqueMatchesToCiteList (caseRegExpMatch, citeType) {
+        let namesArray = []
+        let citationList = []
+        caseRegExpMatch.forEach(citation => {
+            if (!namesArray.includes(citation[0])) {
+                namesArray.push(citation[0])
+                let newCitation = {
+                    type : citeType,
+                    citation : citation[0],
+                    vol : citation[1],
+                    page : citation[2],
+                    year : citation[3]
+                }
+                citationList.push(newCitation)
+            }
+        })
+        return [...citationList]
+    }
+
+        /** turns each html <span> into javascript object {'text': text} */
+    #splitParagraphs() {
+        let paraList = []
+        const paragraphMatchList = [...this.cleanHtml.matchAll(/<span[^]*?>([^]*?)<\/span>/g)] // $1: paragraph body
+        if (!paragraphMatchList || !paragraphMatchList.length > 0) {
+            warnBG('Annotations file is empty or broken', "annotations.js", "splitParagraphs")
+        } else {
             paragraphMatchList.forEach(match => {
-                this.paragraphList.push({'text': match[1].trim()})
+                paraList.push(match[1].trim())
             })
         }
+        return paraList
+    }
+}
+
+class AnnoParent {
+    constructor (chapterNo) {
+        this.chapterNo = chapterNo
+        this.sectionList = []
+        this.buildNewSection('Whole ORS Chapter')
     }
 
-    #classifyParagraphs() {
-        let secRegExp = RegExp(`^${tabRegExp}${this.chapter}\\.\\d{3,4}`)
-        let chapRegExp = RegExp(`Chapter\\s0*${this.chapter}`)
-        this.paragraphList.forEach(p => {
-            p['classIs'] = (assignClass(p.text))
+    buildNewSection(ors) {
+        let newSection = new AnnoSection(ors)
+        this.sectionList.push(newSection)
+        this.currentSection = newSection
+    }
+
+    /** removes grandchildren without lists, children without grandchildren and current items */
+    async cleanup() {
+        this.orsList = []
+        this.sectionList.forEach(child => {
+            if (child.subheadingsList.length < 1) {
+                this.sectionList = this.sectionList.filter(item =>
+                    item !== child
+                )
+                infoAnnos(`Deleting '${child.ors}' from Anno List`, 'AnnoParent.cleanup()')
+            } else {
+                delete child.currentSubHead
+            }
         })
-        function assignClass(text) {
-            if(secRegExp.test(text)) {
-                return 'sectionHead'
-            }
-            if (
-                (chapRegExp.test(text)) ||
-                (/^NOTES\sOF\sDECISION/m.test(text)) ||
-                (RegExp(`^${tabRegExp}$`).test(text)) ||
-                (RegExp(`^${tabRegExp}*<b>`).test(text))
-            ) {
-                return 'remove'
-            }
-            return 'default'
+        delete this.currentSection
+    }
+}
+class AnnoSection {
+    constructor(orSection) {
+        this.ors = orSection
+        this.subheadingsList = []
+        if (orSection == 'chapter') {
+            this.buildSubHead('chapter', `Chapter ${parent.chapterNo}`)
         }
     }
 
-    #filterParagraphs() {
-        this.paragraphList = this.paragraphList.filter(p => {
-            return (p.classIs !== 'remove')
-        })
+    buildSubHead(title) {
+        const newSubHead = new AnnoSubHead(title)
+        this.subheadingsList.push(newSubHead)
+        this.currentSubHead = newSubHead
     }
+}
 
-    #buildSections() {
-        const seriesRegExp = RegExp(`${this.chapter}\\.\\d{3,4}\\sto\\s${this.chapter}\\.\\d{3,4}`)
-        const secRegExp = RegExp(`${this.chapter}\\.\\d{3,4}`)
-        this.paragraphList.forEach(p => {
-            if (p.classIs == 'sectionHead') {
-                const section = [...p.text.match(secRegExp)][0]
-                const build = seriesRegExp.test(p.text)
-                ? `Series ORS ${[...p.text.match(seriesRegExp)][0]}`
-                : `ORS ${section}`
-                this.#buildAnnoSection(section, build)
-                return
-            }
-            this.#addToCurrent(p.text)
-        })
-    }
-
-    #buildAnnoSection(name, type) {
-        {
-            if (!(name in this.annoSecList)) {
-                this.annoSecList[name] = {}
-            }
-            this.annoSecList[name][type] = []
-            this.current = this.annoSecList[name][type]
-        }
-    }
-
-    #addToCurrent(newPara) {
-        try {
-            this.current.push(newPara)
-        } catch (error) {
-            warnBG(`Could not add paragraph ${newPara}; error: ${error}`, 'annotations.js', '#addToCurrent')
-        }
-    }
-
-    #deleteParentsWithNoChildren() {
-        for (const aName in this.annoSecList) {
-            for (const aType in aName) {
-                if (aType.length < 1) {
-                delete this.annoSecList[aName][aType]
-                }
-            }
-            if (Object.keys(aName).length < 1) {
-                delete this.annoSecList[aName]
-            }
-        }
+class AnnoSubHead {
+    constructor(title) {
+        this.subHeadTitle = title
+        this.childrenList = []
     }
 }
 
 //GLOBAL CONSTANTS FOR ANNO HANDLER
-let annoBuild
+let annoFetchDoneResolution
+let hasAnnoFinished
 
 const infoAnnos = (info, script) => {
-    infoBG(info, script, 'annotations.js', '#9df') // light blue
+    infoBG(info, 'annotations.js', script, '#9df') // light blue
 }
 
+// building promise for annoFetchDoneResolution to signal promise fulfilled
+const resetPromise = () => {
+    hasAnnoFinished = new Promise ((resolve) => {
+        annoFetchDoneResolution = resolve
+    })
+}
+
+// annoCollection will eventually be passed from background to content script
+let annoCollection
+
 /** Starts getting Annos (will not be done by time rest of script runs) from msgListenerBG.js */
-const startAnnoRetrieval = (chapter) => {
-    infoAnnos(`Getting annotations for ${chapter}`, 'startAnnoRetrieval')
-    annoBuild = new AnnoHandler(chapter)
-    return true
+const startAnnoRetrieval = async (chapterNo) => {
+    resetPromise()
+    annoCollection = new AnnoParent(chapterNo)
+    infoAnnos(`Fetching annotations for chapter ${chapterNo}`, 'startAnnoRetrieval')
+    if (!orsRegExp.test(chapterNo)) {
+        warnBG(`Can't find '${chapterNo}' anywhere in annotation section`, 'annotations.js', 'validateAndCleanChapter')
+        return
+    }
+    const url = `https://www.oregonlegislature.gov/bills_laws/ors/ano00${chapterNo}.html`.replace(/0*(\d{3})/, '$1')
+    let cleanedAnno = new AnnoCleaner(chapterNo, await getTextFromHtml(url, 'windows-1251'))  // webResources.js
+    infoAnnos(`Retrieved annotations text from ${url}`, '#fetchData')
+    /** classifying each existing anno entry and adding as object property */
+    const seriesRegExp = RegExp(`${chapterNo}\\.\\d{3,4}\\sto\\s${chapterNo}\\.\\d{3,4}`)
+    const secRegExp = RegExp(`^${tabRegExp}?${chapterNo}\\.\\d{3,4}`)
+    cleanedAnno.rawParaList.forEach(annoParaTxt => {
+        if (seriesRegExp.test.annoParaTxt) {    // series subheading
+            annoCollection.currentSection.buildSubHead(`Series ' ${annoParaTxt}`)
+            return
+        }
+        if (secRegExp.test(annoParaTxt)) {  // new sections
+            annoCollection.buildNewSection(annoParaTxt.match(secRegExp)[0])
+            return
+        }
+        if (RegExp(`NOTES? OF DECISION`).test(annoParaTxt)) {       // other subheadings
+            annoCollection.currentSection.buildSubHead(annoParaTxt)
+            return
+        }
+        if (    // skipable content
+            (annoParaTxt.length < 1) ||
+            (RegExp(`^${tabRegExp}$`).test(annoParaTxt)) ||
+            (RegExp(`^${tabRegExp}Chapter\\s0*${chapterNo}`).test(annoParaTxt)) // may have leading zeros
+        ){
+            return
+        }
+        if (RegExp('^<b>([^]*)</b>$').test(annoParaTxt)) {
+            annoCollection.currentSection.buildSubHead(`${annoParaTxt}`)
+            return
+        }
+        // default
+        try {
+            annoCollection.currentSection.currentSubHead.childrenList.push(annoParaTxt)
+        } catch (e) {
+            infoAnnos(`No subhead found for '${annoParaTxt.slice(0,80)}' building dummy subhead in ${annoCollection.currentSection.ors}.`, 'rawParaList(callback)')
+            annoCollection.currentSection.buildSubHead(" ")
+            annoCollection.currentSection.currentSubHead.childrenList.push(annoParaTxt)
+        }
+    })
+    await annoCollection.cleanup()      // not necessary to be async, but belt & suspenders approach to timing issue
+    annoFetchDoneResolution()
 }
 
 /** Finishes getting Annos, returns list of section Objects {name; type; children:{text}}; from msgListenerBG.js */
+
+const retrieveWhenFinished = async () => {
+        await hasAnnoFinished
+        resetPromise()
+        const sendObject = annoCollection.sectionList
+        infoAnnos(`Finished anno pre-processing. Sending '${JSON.stringify(sendObject).slice(0,100)} ...' to content.`, 'finishAnnoRetrieval')
+        return sendObject
+}
+
 const finishAnnoRetrieval = async () => {
-    try {
-        infoAnnos('Finishing annotations retrieval', 'finishAnnoRetrieval')
-        return await annoBuild.getAnnoSections()
-    } catch (error) {
-        warnBG(`Retrieving annotations error: ${error}`, 'annotations.js', 'finishAnnoRetrieval')
-    }
+    infoAnnos(`Awaiting download & initial parsing`, 'finishAnnoRetrieval')
+    return await tryCatchWarnBG({
+        tryFunction: retrieveWhenFinished,      // no arguments
+        warningMsg : `Retrieving finished annotations Object failed`
+    }) // sent to enhanceSecs.js -> getAnnoList()
 }

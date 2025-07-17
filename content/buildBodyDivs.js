@@ -275,7 +275,6 @@ let cleanerObject = {
         newSpan.classList.add(isDateTrue ? 'isTrue' : 'isFalse')
         let wrappedArray = elemHTML.split(match)
         wrappedArray.splice(1, 0, newSpan.innerHTML)
-        console.log(wrappedArray)
         return wrappedArray.join('')
     }
 }

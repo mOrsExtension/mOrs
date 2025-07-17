@@ -1,7 +1,7 @@
 //bodyClean.js
 
 function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
-    const tabRegExp = '(?:&nbsp;|\\s){0,8}' //regExp for a tab/blank space
+    const tabRegExp = '(?:&nbsp;|\\s){0,20}' //regExp for a tab/blank space (extending to 20 to capture chapter 3 long tabs)
 
     /** First pass tagging paragraphs [SearchString, classParagraphAs]
      * Tags ORS Refs, Leadlines, Forms, & makes links for internal ORS refs */
@@ -28,24 +28,37 @@ function bodyCleanUp (/**@type {HTMLDivElement} */ docBody) {
         [`^${tabRegExp}<b>${tabRegExp}Note(\\s\\d)?:${tabRegExp}<\\/b>`, 'startNote'],
 
         // Heading (5+ initial capital letters) (E.g., "PENALTIES"; but not "TAX")
-        [/^[^a-z0-9(_]{3,}[^a-z0-9(_]*$/, 'headingLabel'],
+        [`^${tabRegExp}[^a-z0-9(_]{3,}[^a-z0-9(_]*$`, 'headingLabel'],
 
         // Leading parens with at least 4 letters (E.g. "(Disputes)")
-        [/^\([^]{5,}\)$/, 'subheadLabel'],
+        [`^${tabRegExp}\\([^]{5,}\\)$`, 'subheadLabel'],
 
         // "(Temporary provisions ... - introduce notes
-        [/\(Temporary\sprovisions/, 'tempHeadLabel']
+        [`${tabRegExp}\\(Temporary\\sprovisions`, 'tempHeadLabel']
     ]
-    docBody.querySelectorAll('p').forEach(aPara => {
+    let paraList = docBody.querySelectorAll('p')
+    // iterates backwards through list in order to filter double headings
+    for (let i = paraList.length - 1; i > -1; i--) {
+        aPara = paraList[i]
         firstPassClass.forEach(([searchFor, /**@type {String} */ newClass]) => {
             if (new RegExpHandler(searchFor).testMe(aPara.innerHTML)) {
-                aPara.className=newClass
+                aPara.className = newClass
             }
         })
-    })
+        // concatenates headings appearing in adjacent lines and deletes second one
+        if(
+            aPara.classList.contains('headingLabel') &&
+            paraList[i+1] &&
+            paraList[i+1].classList.contains('headingLabel')
+
+        ){
+            aPara.innerText = new RegExpHandler(`([^]*?)(\\s){2,}([^]*?)`).replaceAll(`${aPara.innerText} ${paraList[i+1].innerText}`, '$1 $3')
+            paraList[i+1].remove()
+        }
+    }
 
     //delete extra spaces in labeled paragraphs
-    docBody.querySelectorAll('p.subSec, p.para, p.subPara, p.sectionStart, p.sourceNote, p.note').forEach(aPara => {
+    docBody.querySelectorAll('p.subSec, p.para, p.subPara, p.sectionStart, p.sourceNote, p.note').forEach((aPara) => {
         //search for leading tabs & delete
         aPara.innerHTML = new RegExpHandler(`^${tabRegExp}(?:<b>)?${tabRegExp}`,'').replacePerFlags(aPara.innerHTML, '')
     })

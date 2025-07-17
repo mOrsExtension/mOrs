@@ -1,11 +1,15 @@
 //mORS.js
 
 const runMain = async () => {
-    let docBody = document.body.cloneNode(true)
+    let docBody = document.createElement('body');
+    docBody.innerHTML = document.body.innerHTML;
+    Array.from(document.body.attributes).forEach(attr => {
+        docBody.setAttribute(attr.name, attr.value);
+    });
     docBody = await firstClean(docBody)
     const extractHeadingInfo = extractChapterInfo(docBody) // buildHeading.js
     addToHead() // buildHeading.js
-    sendAwait({startAnnos: chapterInfo.chapNo}, false) // launch in background
+    sendAwait({startAnnos: chapterInfo.chapNo}, false) // open annos page in background, don't await response or completion
     docBody = extractHeadingInfo.bodyComponent // firstClean.js
     const tocDiv = (chapterInfo.isFormerProvisions) ? null : buildTOC(docBody) // buildTOC.js - not needed if former provisions section
     let mainDiv = document.createElement('div') // moving remaining body into its own separate "main" div
@@ -24,10 +28,9 @@ const runMain = async () => {
     const volumeNav = finishedPromises[1]
     mainDiv = finishedPromises[2] // orLawLink.js : add links for OrLaws based on \data\orLawLegLookup.json
     finalCleanUp([headingDiv, volumeNav, tocDiv, mainDiv, floatMenuDiv]) // finalClean.js : puts together pieces, does post html rendering cleanup
-    sectionAdjustments() // buttons.js : add buttons for collapsable sections, expanding links & button listeners
-    startObserver(6)
-    navigateToTag() // navigate.js : navigate to tag (#) in url, if any
-
+    await sectionAdjustments() // enhancements.js : add buttons for collapsable sections; add annos; adds ids expanding links & button listeners
+    await startObserver(6)
+    scrollToTag() // navigate.js : navigate to tag (#) in url, if any
 }
 
 //Startup
@@ -38,7 +41,7 @@ window.addEventListener('load', () => {
         "on 'load'"
     )
     userStylesRefresh() // stylesheet.js
-    implementUserParameters()
+    implementUserParameters() // userData
     runMain() // mORS.js (above) - implements changes to page
     listenToPopup() // addListeners.js - prepare to receive messages from popup.js's sendMsgToOrsTabs (or options.js)
 })

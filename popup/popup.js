@@ -196,6 +196,5 @@ const versionID = document.getElementById('version')
 const theRoot = document.documentElement
 
 window.addEventListener('load', () => {
-    console.log('popup running')
     popupMain()
 })

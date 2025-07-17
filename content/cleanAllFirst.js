@@ -12,7 +12,7 @@ const regExpCleanUp = bodyHTML => {
     const /** @type {[RegExp|String, String][]} */ cleanUpList = [
         [/(\n|\r|\f|\s\s)+/, ' '], // removes line breaks, double spaces
         [/\s\s+/, ' '], // removes left over double spaces ('done twice to deal with odd number of spaces >2)
-        [/<div[^>]*>/, ''], // remove opening divs
+        [/<div[^]*?>/, ''], // remove opening divs
         [/<\/div>/, ''], // remove closing divs
         [/\[(19\d{2}|20\d{2}|Sub|For|Re|Am)/, '</p><p class="default">[$1'], // new paragraph for source notes
         [/<\/b>/, '</b></p><p class="default">'] // new paragraph after bold text ends

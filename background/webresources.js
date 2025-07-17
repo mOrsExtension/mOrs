@@ -83,10 +83,11 @@ const getChapterList = async () => {
 const promiseGetChapterInfo = async ({ chapNum, offset = 0 }) => {
     const myList = await getChapterList()
     let ans = []
-    myList.every((chapter, index) => {
-        // every works like forEach, but breaks on "false"
+    myList.every((chapter, index) => {      // every works like forEach, but breaks on "false"
         if (chapter[0] == chapNum) {
-            let limitRange = Math.max(Math.min(index + offset, myList.length - 1), 0)
+            let limitRange = Math.max(
+                Math.min(index + offset, myList.length - 1)
+            , 0)
             ans = myList[limitRange]
         }
         return ans.length == 0 // keeps going while true; stops as soon as we find it

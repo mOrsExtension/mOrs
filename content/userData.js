@@ -1,5 +1,9 @@
 //storedData.js
 
+const infoStoredData = (infoMsg, functionName) => {
+    infoCS(infoMsg, `storedData.js`, functionName, '#dd44ff')
+}
+
 const implementUserParameters = async () => {
 
     /** returns promise to take in a command and executes function if true (or false if any)
@@ -9,9 +13,8 @@ const implementUserParameters = async () => {
         try {
             const response = await sendAwait({'getStorage': dataRequest})
             const isReturnTrue = response[dataRequest]
-            infoCS(
+            infoStoredData(
                 `Content script received response: '${dataRequest}'='${isReturnTrue}'`,
-                'storedData.js',
                 'getInformation'
             )
             responsiveFunction(isReturnTrue)
@@ -48,44 +51,46 @@ const implementUserParameters = async () => {
 
 /** determines section from url (based on #xxx) */
 /** scroll to html id tag in url, if any */
-const navigateToTag = async () => {
-    let navToTag = new urlHandler (window.location.toString())
-    if (navToTag.hasTarget) {
+const scrollToTag = async () => {
+    let toTag = new tagFindAndSeek (window.location.toString())
+    if (toTag.hasTarget) {
 //        await newDelay(100) // delay in milliseconds before starting scroll. Seems to reduce issues with scrolling and then needing html redrawn.
-        navToTag.scrollToTarget()
+        toTag.scrollToTarget()
     }
 }
 const newDelay = async (msecs) => {
     setTimeout(() => {return true}, msecs)
 }
 
-    /** Takes in ors URL and if there's a #tag that can be found on page, scrolls browser to it) */
-    class urlHandler {
+/** Takes in ors URL and if there's a #tag that can be found on page, scrolls browser to it) */
+class tagFindAndSeek {
     constructor (fullUrl) {
         this.url = fullUrl
-        this.idFinder =  /(?:\.html\#)([^\/]*)/
-        this.hasTarget = this.idFinder.test(fullUrl)
-        if (this.hasTarget) {
-            this.getUpperTargetString()
-            this.setDocElement()
+        this.urlRegExp = new RegExpHandler("(?:\\.html\\#)([^\\/]*)") // tag : $1
+        if (this.urlRegExp.testMe(fullUrl)) {
+            this.#getUpperTargetString()
+            this.#setDocElement()
         }
     }
-    getUpperTargetString () {
+    #getUpperTargetString () {
+
         try {
-            let id = this.idFinder.exec(this.url)  //TODO - could maybe use RegExpHandler instead?
-            if (id !=null && id[1] !=null) {
-                this.targetIdString = id[1].toUpperCase()
+            this.targetIdString = this.urlRegExp.firstMatchGroupNo(this.url, 1).toUpperCase()
+            if (this.targetIdString.length > 0) {
+                this.hasTarget = true
             }
         } catch (error) {
             warnCS(error)
             this.hasTarget = false
         }
     }
-    setDocElement() {
+
+    #setDocElement() {
         let elem = document.getElementById(this.targetIdString)
         if (elem != null) {
             this.targetDocElement = elem
         } else {
+            infoStoredData(`Could not find element with id = '#${this.targetIdString}' to scroll to.`, 'urlHandler/#setDocElement')
             this.hasTarget = false
         }
     }
@@ -94,38 +99,39 @@ const newDelay = async (msecs) => {
         if (!this.hasTarget || this.targetDocElement == null) {
             return
         }
-        infoCS(`navigating to '${this.targetIdString}'`, 'userData.js', 'urlHandler/scrollToTarget')
+        infoStoredData(
+            `Scrolling to element id = '#${this.targetIdString}'`,
+            'urlHandler/scrollToTarget'
+        )
         this.targetDocElement.scrollIntoView()
-        this.expandTarget ()
+        this.#expandTarget ()
     }
 
-    expandTarget () {
+    #expandTarget () {
         try {
             expandSingle(this.targetDocElement) // helper.js - expands the section if collapsed
         } catch (error) {
-            warnCS(error, "userData.js", "navigateToTag")
+            warnCS(error, "userData.js", "tagFindAndSeek")
         }
     }
 }
 
+const buildColors = async () => {
+    const theRootStyle = document.documentElement.style
+    const replacementSheet = await sendAwait({miscTask: 'buildColorData'}) // calls /background/style.js
+    for (let key in replacementSheet) {
+        theRootStyle.setProperty(`--${key}`, replacementSheet[key])
+    }
+    infoStoredData(
+        `Added user css properties to stylesheet: ${JSON.stringify(replacementSheet)}`,
+        'buildColors'
+    )
+}
+
 /**replaces part of stylesheet - called on launch or on msg from popup.js or options.js when user data changes re: stylesheet */
 const userStylesRefresh = async () => {
-    const theRootStyle = document.documentElement.style
-    try {
-        const replacementSheet = await sendAwait({miscTask: 'buildColorData'}) // calls /background/style.js
-        for (let key in replacementSheet) {
-            theRootStyle.setProperty(`--${key}`, replacementSheet[key])
-        }
-        infoCS(
-            `Added user css properties to stylesheet: ${JSON.stringify(replacementSheet)}`,
-            'userData.js',
-            'userStylesRefresh'
-        )
-    } catch (e) {
-        warnCS(
-            `Error applying stylesheet ${e}.`,
-            'userData.js',
-            'userStylesRefresh'
-        )
-    }
+    tryCatchWarnCS({          // nothing returned, no need to await...
+        tryFunction : buildColors,
+        warningMsg : `Error applying stylesheet from userData.js : buildColors`}
+    )
 }
