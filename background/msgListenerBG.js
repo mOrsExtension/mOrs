@@ -18,7 +18,7 @@ class MessageObj {
     async doTasksAndFetchResponse() {
         this.responseMsg = (
             ('getStorage' in this.receivedMsg)
-             ? await this.#getFromStorage()   // returns object(s)
+             ? await this.#retrieveUserData()   // returns object(s)
             : ('fetchJson' in this.receivedMsg)
              ? await this.#fetchJson() // returns jsonItem
             : ('getChapInfo' in this.receivedMsg)
@@ -45,7 +45,7 @@ class MessageObj {
     }
 
     /** get single item or array of items from storage, return either array or response */
-    async #getFromStorage() {
+    async #retrieveUserData() {
         let toFetch = this.receivedMsg.getStorage
         let ansObj = {}
         if (Array.isArray(toFetch)) {
@@ -63,7 +63,7 @@ class MessageObj {
         return ansObj
     }
     async #getAnItem(getItem) {
-        return await promiseGetFromStorage(getItem)
+        return await getFromStorage(getItem) //
     }
 
     /** list of one offs that could each be their own functions, but aren't */

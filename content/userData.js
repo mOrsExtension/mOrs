@@ -4,6 +4,7 @@ const infoStoredData = (infoMsg, functionName) => {
     infoCS(infoMsg, `storedData.js`, functionName, '#dd44ff')
 }
 
+//TODO: #95 Make into object, retrieve items as list, begin before page load completed.
 const implementUserParameters = async () => {
 
     /** returns promise to take in a command and executes function if true (or false if any)
@@ -17,10 +18,11 @@ const implementUserParameters = async () => {
                 `Content script received response: '${dataRequest}'='${isReturnTrue}'`,
                 'getInformation'
             )
+            console.log(responsiveFunction)
             responsiveFunction(isReturnTrue)
         } catch (e) {
             warnCS(
-                `Error awaiting response to '${dataRequest}': ${e}`,
+                `Error with response to '${dataRequest}': ${e}`,
                 'storedData.js',
                 'getInformation'
             )
@@ -28,23 +30,29 @@ const implementUserParameters = async () => {
     }
 
     // MAIN Implement User Parameters
-    await getInformation('collapseDefaultStored', doCollapse => {
+    await getInformation('isCollapseDefault', doCollapse => {
         doCollapse ? collapseAllSections() : expandAllSections() // in helper.js
     })
-    await getInformation('showFullWidth', isTrue => {
+    await getInformation('doShowFullWidth', isTrue => {
         setFullWidth(isTrue) // in helper.js
     })
     await getInformation('doShowBurnt', doShow => {
         showBurnt(doShow) // in helper.js
     })
-    await getInformation('showSNsStored', isTrue => {
+    await getInformation('doShowSourceNotes', isTrue => {
         showSourceNotes(isTrue) //  in helper.js
     })
-    await getInformation('showMenuStored', isTrue => {
+    await getInformation('doShowMenu', isTrue => {
         showMenu(isTrue) // in helper.js
     })
-    await getInformation('showNavStored', isTrue => {
+    await getInformation('doShowVolNav', isTrue => {
         showVolumeOutline(isTrue) // in helper.js
+    })
+    await getInformation('doShowTOC', isTrue => {
+        showTOC(isTrue) // in helper.js
+    })
+    await getInformation('doShowAnnos', isTrue => {
+        showAnnos(isTrue) // in helper.js
     })
     return true
 }

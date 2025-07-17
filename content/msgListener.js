@@ -45,6 +45,14 @@ const listenToPopup = () => {
                 showVolumeOutline(msgText['showNav'])
                 break
 
+                case 'showTOC':
+                showTOC(msgText['showTOC'])
+                break
+
+                case 'showAnnos':
+                showAnnos(msgText['showAnnos'])
+                break
+
                 default:
                 throw new Error(
                 `Unidentified message from popup.html: ${

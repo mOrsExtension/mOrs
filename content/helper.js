@@ -128,6 +128,12 @@ const showVolumeOutline = doShow => {
 const showSourceNotes = doShow => {
     makeVisible('p.sourceNote', doShow)
 }
+const showTOC = doShow => {
+    makeVisible('div#toc', doShow)
+}
+const showAnnos = doShow => {
+    makeVisible('div.annotations', doShow)
+}
 
 /** Sends "information" message to service worker console.
 * @param {string} infoMsg

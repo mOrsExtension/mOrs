@@ -5,10 +5,10 @@
 const promiseGenerateCss = async () => {
     let cssOptions
     try {
-        const userCss = await promiseGetFromStorage('cssSelectorStored') // find user's selected CSS style saved in popup (E.g., Dark)
+        const userCss = await getFromStorage('cssSelector') // find user's selected CSS style saved in popup (E.g., Dark)
         infoBG(`Loading '${userCss}' stylesheet`, 'style.js', 'promiseGenerateCss')
         if (userCss == 'Custom') {
-            cssOptions = await promiseGetFromStorage('userColors') // get css from synced user data for custom
+            cssOptions = await getFromStorage('userColors') // get css from synced user data for custom
         } else {
             cssOptions = (await promiseReadJsonFile('cssPresetColors.json'))[userCss] // get css from json defaults
         }

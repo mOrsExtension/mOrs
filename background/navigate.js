@@ -55,7 +55,7 @@ class UrlBuilderFromSearch {
         if (/ore?\.?leg/.test(this.search)) {
             return 'OrLeg'
         }
-        const reader = await promiseGetFromStorage('lawsReaderStored') // userStorage.js - if user didn't request reader, use stored default
+        const reader = await getFromStorage('lawsReader') // userStorage.js - if user didn't request reader, use stored default
         if (reader == 'Hein' || reader == 'OrLeg') {
             return reader
         }
