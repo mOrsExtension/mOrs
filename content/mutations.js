@@ -41,8 +41,18 @@ const startObserver = async (maxWait = 5) => {
         attributeFilter: ['class', 'style']
     }
 
+    const reSetTimer = () => {
+        redrawTimeout = setTimeout(() => {
+            infoMutation('No significant changes detected for 150ms, initiating redraw', 'observer')
+            stopObserving()
+            forceRedraw()
+        }, 150)
+    }
+    reSetTimer()
+
     // Set up the MutationObserver
     const observer = new MutationObserver((mutations) => {
+
         if (!isObserving) return
             let significantChanges = mutations.some(mutation =>
                 mutation.type === 'childList' ||
@@ -53,6 +63,7 @@ const startObserver = async (maxWait = 5) => {
                 )
             )
 
+
         if (significantChanges) {
             infoMutation(`Significant changes detected: ${mutations.length}`, 'observer')
 
@@ -60,13 +71,7 @@ const startObserver = async (maxWait = 5) => {
             if (redrawTimeout) {
                 clearTimeout(redrawTimeout)
             }
-
-            // Set a new timeout
-            redrawTimeout = setTimeout(() => {
-                infoMutation('No significant changes detected for 150ms, initiating redraw', 'observer')
-                stopObserving()
-                forceRedraw()
-            }, 150)
+            reSetTimer()
         }
     })
 

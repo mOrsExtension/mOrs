@@ -4,8 +4,8 @@
 const errorUrl = 'https://github.com/mOrsExtension/mOrs/wiki/Help-Using-Omnibox'
 
 //const orsRegExp is in helperBG.js
-const yearRegExp = /\b(?:19|20)\d{2,}\b/
-const chpRegExp = /(?:-|(?:19|20)\d{2}\s|c\.\s?)([1-9]\d{0,3}\b)/
+const yearRegExp = /\b(?:19|20)\d{2}(?=[\D\b])/
+const chpRegExp = /(?:(?:19|20)\d{2}|ch?p?\.?)([1-9]\d{0,3})(?:[\D\b]|$)/   // works with "c" "ch" or "chp" for chapter w/
 
 /**Builds url based on omnibox input */
 class UrlBuilderFromSearch {
@@ -24,7 +24,7 @@ class UrlBuilderFromSearch {
     getOrsUrl() {
         this.isOrs = orsRegExp.test(this.search)
         if (!this.isOrs) {
-            infoNav('Invalid search: ${this.search}; sending user to help page', 'getOrsUrl')
+            infoNav(`Invalid search: ${this.search}; sending user to help page`, 'getOrsUrl')
             return errorUrl
         }
         let orsUrl = this.search.replace(orsRegExp, '00$1.html#$1$3') // add more than enough zeros
@@ -52,7 +52,7 @@ class UrlBuilderFromSearch {
         if (/hein/.test(this.search)) {
             return 'Hein'
         }
-        if (/ore?(\s?|\.)*leg/.test(this.search)) {
+        if (/ore?\.?leg/.test(this.search)) {
             return 'OrLeg'
         }
         const reader = await promiseGetFromStorage('lawsReaderStored') // userStorage.js - if user didn't request reader, use stored default
@@ -62,7 +62,7 @@ class UrlBuilderFromSearch {
         return (year > 1998 ? 'OrLeg' : 'Hein') // or pick one based on year
     }
     getSpecialSession() {
-        const specialSessionSearch = /s\.?s\.?\s?(\d)\s?/ // * special session = match 1
+        const specialSessionSearch = /s\.?s\.?(\d)/ // * special session = match 1
         if (specialSessionSearch.test(this.search)) {
             const ssNum =  this.search.match(specialSessionSearch)[1]
             infoNav(`Detected special session = ${ssNum}`)
@@ -213,5 +213,7 @@ const buildAndNavigateToUrls = searchString => {
  *  Makes text lowercase
 * @param {string} userText */
 const sanitize = userText => {
-    return userText.replace(/[-\(\)\{\}\]\[,`~$%#@!^&*_\+="'?\<\>;]/g, '|').toLowerCase()
+    let noSpaces = userText.replace(/[\s\n\r\v\f\0]/g, '')
+    let sanitized = noSpaces.replace(/[\]\\\-(){}[+*?<>/,`~$%#@!&_="';]/g, '|').toLowerCase()
+    return sanitized
 }

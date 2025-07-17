@@ -51,11 +51,11 @@ const implementUserParameters = async () => {
 
 /** determines section from url (based on #xxx) */
 /** scroll to html id tag in url, if any */
-const navigateToTag = async () => {
-    let navToTag = new urlHandler (window.location.toString())
-    if (navToTag.hasTarget) {
+const scrollToTag = async () => {
+    let toTag = new tagFindAndSeek (window.location.toString())
+    if (toTag.hasTarget) {
 //        await newDelay(100) // delay in milliseconds before starting scroll. Seems to reduce issues with scrolling and then needing html redrawn.
-        navToTag.scrollToTarget()
+        toTag.scrollToTarget()
     }
 }
 const newDelay = async (msecs) => {
@@ -63,12 +63,10 @@ const newDelay = async (msecs) => {
 }
 
 /** Takes in ors URL and if there's a #tag that can be found on page, scrolls browser to it) */
-class urlHandler {
+class tagFindAndSeek {
     constructor (fullUrl) {
         this.url = fullUrl
         this.urlRegExp = new RegExpHandler("(?:\\.html\\#)([^\\/]*)") // tag : $1
-        console.log(this.urlRegExp.RE)
-
         if (this.urlRegExp.testMe(fullUrl)) {
             this.#getUpperTargetString()
             this.#setDocElement()
@@ -92,7 +90,7 @@ class urlHandler {
         if (elem != null) {
             this.targetDocElement = elem
         } else {
-            infoStoredData(`Could not find element with id = #'${this.targetIdString}' to scroll to.`, 'urlHandler/#setDocElement')
+            infoStoredData(`Could not find element with id = '#${this.targetIdString}' to scroll to.`, 'urlHandler/#setDocElement')
             this.hasTarget = false
         }
     }
@@ -102,7 +100,7 @@ class urlHandler {
             return
         }
         infoStoredData(
-            `scrolling to element id = '#${this.targetIdString}'`,
+            `Scrolling to element id = '#${this.targetIdString}'`,
             'urlHandler/scrollToTarget'
         )
         this.targetDocElement.scrollIntoView()
@@ -113,7 +111,7 @@ class urlHandler {
         try {
             expandSingle(this.targetDocElement) // helper.js - expands the section if collapsed
         } catch (error) {
-            warnCS(error, "userData.js", "navigateToTag")
+            warnCS(error, "userData.js", "tagFindAndSeek")
         }
     }
 }

@@ -8,7 +8,7 @@ class AnnoCleaner {
         this.#regExpCleanup()
         this.#buildCitations()
         this.rawParaList = this.#splitParagraphs()
-        infoAnnos(`Created anno paragraph list for ${this.rawParaList.length} ORS sections`, 'docDomParsing')
+        infoAnnos(`Split anno doc into ${this.rawParaList.length} paragraphs.`, 'docDomParsing')
     }
 
     /** deletes html junk & extra line breaks; */
@@ -123,7 +123,7 @@ class AnnoParent {
     constructor (chapterNo) {
         this.chapterNo = chapterNo
         this.sectionList = []
-        this.buildNewSection('Chapter')
+        this.buildNewSection('Whole ORS Chapter')
     }
 
     buildNewSection(ors) {
@@ -133,14 +133,9 @@ class AnnoParent {
     }
 
     /** removes grandchildren without lists, children without grandchildren and current items */
-    cleanup() {
+    async cleanup() {
         this.orsList = []
         this.sectionList.forEach(child => {
-            child.subheadingsList.forEach(grandChild => {
-                if (grandChild.childrenList.length < 1) {
-//                    child.deleteChild(grandChild) depreciating for now
-                }
-            })
             if (child.subheadingsList.length < 1) {
                 this.sectionList = this.sectionList.filter(item =>
                     item !== child
@@ -149,7 +144,6 @@ class AnnoParent {
             } else {
                 delete child.currentSubHead
             }
-
         })
         delete this.currentSection
     }
@@ -179,21 +173,25 @@ class AnnoSubHead {
 
 //GLOBAL CONSTANTS FOR ANNO HANDLER
 let annoFetchDoneResolution
+let hasAnnoFinished
 
 const infoAnnos = (info, script) => {
     infoBG(info, 'annotations.js', script, '#9df') // light blue
 }
 
 // building promise for annoFetchDoneResolution to signal promise fulfilled
-let hasAnnoFinished = new Promise ((resolve) => {
-    annoFetchDoneResolution = resolve
-})
+const resetPromise = () => {
+    hasAnnoFinished = new Promise ((resolve) => {
+        annoFetchDoneResolution = resolve
+    })
+}
 
 // annoCollection will eventually be passed from background to content script
 let annoCollection
 
 /** Starts getting Annos (will not be done by time rest of script runs) from msgListenerBG.js */
 const startAnnoRetrieval = async (chapterNo) => {
+    resetPromise()
     annoCollection = new AnnoParent(chapterNo)
     infoAnnos(`Fetching annotations for chapter ${chapterNo}`, 'startAnnoRetrieval')
     if (!orsRegExp.test(chapterNo)) {
@@ -234,12 +232,12 @@ const startAnnoRetrieval = async (chapterNo) => {
         try {
             annoCollection.currentSection.currentSubHead.childrenList.push(annoParaTxt)
         } catch (e) {
-            infoAnnos(`No subhead found for '${annoParaTxt}' building dummy subhead in ${annoCollection.currentSection.ors}.`, 'rawParaList(callback)')
+            infoAnnos(`No subhead found for '${annoParaTxt.slice(0,80)}' building dummy subhead in ${annoCollection.currentSection.ors}.`, 'rawParaList(callback)')
             annoCollection.currentSection.buildSubHead(" ")
             annoCollection.currentSection.currentSubHead.childrenList.push(annoParaTxt)
         }
     })
-    annoCollection.cleanup()
+    await annoCollection.cleanup()      // not necessary to be async, but belt & suspenders approach to timing issue
     annoFetchDoneResolution()
 }
 
@@ -247,6 +245,7 @@ const startAnnoRetrieval = async (chapterNo) => {
 
 const retrieveWhenFinished = async () => {
         await hasAnnoFinished
+        resetPromise()
         const sendObject = annoCollection.sectionList
         infoAnnos(`Finished anno pre-processing. Sending '${JSON.stringify(sendObject).slice(0,100)} ...' to content.`, 'finishAnnoRetrieval')
         return sendObject
@@ -255,7 +254,7 @@ const retrieveWhenFinished = async () => {
 const finishAnnoRetrieval = async () => {
     infoAnnos(`Awaiting download & initial parsing`, 'finishAnnoRetrieval')
     return await tryCatchWarnBG({
-        tryFunction: retrieveWhenFinished,      // no arguments & nothing returned
+        tryFunction: retrieveWhenFinished,      // no arguments
         warningMsg : `Retrieving finished annotations Object failed`
     }) // sent to enhanceSecs.js -> getAnnoList()
 }

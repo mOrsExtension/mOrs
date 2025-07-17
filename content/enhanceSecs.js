@@ -18,9 +18,9 @@ const sectionAdjustments = async () => {
         section['div'] = await makeAnnoSectionDiv(section)
     })
 
-    if (orsList.includes('Chapter')) {
+    if (orsList.includes('Whole ORS Chapter')) {
         if (document.body.querySelector('#main')) {
-            document.body.querySelector('#main').prepend(annoObject[0].div)
+            document.body.querySelector('#main').prepend(annoObject[0].div)  // If it exists I think it has to be the first position
         }
     }
     document.body.querySelectorAll('div.section').forEach(aDiv => { // cycle through div w/ class of 'section'
@@ -163,7 +163,7 @@ const makeLinkExpandTarget = aLink => {
         aLink.anchor.addEventListener('click', () => {
             expandSingle(target)
             infoCS(
-                `scrolling to ${aLink.anchor.innerHTML}`,
+                `Scrolling to element id = '#${aLink.anchor.innerHTML}'`,
                 'enhanceSecs.js',
                 'makeLinkExpandTarget'
             )

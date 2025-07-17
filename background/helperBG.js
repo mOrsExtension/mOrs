@@ -1,7 +1,7 @@
 //background/helperBG.js
 
 // background global constants used within folder
-const orsRegExp = /\b0*([1-9]\d{0,2}([a-c]|[A-C])?)(\.\d{3,4})?/ // finds "chapter" or "chapter.section", e.g. "459A"
+const orsRegExp = /\b0*([1-9]\d{0,2}([a-c]|[A-C])?)(\.\d{3,4})?(?=(?:[\D\b]|$))/ // finds "chapter" or "chapter.section", e.g. "459A"
 const tabRegExp = '(?:(?:&nbsp;|\\s)*)'
 
 /** Sends infoTxt from background script to service worker inspection console; helperBG.js
@@ -40,16 +40,16 @@ browser.runtime.onInstalled.addListener(async details => {
     }
 })
 
-/**  config = {tryFunction + (optional) warningMsg='', doLog = false, successMsg = ''} */
+/**  config = {tryFunction + (optional) warningMsg='', successMsg = ''} */
 const tryCatchWarnBG = async (config, ...args) => {
-    const {tryFunction, warningMsg='', doLog = false, successMsg = ''} = config
+    const {tryFunction, warningMsg='', successMsg = ''} = config
     try {
         let theResponse = await tryFunction(...args)
-        if(doLog) {
+        if(successMsg.length > 0) {
             infoCS(`Success: ${successMsg}"`, 'helper', tryFunction.name,'#a8a8a8')
         }
         return theResponse
     } catch (error) {
-        warnCS(`Error: ${warningMsg}: ${error}`, tryFunction.name)
+        warnBG(`Error: ${warningMsg}: ${error}`, tryFunction.name)
     }
 }

@@ -30,7 +30,7 @@ const runMain = async () => {
     finalCleanUp([headingDiv, volumeNav, tocDiv, mainDiv, floatMenuDiv]) // finalClean.js : puts together pieces, does post html rendering cleanup
     await sectionAdjustments() // enhancements.js : add buttons for collapsable sections; add annos; adds ids expanding links & button listeners
     await startObserver(6)
-    navigateToTag() // navigate.js : navigate to tag (#) in url, if any
+    scrollToTag() // navigate.js : navigate to tag (#) in url, if any
 }
 
 //Startup
