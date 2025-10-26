@@ -1,12 +1,12 @@
 {
-    "Root":{
-    "Files": "C:\file_list.txt",
-    "Mors": {
-        "Files":{
-            "1":".gitignore",
-            "2":"backgroundLoader.js",
-            "3":"eslint.config.mjs",
-            "4":"LICENSE.md"
+    "Root": {
+        "Files": "C:\file_list.txt",
+        "Mors": {
+            "Files": {
+                "1": ".gitignore",
+                "2": "backgroundLoader.js",
+                "3": "eslint.config.mjs",
+                "4": "LICENSE.md"
 C:\mOrs\manifest.json
 C:\mOrs\mORSerror.md
 C:\mOrs\package-lock.json

@@ -150,7 +150,6 @@ const handleMessage = async (message, sender) => {
       "#fb8"
     );
   }
-  //try {
   if (await newMsg.doTasksAndFetchResponse()) {
     if (!newMsg.isLog) {
       infoBG(
@@ -160,12 +159,8 @@ const handleMessage = async (message, sender) => {
         "#fb8"
       );
     }
-    try {
       return { response: newMsg.responseMsg };
-    } catch (e) {
-      warnBG("I'm the problem it's me.");
-    }
-  } else {
+    else {
     let error = new Error(
       "Completing task and fetching response failed on handleMessage()"
     );
