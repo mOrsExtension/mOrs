@@ -37,24 +37,40 @@ const promiseGetPalletteList = async () => {
 // volumeOutline.json specific
 /** is a list of chapters in order returning [chapter#, title#, volume#, chapterName, titleName] */
 const buildChapterList = async () => {
-    let chapterList = []
     const fullOutline = await promiseReadJsonFile('volumeOutline.json')
-    const Volumes = fullOutline.Volumes
-    for (let volume in fullOutline.Volumes) {
-        const Titles = Volumes[volume].Titles
-        for (let title in Titles) {
-            const Chapters = Titles[title].Chapters
-            for (let chapter in fullOutline.Volumes[volume].Titles[title].Chapters) {
-                chapterList.push([
-                chapter.trim(),
-                title.trim(),
-                volume,
-                Chapters[chapter],
-                Titles[title].Heading
-                ])
-            }
-        }
+
+    // Safety check
+    if (!fullOutline || !fullOutline.Volumes) {
+        warnBG('Invalid volumeOutline.json structure', 'webResources.js', 'buildChapterList')
+        return []
     }
+
+    const chapterList = Object.entries(fullOutline.Volumes).flatMap(
+        ([volume, volumeData]) => {
+            if (!volumeData || !volumeData.Titles) {
+                warnBG(`Volume ${volume} has no Titles`, 'webResources.js', 'buildChapterList')
+                return []
+            }
+            return Object.entries(volumeData.Titles).flatMap(([title, titleData]) => {
+                // Handle both "Chapter" and "Chapters" (data inconsistency in JSON)
+                const chapters = titleData.Chapters || titleData.Chapter
+
+                if (!chapters) {
+                    warnBG(`Title ${title} in volume ${volume} has no Chapters`, 'webResources.js', 'buildChapterList')
+                    return []
+                }
+
+                return Object.entries(chapters).map(([chapter, chapterName]) => [
+                    chapter.trim(),
+                    title.trim(),
+                    volume,
+                    chapterName,
+                    titleData.Heading,
+                ])
+            })
+        }
+    )
+
     return chapterList
 }
 
