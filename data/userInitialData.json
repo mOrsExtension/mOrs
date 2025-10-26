@@ -6,10 +6,10 @@
    "doFullWidth": false,
    "isCollapseDefault": false,
    "doShowMenu": true,
-   "doShowVolNav":true,
+   "doShowVolNav": true,
    "doShowTOC": true,
    "doShowAnno": true,
-   "userColors" : {
+   "userColors": {
       "background": "#336677",
       "altBack": "#222233",
       "formBack": "#223344",

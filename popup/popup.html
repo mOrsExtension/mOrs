@@ -1,76 +1,84 @@
 <html lang="en">
-<head>
-   <meta name="viewport" content="width=device-width" />
-   <meta charset="UTF-8" />
-   <title>mORS</title>
-   <link href="../data/main.css" rel="stylesheet" />
-</head>
-<body id="popup">
-   <div>
-      <h2>mORS <a href="https://github.com/mOrsExtension/mOrs/" id="version" rel="noopener">v.-0.99</a></h2>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta charset="UTF-8" />
+    <title>mORS</title>
+    <link href="../data/main.css" rel="stylesheet" />
+  </head>
+  <body id="popup">
+    <div>
+      <h2>
+        mORS
+        <a
+          href="https://github.com/mOrsExtension/mOrs/"
+          id="version"
+          rel="noopener"
+          >v.-0.99</a
+        >
+      </h2>
       <p>for Oregon Revised Statutes</p>
-   </div>
-   <form id='navForm'>
+    </div>
+    <form id="navForm">
       <p>
-         <button type="button" id="helpButton">Help</button>
+        <button type="button" id="helpButton">Help</button>
       </p>
-      <p class="userMsg" id="userMsg"></p> <!-- Popup.js output to send line or two of text to popup frame -->
-   </form>
-   <div>
+      <p class="userMsg" id="userMsg"></p>
+      <!-- Popup.js output to send line or two of text to popup frame -->
+    </form>
+    <div>
       <h3>Extension Options:</h3>
       <p>
-         <label for="cssSelector">Display Colors:</label>&nbsp;&nbsp;
-         <select id="cssSelector"></select>
-         <button type="button" id="colorOptions">Set Custom Colors</button>
+        <label for="cssSelector">Display Colors:</label>&nbsp;&nbsp;
+        <select id="cssSelector"></select>
+        <button type="button" id="colorOptions">Set Custom Colors</button>
       </p>
       <p>
-         <label for="OrLaws">Oregon Session Law Lookup Source:</label>
+        <label for="OrLaws">Oregon Session Law Lookup Source:</label>
       </p>
       <p>
-         <select id="OrLaws">
-            <option selected value="OrLeg">Ore. Legislature (1999-)</option>
-            <option value="Hein">HeinOnline (1859-; account required)</option>
-            <option value="Both">Ore. Leg. with Hein Backup</option>
-            <option value="None">None</option>
-         </select>
+        <select id="OrLaws">
+          <option selected value="OrLeg">Ore. Legislature (1999-)</option>
+          <option value="Hein">HeinOnline (1859-; account required)</option>
+          <option value="Both">Ore. Leg. with Hein Backup</option>
+          <option value="None">None</option>
+        </select>
       </p>
       <p class="popupOption">
-         <input type="checkbox" id="showBurnt" />
-         <label for="showBurnt">Show repealed/renumbered sections</label>
+        <input type="checkbox" id="showBurnt" />
+        <label for="showBurnt">Show repealed/renumbered sections</label>
       </p>
       <p class="popupOption">
-         <input type="checkbox" id="showSNote" />
-         <label for="showSNote">Show section source notes</label>
+        <input type="checkbox" id="showSNote" />
+        <label for="showSNote">Show section source notes</label>
       </p>
       <p class="popupOption">
-         <input type="checkbox" id="showFullWidth" />
-         <label for="showFullWidth">Full width display</label>
+        <input type="checkbox" id="showFullWidth" />
+        <label for="showFullWidth">Full width display</label>
       </p>
       <p class="popupOption">
-         <input type="checkbox" id="collapseDefault" />
-         <label for="collapseDefault">Collapse all ORS sections by default</label>
+        <input type="checkbox" id="collapseDefault" />
+        <label for="collapseDefault"
+          >Collapse all ORS sections by default</label
+        >
       </p>
       <p class="popupOption">
-         <input type="checkbox" id="showMenu" />
-         <label for="showMenu">Show menu button on ORS pages</label>
+        <input type="checkbox" id="showMenu" />
+        <label for="showMenu">Show menu button on ORS pages</label>
       </p>
       <p class="popupOption">
-         <input type="checkbox" id="showToc"/>
-         <label for="showToc">Show chapter Table of Contents</label>
+        <input type="checkbox" id="showToc" />
+        <label for="showToc">Show chapter Table of Contents</label>
       </p>
       <p class="popupOption">
-         <input type="checkbox" id="showNav"/>
-         <label for="showNav">Show title/vol navigation at top</label>
+        <input type="checkbox" id="showNav" />
+        <label for="showNav">Show title/vol navigation at top</label>
       </p>
-    <p class="popupOption">
-         <input type="checkbox" id="showAnnos"/>
-         <label for="showAnnos">Show ORS annotations</label>
+      <p class="popupOption">
+        <input type="checkbox" id="showAnnos" />
+        <label for="showAnnos">Show ORS annotations</label>
       </p>
-
-
-   </div>
-</body>
-<script src="popAndOpHelper.js"></script>
-<script src="popup.js"></script>
-
+    </div>
+  </body>
+  <script src="popAndOpHelper.js"></script>
+  <script src="popup.js"></script>
 </html>

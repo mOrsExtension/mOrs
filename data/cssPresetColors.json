@@ -1,11 +1,11 @@
 {
     "Black & White": {
         "background": "#ffffff",
-        "altBack" : "#eeeeee",
+        "altBack": "#eeeeee",
         "formBack": "#dddddd",
         "buttonColor": "#ffffff",
         "note": "#000000",
-        "mainText" : "#000000",
+        "mainText": "#000000",
         "heading": "#000000",
         "subheading": "#111111",
         "sourceNote": "#111111",
