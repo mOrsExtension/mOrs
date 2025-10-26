@@ -1,39 +1,51 @@
 {
-   "Dark": {
-      "background": "#222211",
-      "altBack": "#443322",
-      "formBack": "#554433",
-      "buttonColor": "#665544",
-      "note": "#ff88bb",
-      "mainText": "#eeeeee",
-      "heading": "#eebb77",
-      "subheading": "#ffcc99",
-      "sourceNote": "#ffeecc",
-      "linkText": "#ccddff"
-   },
-   "Light": {
-      "background": "#ddeeff",
-      "altBack": "#bbddff",
-      "formBack": "#bbccdd",
-      "buttonColor": "#dddddd",
-      "note": "#ff4466",
-      "mainText": "#222244",
-      "heading": "#112299",
-      "subheading": "#116699",
-      "sourceNote": "#223388",
-      "linkText": "#1122aa"
-   },
-   "DarkGrey": {
-      "background": "#222222",
-      "altBack": "#444444",
-      "formBack": "#555555",
-      "buttonColor": "#333333",
-      "note": "#ff88bb",
-      "mainText": "#eeeeee",
-      "heading": "#eeeeee",
-      "subheading": "#dddddd",
-      "sourceNote": "#cccccc",
-      "linkText": "#ccddff"
-   },
-   "Custom": "Custom"
+    "Black & White": {
+        "background": "#ffffff",
+        "altBack" : "#eeeeee",
+        "formBack": "#dddddd",
+        "buttonColor": "#ffffff",
+        "note": "#000000",
+        "mainText" : "#000000",
+        "heading": "#000000",
+        "subheading": "#111111",
+        "sourceNote": "#111111",
+        "linkText": "#2222bb"
+    },
+    "Dark": {
+        "background": "#222211",
+        "altBack": "#443322",
+        "formBack": "#554433",
+        "buttonColor": "#665544",
+        "note": "#ff88bb",
+        "mainText": "#eeeeee",
+        "heading": "#eebb77",
+        "subheading": "#ffcc99",
+        "sourceNote": "#ffeecc",
+        "linkText": "#ccddff"
+    },
+    "Light": {
+        "background": "#ddeeff",
+        "altBack": "#bbddff",
+        "formBack": "#bbccdd",
+        "buttonColor": "#dddddd",
+        "note": "#ff4466",
+        "mainText": "#222244",
+        "heading": "#112299",
+        "subheading": "#116699",
+        "sourceNote": "#223388",
+        "linkText": "#1122aa"
+    },
+    "DarkGrey": {
+        "background": "#222222",
+        "altBack": "#444444",
+        "formBack": "#555555",
+        "buttonColor": "#333333",
+        "note": "#ff88bb",
+        "mainText": "#eeeeee",
+        "heading": "#eeeeee",
+        "subheading": "#dddddd",
+        "sourceNote": "#cccccc",
+        "linkText": "#ccddff"
+    },
+    "Custom": "Custom"
 }

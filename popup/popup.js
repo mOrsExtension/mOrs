@@ -67,19 +67,21 @@ const displayExistingUserOptions = async () => {
         await displayPaletteDropdownList()
         const storedData = await fetchAllStoredData()
         showBurntCheck.checked = storedData.doShowBurnt
-        showSNsCheck.checked = storedData.showSNsStored
-        showFWCheck.checked = storedData.showFullWidth
-        collapseCheck.checked = storedData.collapseDefaultStored
-        showMenuCheck.checked = storedData.showMenuStored
-        showNavCheck.checked = storedData.showNavStored
+        showSNsCheck.checked = storedData.doShowSourceNotes
+        showFWCheck.checked = storedData.doShowFullWidth
+        collapseCheck.checked = storedData.isCollapseDefault
+        showMenuCheck.checked = storedData.doShowMenu
+        showNavCheck.checked = storedData.doShowVolNav
+        showTocCheck.checked = storedData.doShowTOC
+        showAnnosCheck.checked = storedData.doShowAnnos
         for (let i = 0; i < cssDropDown.options.length; i++) {
-            if (cssDropDown?.options[i].value == storedData.cssSelectorStored) {
+            if (cssDropDown?.options[i].value == storedData.cssSelector) {
                 cssDropDown.selectedIndex = i
                 break
             }
         }
         for (let i = 0; i < orLawDropDown.options.length; i++) {
-            if (orLawDropDown?.options[i].value == storedData.lawsReaderStored) {
+            if (orLawDropDown?.options[i].value == storedData.lawsReader) {
                 orLawDropDown.selectedIndex = i
                 break
             }
@@ -90,16 +92,20 @@ const displayExistingUserOptions = async () => {
         warnPopup(error, 'displayExistingUserOptions')
     }
 }
+
+/** checks user profile for listed variables (all of them) to populate popup*/
 const fetchAllStoredData = async () => {
-    let msg = new MessageDispatch({'getStorage': [  // may want to rename some of these
-        'lawsReaderStored',
-        'cssSelectorStored',
-        'showSNsStored',
+    let msg = new MessageDispatch({'getStorage': [
+        'lawsReader',
+        'cssSelector',
+        'doShowSourceNotes',
         'doShowBurnt',
-        'showFullWidth',
-        'showMenuStored',
-        'showNavStored',
-        'collapseDefaultStored'
+        'doShowFullWidth',
+        'doShowMenu',
+        'doShowVolNav',
+        'doShowTOC',
+        'doShowAnnos',
+        'isCollapseDefault'
     ]})
     return await msg.sendAwaitResponse()
 }
@@ -126,30 +132,37 @@ const userMsg = (/**@type {string} */ msgText, /**@type {string} */ color = 'def
 
 const addListenerCheckboxes = () => {
     cssDropDown?.addEventListener('change', () => {
-        storeAndUpdateTabs(cssDropDown.value, 'cssSelectorStored', 'updateCss')
+        storeAndUpdateTabs(cssDropDown.value, 'cssSelector', 'updateCss')
         updateCssForPopup()
     })
     orLawDropDown?.addEventListener('change', () => {
-        storeAndUpdateTabs(orLawDropDown.value, 'lawsReaderStored', 'updateOrLawsReader')
+        storeAndUpdateTabs(orLawDropDown.value, 'lawsReader', 'updateOrLawsReader')
     })
     showBurntCheck?.addEventListener('change', () => {
         storeAndUpdateTabs(showBurntCheck.checked, 'doShowBurnt', 'showBurnt')
     })
     showSNsCheck?.addEventListener('change', () => {
-        storeAndUpdateTabs(showSNsCheck.checked, 'showSNsStored', 'showSourceNote' )
+        storeAndUpdateTabs(showSNsCheck.checked, 'doShowSourceNotes', 'showSourceNote' )
     })
     showFWCheck?.addEventListener('change', () => {
-        storeAndUpdateTabs(showFWCheck.checked, 'showFullWidth', 'displayFullWidth')
+        storeAndUpdateTabs(showFWCheck.checked, 'doShowFullWidth', 'displayFullWidth')
     })
     collapseCheck?.addEventListener('change', () => {
-        storeAndUpdateTabs(collapseCheck.checked, 'collapseDefaultStored', 'collapseAll')
+        storeAndUpdateTabs(collapseCheck.checked, 'isCollapseDefault', 'collapseAll')
     })
     showNavCheck?.addEventListener('change', async () => {
-        storeAndUpdateTabs(showNavCheck.checked, 'showNavStored', 'showNav')
+        storeAndUpdateTabs(showNavCheck.checked, 'doShowVolNav', 'showNav')
     })
     showMenuCheck?.addEventListener('change', async () => {
-        storeAndUpdateTabs(showMenuCheck.checked, 'showMenuStored', 'showMenu')
+        storeAndUpdateTabs(showMenuCheck.checked, 'doShowMenu', 'showMenu')
     })
+    showTocCheck?.addEventListener('change', async () => {
+        storeAndUpdateTabs(showTocCheck.checked, 'doShowTOC', 'showTOC')
+    })
+    showAnnosCheck?.addEventListener('change', async () => {
+        storeAndUpdateTabs(showAnnosCheck.checked, 'doShowAnnos', 'showAnnos')
+    })
+
 }
 
 //Store changed value and update ORS tabs with update message
@@ -192,6 +205,8 @@ const showFWCheck = document.getElementById('showFullWidth')
 const collapseCheck = document.getElementById('collapseDefault')
 const showMenuCheck = document.getElementById('showMenu')
 const showNavCheck = document.getElementById('showNav')
+const showTocCheck = document.getElementById('showToc')
+const showAnnosCheck = document.getElementById('showAnnos')
 const versionID = document.getElementById('version')
 const theRoot = document.documentElement
 

@@ -2,7 +2,7 @@
 //depends on ../popup/popAndOpHelper.js
 
 window.addEventListener('load', async () => {
-    await browser.storage.sync.set({ cssSelectorStored: 'Custom' })
+    await browser.storage.sync.set({ cssSelector: 'Custom' })
 
     const main = async () => {
         await refreshHtml()
