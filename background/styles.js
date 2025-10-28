@@ -2,16 +2,18 @@
 
 /**  retrieves CSS, either from sync.storage for User Custom or from css.json file for preset options
  * merges them with calculations*/
-const promiseGenerateCss = async () => {
+const generateCSS = async () => {
   let cssOptions;
   try {
     const userCss = await getFromStorage("cssSelector"); // find user's selected CSS style saved in popup (E.g., Dark)
-    infoBG(`Loading '${userCss}' stylesheet`, "style.js", "promiseGenerateCss");
+    console.assert(userCss, "User CSS doesn't exist/is false");
+    infoBG(`Loading '${userCss}' stylesheet`, "style.js", "GenerateCss");
     if (userCss == "Custom") {
       cssOptions = await getFromStorage("userColors"); // get css from synced user data for custom
     } else {
       cssOptions = (await promiseReadJsonFile("cssPresetColors.json"))[userCss]; // get css from json defaults
     }
+    console.log(JSON.stringify(cssOptions));
     cssOptions.linkVisited = purplerLink(cssOptions.linkText);
     cssOptions.linkInt = greenerLink(cssOptions.linkText);
     cssOptions.buttonHover = mergeColor(
@@ -23,7 +25,8 @@ const promiseGenerateCss = async () => {
     );
     return cssOptions;
   } catch (error) {
-    warnBG(error, "styles.js", "promiseGenerateCss");
+    warnBG(`Issue retrieving styles: ${error}`, "styles.js", "generateCss");
+    throw error;
   }
 };
 

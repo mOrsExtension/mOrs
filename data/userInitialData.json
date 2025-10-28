@@ -9,6 +9,7 @@
    "doShowVolNav": true,
    "doShowTOC": true,
    "doShowAnno": true,
+   "doShowVerbose": true,
    "userColors": {
       "background": "#336677",
       "altBack": "#222233",

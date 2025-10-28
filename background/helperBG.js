@@ -5,17 +5,27 @@ const orsRegExp =
   /\b0*([1-9]\d{0,2}([a-c]|[A-C])?)(\.\d{3,4})?(?=(?:[\D\b]|$))/; // finds "chapter" or "chapter.section", e.g. "459A"
 const tabRegExp = "(?:(?:&nbsp;|\\s)*)";
 
+var verbose;
+if (verbose == undefined) {
+  verbose = true;
+}
+
 /** Sends infoTxt from background script to service worker inspection console; helperBG.js
  * @param {string} infoTxt
  * @param {string} script
  * @param {string} calledBy
- * @param {string} color */
+ * @param {string} color
+ * @param {boolean} verboseOverride */
 const infoBG = (
   infoTxt,
   script = "helperBG.js",
   calledBy = "",
-  color = "yellow"
+  color = "yellow",
+  verboseOverride = false
 ) => {
+  if (!verbose && !verboseOverride) {
+    return;
+  }
   console.info(`${script} ${calledBy}: %c${infoTxt}`, `color:${color}`);
 };
 
@@ -52,19 +62,6 @@ browser.runtime.onInstalled.addListener(async (details) => {
       "helperBG.js",
       "onInstalled.addListener"
     );
+    throw error;
   }
 });
-
-/**  config = {tryFunction + (optional) warningMsg='', successMsg = ''} */
-const tryCatchWarnBG = async (config, ...args) => {
-  const { tryFunction, warningMsg = "", successMsg = "" } = config;
-  try {
-    let theResponse = await tryFunction(...args);
-    if (successMsg.length > 0) {
-      infoBG(`Success: ${successMsg}"`, "helper", tryFunction.name, "#a8a8a8");
-    }
-    return theResponse;
-  } catch (error) {
-    warnBG(`Error: ${warningMsg}: ${error}`, tryFunction.name);
-  }
-};

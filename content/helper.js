@@ -7,6 +7,8 @@ try {
   console.warn(`Assignment of chrome to browser failed:'${error}'`); // using warn rather than warnCS, because browser isn't registering right
 }
 
+var verbose = true;
+
 class RegExpHandler {
   constructor(searchFor, flags = "") {
     this.RE = this.buildRegExp(searchFor, flags);
@@ -106,6 +108,19 @@ const sendAwait = async (messageItem, doAwaitResponse = true) => {
 };
 
 // SET INITIAL/CHANGED VARIABLES
+
+/** Toggles whether to show most info in console.log */
+const showVerbose = (isVerbose) => {
+  verbose = isVerbose;
+  infoCS(
+    `Verbose = ${verbose} for content script purposes`,
+    "helper.js",
+    "showVerbose",
+    "#f04",
+    true
+  );
+};
+
 /** toggle Full Width of ORS display from 85ch to 100% */
 const toggleFullWidth = () => {
   setFullWidth(
@@ -152,17 +167,22 @@ const showAnnos = (doShow) => {
   makeVisible("div.annotations", doShow);
 };
 
-/** Sends "information" message to service worker console.
+/** Sends info message to service worker console (for displaying).
  * @param {string} infoMsg
  * @param {string} scriptFileName
  * @param {string} functionName
- * @param {string} color */
+ * @param {string} color
+ * @param {boolean} verboseOverride */
 const infoCS = (
   infoMsg,
   scriptFileName = "helper.js",
   functionName = "",
-  color = "pink"
+  color = "pink",
+  verboseOverride = false
 ) => {
+  if (!verbose && !verboseOverride) {
+    return;
+  }
   if (functionName == "") {
     try {
       functionName = infoCS.caller.name;
@@ -229,27 +249,6 @@ const expandSingle = (expandedElem) => {
   }
 };
 
-// try/catch/warn for each module
-
-/**  config = {tryFunction + (optional) warningMsg='', doLog = false, successMsg = ''} */
-const tryCatchWarnCS = async (config, ...args) => {
-  const {
-    tryFunction,
-    warningMsg = "",
-    doLog = false,
-    successMsg = "",
-  } = config;
-  try {
-    let theResponse = await tryFunction(...args);
-    if (doLog) {
-      infoCS(`Success: ${successMsg}"`, "helper", tryFunction.name, "#a8a8a8");
-    }
-    return theResponse;
-  } catch (error) {
-    warnCS(`Error: ${warningMsg}: ${error}`, tryFunction.name);
-  }
-};
-
 /**  Collapses (actually, makes invisible now) all ORS sections  */
 const collapseAllSections = () => {
   document.querySelectorAll("div.collapsible").forEach((hidable) => {
@@ -275,5 +274,6 @@ const storeKey = async (keyValueObj) => {
     return true;
   } catch (error) {
     warnCS(error, "helper.js", "promiseStoreKey");
+    throw error;
   }
 };

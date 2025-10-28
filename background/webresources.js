@@ -3,31 +3,31 @@
 let retrievalObject = {};
 
 /** returns promise to retrieves JSON data from "filename" and returns javascript library
- * @param {string} filename */
-const promiseReadJsonFile = async (filename) => {
-  if (retrievalObject.fileName) {
+ * @param {string} fileName */
+const promiseReadJsonFile = async (fileName) => {
+  if (retrievalObject[fileName]) {
     infoBG(
-      `Retrieving cached ${filename}`,
+      `Retrieving cached ${fileName}`,
       "webResources.js",
       "promiseReadJsonFile"
     );
-    return retrievalObject.fileName;
+    return retrievalObject[fileName];
   }
   try {
-    const jsonFile = browser.runtime.getURL(`/data/${filename}`);
+    const jsonFile = browser.runtime.getURL(`/data/${fileName}`);
     infoBG(`Unpacking: ${jsonFile}`, "webResources.js", "promiseReadJsonFile");
     const fetchResponse = await fetch(jsonFile);
     if (!fetchResponse.ok) {
       throw new Error(
-        `File ${filename} not loaded: ${fetchResponse.statusText}`
+        `File ${fileName} not loaded: ${fetchResponse.statusText}`
       );
     }
     const fetchedJson = await fetchResponse.json();
-    retrievalObject.fileName = fetchedJson; // caches response
+    retrievalObject[fileName] = fetchedJson; // caches response
     return fetchedJson;
-  } catch (e) {
-    warnBG(e, "webResources.js", "promiseReadJsonFile");
-    throw e;
+  } catch (error) {
+    warnBG(error, "webResources.js", "promiseReadJsonFile");
+    throw error;
   }
 };
 
@@ -40,16 +40,15 @@ const promiseGetPalletteList = async () => {
 /** is a list of chapters in order returning [chapter#, title#, volume#, chapterName, titleName] */
 const buildChapterList = async () => {
   const fullOutline = await promiseReadJsonFile("volumeOutline.json");
-  console.log(JSON.stringify(fullOutline).slice(0, 100));
   const chapterList = Object.entries(fullOutline.Volumes).flatMap(
     ([volume, volumeData]) => {
       if (!volumeData.Titles) {
-        warnBG(`Volume ${volume} has no titles`);
+        warnBG(`Note: Volume ${volume} has no titles`);
         return [];
       }
       return Object.entries(volumeData.Titles).flatMap(([title, titleData]) => {
         if (!titleData.Chapters) {
-          warnBG(`Title ${title} has no chapters`);
+          warnBG(`Note: Title ${title} has no chapters`);
           return [];
         }
         return Object.entries(titleData.Chapters).map(
@@ -82,7 +81,7 @@ const buildChapterList = async () => {
         ]);
       }
     }
-  }*/
+    }*/
   return chapterList;
 };
 

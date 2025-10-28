@@ -77,7 +77,7 @@ class MessageObj {
           url: "*://www.oregonlegislature.gov/bills_laws/ors/ors*.html*",
         })
       : task == "buildColorData"
-      ? await promiseGenerateCss() // styles.js returns object (list of user prefs)
+      ? await generateCSS() // styles.js returns object (list of user prefs)
       : task == "getPaletteList"
       ? await promiseGetPalletteList() // webResources.js returns object
       : task == "finishAnnoRetrieval"
@@ -158,21 +158,13 @@ const handleMessage = async (message, sender) => {
         "handleMessage",
         "#fb8"
       );
-    }
       return { response: newMsg.responseMsg };
-    else {
+    }
+  } else {
     let error = new Error(
       "Completing task and fetching response failed on handleMessage()"
     );
     warnBG(error.message, "msgListenerBG.js", "handleMessage");
     return error;
   }
-  /* } catch (error) {
-    warnBG(
-      `Unhandled error in message ${JSON.stringify(message)}: ${error}`,
-      "msgListenerBG.js",
-      "handleMessage"
-    );
-    return error;
-  } */
 };
