@@ -32,16 +32,6 @@ const warnPopup = (warnTxt, calledBy = "??") => {
   msg.sendOneWay();
 };
 
-//TODO #41 - implement try/catch/warn for each module
-//try catch or warn
-const tryCatchWarn = (attemptedFunction, warningMsg = "") => {
-  try {
-    attemptedFunction;
-  } catch (error) {
-    warnPopup(error, warningMsg);
-  }
-};
-
 //main functions
 const popupMain = async () => {
   try {
@@ -52,6 +42,7 @@ const popupMain = async () => {
     addListenerCheckboxes();
   } catch (error) {
     warnPopup(error, "popUpMain");
+    throw error;
   }
 };
 
@@ -80,6 +71,7 @@ const displayExistingUserOptions = async () => {
     showNavCheck.checked = storedData.doShowVolNav;
     showTocCheck.checked = storedData.doShowTOC;
     showAnnosCheck.checked = storedData.doShowAnnos;
+    showVerboseCheck.checked = storedData.doShowVerbose;
     for (let i = 0; i < cssDropDown.options.length; i++) {
       if (cssDropDown?.options[i].value == storedData.cssSelector) {
         cssDropDown.selectedIndex = i;
@@ -96,6 +88,7 @@ const displayExistingUserOptions = async () => {
     versionID.innerHTML = `v.${manifest.version}`;
   } catch (error) {
     warnPopup(error, "displayExistingUserOptions");
+    throw error;
   }
 };
 
@@ -103,6 +96,7 @@ const displayExistingUserOptions = async () => {
 const fetchAllStoredData = async () => {
   let msg = new MessageDispatch({
     getStorage: [
+      "doShowVerbose",
       "lawsReader",
       "cssSelector",
       "doShowSourceNotes",
@@ -187,6 +181,13 @@ const addListenerCheckboxes = () => {
   showAnnosCheck?.addEventListener("change", async () => {
     storeAndUpdateTabs(showAnnosCheck.checked, "doShowAnnos", "showAnnos");
   });
+  showVerboseCheck?.addEventListener("change", async () => {
+    storeAndUpdateTabs(
+      showVerboseCheck.checked,
+      "doShowVerbose",
+      "showVerbose"
+    );
+  });
 };
 
 //Store changed value and update ORS tabs with update message
@@ -202,6 +203,7 @@ const storeAndUpdateTabs = async (newValue, storeTo, msgToTabs) => {
       `error storing ${newValue} to ${storeTo}: ${error}`,
       "storeAndUpdateTabs"
     );
+    throw error;
   }
 };
 
@@ -216,6 +218,7 @@ const promiseStoreKey = async (keyValueObj) => {
     return true;
   } catch (error) {
     warnPopup(error, "setPromiseStoreKey");
+    throw error;
   }
 };
 
@@ -234,6 +237,7 @@ const showMenuCheck = document.getElementById("showMenu");
 const showNavCheck = document.getElementById("showNav");
 const showTocCheck = document.getElementById("showToc");
 const showAnnosCheck = document.getElementById("showAnnos");
+const showVerboseCheck = document.getElementById("showVerbose");
 const versionID = document.getElementById("version");
 const theRoot = document.documentElement;
 

@@ -41,6 +41,7 @@ const newOrUpdateOrLawLinks = async (bodyMain) => {
   } catch (error) {
     const warning = `Error attempting to generate OrLaws links: ${error}`;
     warnCS(warning, "navigate.js", "OrLawLinking");
+    throw error;
   }
 };
 const sortByDate = (anchors) => {

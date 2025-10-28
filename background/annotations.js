@@ -154,12 +154,13 @@ class AnnoCleaner {
     const paragraphMatchList = [
       ...this.cleanHtml.matchAll(/<span[^]*?>([^]*?)<\/span>/g),
     ]; // $1: paragraph body
-    if (!paragraphMatchList || !paragraphMatchList.length > 0) {
+    if (!paragraphMatchList || paragraphMatchList.length < 1) {
       warnBG(
         "Annotations file is empty or broken",
         "annotations.js",
         "splitParagraphs"
       );
+      throw new Error("Annotation file is empty or broken.");
     } else {
       paragraphMatchList.forEach((match) => {
         paraList.push(match[1].trim());
@@ -340,8 +341,5 @@ const retrieveWhenFinished = async () => {
 
 const finishAnnoRetrieval = async () => {
   infoAnnos(`Awaiting download & initial parsing`, "finishAnnoRetrieval");
-  return await tryCatchWarnBG({
-    tryFunction: retrieveWhenFinished, // no arguments
-    warningMsg: `Retrieving finished annotations Object failed`,
-  }); // sent to enhanceSecs.js -> getAnnoList()
+  return await retrieveWhenFinished(); // sent to enhanceSecs.js -> getAnnoList()
 };

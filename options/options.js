@@ -83,6 +83,7 @@ window.addEventListener("load", async () => {
         )}.' Error: ${error}`,
         "cssLoadColors"
       );
+      throw error;
     }
     textColorCode.value = exportList.join("-");
   };
@@ -157,6 +158,7 @@ window.addEventListener("load", async () => {
         userSelectedColors[cssVarName] = colorSelector.value;
       } catch (error) {
         warnOptions("Error: ${error}", "getUserColorInputsFromSelectors");
+        throw error;
       }
     });
     return userSelectedColors;
@@ -176,6 +178,7 @@ window.addEventListener("load", async () => {
       );
     } catch (error) {
       warnOptions(`Failed to store user data: ${error}`, "setStorage");
+      throw error;
     }
   };
   saveButton.addEventListener("click", async () => {

@@ -55,6 +55,10 @@ const listenToPopup = () => {
           showAnnos(msgText["showAnnos"]);
           break;
 
+        case "showVerbose":
+          showVerbose(msgText["showVerbose"]);
+          break;
+
         default:
           throw new Error(
             `Unidentified message from popup.html: ${
@@ -64,6 +68,7 @@ const listenToPopup = () => {
       }
     } catch (e) {
       warnCS(e, "addListeners.js", "listenToPopup");
+      throw error;
     }
   });
 };

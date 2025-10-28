@@ -4,6 +4,7 @@
  * @param {string} objKey */
 const getFromStorage = async (objKey) => {
   try {
+    console.log(objKey);
     const storedObj = await browser.storage.sync.get(objKey);
     if (storedObj) {
       let objStr =
@@ -11,20 +12,29 @@ const getFromStorage = async (objKey) => {
           ? storedObj[objKey]
           : JSON.stringify(storedObj[objKey]);
       infoBG(`'${objKey}' : '${objStr}'`, "userStorage.js", "getFromStorage"); //helper.js
+      if (objKey == "doShowVerbose") {
+        verbose = storedObj[objKey];
+      }
       return storedObj[objKey];
     } else {
       warnBG(
-        "Unable to retrieve stored user preference",
+        `Unable to retrieve stored user for: ${objKey}`,
         "userStorage.js",
         "getFromStorage"
       ); //helper.js
       throw new Error("Unable to retrieve stored user preference");
     }
-  } catch (e) {
-    warnBG(`Error: ${e}`, "userStorage.js", "getFromStorage"); //helper.js
-    throw e;
+  } catch (error) {
+    warnBG(`Error: ${error}`, "userStorage.js", "getFromStorage"); //helper.js
+    throw error;
   }
 };
+
+var verbose = (async () => {
+  verbose = await getFromStorage("doShowVerbose");
+  console.log(`From getStorage; verbose = ${verbose}`);
+  return verbose;
+})();
 
 const getTabIdsFromTabQuery = async (queryObj) => {
   const tabList = await browser.tabs.query(queryObj);

@@ -24,10 +24,14 @@ const implementUserParameters = async () => {
         "storedData.js",
         "getInformation"
       );
+      throw error;
     }
   };
 
   // MAIN Implement User Parameters
+  await getInformation("doShowVerbose", (isTrue) => {
+    showVerbose(isTrue); // in helper.js
+  });
   await getInformation("isCollapseDefault", (doCollapse) => {
     doCollapse ? collapseAllSections() : expandAllSections(); // in helper.js
   });
@@ -83,7 +87,6 @@ class tagFindAndSeek {
         this.hasTarget = true;
       }
     } catch (error) {
-      warnCS(error);
       this.hasTarget = false;
     }
   }
@@ -138,9 +141,5 @@ const buildColors = async () => {
 
 /**replaces part of stylesheet - called on launch or on msg from popup.js or options.js when user data changes re: stylesheet */
 const userStylesRefresh = async () => {
-  tryCatchWarnCS({
-    // nothing returned, no need to await...
-    tryFunction: buildColors,
-    warningMsg: `Error applying stylesheet from userData.js : buildColors`,
-  });
+  buildColors();
 };

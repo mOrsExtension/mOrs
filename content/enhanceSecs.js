@@ -101,13 +101,7 @@ const makeAnnoSectionDiv = async (orSection) => {
       const uList = document.createElement("ul");
       details.appendChild(typePara);
       details.appendChild(uList);
-      const addChildList = await tryCatchWarnCS(
-        {
-          tryFunction: addChildrenToDiv,
-          warningMsg: `JSON = ${JSON.stringify(orSection)}`,
-        },
-        subHead
-      );
+      const addChildList = addChildrenToDiv(subHead);
       addChildList.forEach((kid) => {
         uList.appendChild(kid);
       });
