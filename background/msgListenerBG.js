@@ -30,7 +30,7 @@ class MessageObj {
       log: () => this.#logMessage(), //returns true & displays msg on service worker console
     };
 
-    // Find which handler to use (destructuring makes this clearer)
+    // Find which handler to use
     const messageType = Object.keys(this.receivedMsg).find(
       (key) => key in handlers
     );
@@ -69,18 +69,21 @@ class MessageObj {
 
   /** list of one offs that could each be their own functions, but aren't */
   async #miscTasks() {
-    let task = this.receivedMsg.miscTask;
-    return task == "getOrsTabIds"
-      ? await getTabIdsFromTabQuery({
+    console.log(this.receivedMsg.miscTask);
+    switch (this.receivedMsg.miscTask) {
+      case "getOrsTabIds":
+        return await getTabIdsFromTabQuery({
           url: "*://www.oregonlegislature.gov/bills_laws/ors/ors*.html*",
-        })
-      : task == "buildColorData"
-      ? await generateCSS() // styles.js returns object (list of user prefs)
-      : task == "getPaletteList"
-      ? await getPalletteList() // webResources.js returns object
-      : task == "finishAnnoRetrieval"
-      ? await finishAnnoRetrieval() // webResources.js returns object
-      : new Error("unidentified misc task requested");
+        });
+      case "buildColorData":
+        return await generateCSS(); // styles.js returns object (list of user preferences)
+      case "getPaletteList":
+        return getPalletteList(); // webResources.js returns object
+      case "finishAnnoRetrieval":
+        return await finishAnnoRetrieval(); // webResources.js returns object
+      default:
+        throw new Error("Unidentified misc task requested");
+    }
   }
 
   /** sends notes delivered by message to console;
@@ -137,12 +140,12 @@ const handleMessage = async (message, sender) => {
     newMsg.receivedMsg == null ||
     newMsg.receivedMsg == undefined
   ) {
-    return;
+    throw new error("Received null/undefined message");
   }
   if (!newMsg.isLog) {
     // don't want a create duplicate log messages
     infoBG(
-      `Background has received from '${newMsg.fromName}' request '${newMsg.stringyMsg}'`,
+      `Background received from '${newMsg.fromName}' request: '${newMsg.stringyMsg}'`,
       "msgListenerBG.js",
       "handleMessage",
       "#fb8"
@@ -151,7 +154,9 @@ const handleMessage = async (message, sender) => {
   if (await newMsg.doTasksAndFetchResponse()) {
     if (!newMsg.isLog) {
       infoBG(
-        `Background response to request: '${newMsg.stringyResponse}'`,
+        `BG response to ${newMsg.stringyMsg} request: '${JSON.stringify(
+          newMsg.responseToSend
+        )}'`,
         "msgListenerBG.js",
         "handleMessage",
         "#fb8"

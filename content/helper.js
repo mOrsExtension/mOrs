@@ -23,7 +23,6 @@ class RegExpHandler {
   }
 
   replaceAll(/**@type {string} */ oldText, /** @type {string} */ replaceWith) {
-    console.log(oldText);
     return oldText.replace(new RegExp(this.RE.source, "g"), replaceWith);
   }
 

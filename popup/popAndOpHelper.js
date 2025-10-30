@@ -113,7 +113,7 @@ class MessageDispatch {
           txt: warn ? logMsg : logMsg.slice(0, 100),
           script: "popAndOpHelper.js",
           aCaller: functionName,
-          color: warn ? "yellow" : "#af9", // green
+          color: warn ? "yellow" : "rgb(63, 234, 29)", // green
         },
       });
       msg.sendOneWay();

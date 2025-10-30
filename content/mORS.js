@@ -17,11 +17,10 @@ const runMain = async () => {
   mainDiv.innerHTML = docBody.innerHTML;
   mainDiv = bodyCleanUp(mainDiv); // bodyClean.js
   mainDiv = buildBodyDivs(mainDiv); // createDivs.js
-  const navConstructor = new VolNavConstructor();
   const headingDiv = await buildHeading();
   const finishedPromises = await Promise.all([
     buildFloatingMenuDiv(), // newDivs.js building floating menu
-    navConstructor.init(), //newDivs.js building new menu for navigating through volumes
+    VolNavConstructor.buildDiv(), //newDivs.js building new menu for navigating through volumes
     newOrUpdateOrLawLinks(mainDiv), //buildOrLawLinks.js adds links for session laws
   ]);
   const floatMenuDiv = finishedPromises[0];
