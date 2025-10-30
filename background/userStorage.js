@@ -4,7 +4,6 @@
  * @param {string} objKey */
 const getFromStorage = async (objKey) => {
   try {
-    console.log(objKey);
     const storedObj = await browser.storage.sync.get(objKey);
     if (storedObj) {
       let objStr =

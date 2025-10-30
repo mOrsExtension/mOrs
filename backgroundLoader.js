@@ -23,8 +23,9 @@ scriptList.forEach((aScript) => {
       "importScripts",
       "#afa"
     ); // helperBG.js (why it needs to load first)
-  } catch (e) {
+  } catch (error) {
     /** using console warn for script import issues, rather than warnBG in helper.js, because it might not have imported */
-    console.warn(`'${aScript}' loading error: ${e}`);
+    console.warn(`'${aScript}' loading error: ${error}`);
+    throw error;
   }
 });

@@ -18,7 +18,7 @@ const regExpCleanUp = (bodyHTML) => {
       [/<\/b>/, '</b></p><p class="default">'], // new paragraph after bold text ends
     ];
   cleanUpList.forEach(([toReplace, replaceWith]) => {
-    bodyHTML = new RegExpHandler(toReplace).replaceAll(bodyHTML, replaceWith);
+    bodyHTML = RegExpHandler.replaceAllWith(bodyHTML, toReplace, replaceWith);
   });
   return bodyHTML;
 };
@@ -101,17 +101,21 @@ const removeAttributesAndStylesFromPElems = (
  * and global RegExp cleanup & wrapping of anchors (links) */
 const errataFixes = async (/**@type {String}*/ bodyHtml) => {
   /**returns errataList from JSON file /data/errataList.json as {key:value} object*/
-  const promiseErrataList = await (async () => {
+  const getErrataList = await (async () => {
     try {
       return await sendAwait({ fetchJson: "ErrataList" });
-    } catch (e) {
-      warnCS(e);
-      return bodyHtml;
+    } catch (error) {
+      warnCS(
+        `Couldn't get errata file: ${error}`,
+        "cleanAllFirst",
+        "errataFixes"
+      );
+      return;
     }
   })();
 
   // After awaiting the retrieval of list, iterate through it and make each regExp change to text
-  const errataList = await promiseErrataList;
+  const errataList = await getErrataList;
   for (var key in errataList) {
     bodyHtml = new RegExpHandler(errataList[key]["old"], "").replacePerFlags(
       bodyHtml,

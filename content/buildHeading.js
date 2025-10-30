@@ -26,8 +26,6 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
       /(Chapter\s([1-9]\d{0,2}[A-C]?)\s)?\(Former\sProvisions\)/
     );
 
-  const titleRegExp = new RegExpHandler(/TITLE\s[1-9]/);
-  const horizontalLineRegExp = new RegExpHandler(/_{15}/);
   const /**@type {HTMLParagraphElement[]} */ removalList = [];
   let /**@type {boolean} */ addToMiscHead = false;
   let /**@type {boolean} */ isDone = false;
@@ -62,7 +60,7 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
     const paraText = aPara.textContent + "";
     removalList.push(aPara);
 
-    if (formerChapRegExp.testMe(paraText)) {
+    if (formerChapRegExp.doesContain(paraText)) {
       infoCS(
         "Former provisions chapter detected",
         "buildHeading.js",
@@ -90,13 +88,13 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
       );
     }
 
-    if (editionRegExp.testMe(paraText)) {
+    if (editionRegExp.doesContain(paraText)) {
       chapterInfo.thisEdition = editionRegExp.firstMatchGroupNo(paraText, 1); // get edition year
       endIndex = index + 2; // TOC will start in 3 lines, unless we run into "TITLE ##"
       addToMiscHead = false;
     }
 
-    if (titleRegExp.testMe(paraText)) {
+    if (RegExpHandler.doesContainThis(/TITLE\s[1-9]/, paraText)) {
       infoCS(
         "Beginning of title detected",
         "buildHeading.js",
@@ -106,11 +104,12 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
       addToMiscHead = false;
     }
 
-    if (horizontalLineRegExp.testMe(paraText)) {
+    if (RegExpHandler.doesContainThis(/_{15}/, paraText)) {
+      // looking for horizontal line
       endIndex = index + 2; // end of title list; TOC will start in 2 lines unless chapter starts
     }
 
-    if (!addToMiscHead && chapNameAndNoRegExp.testMe(paraText)) {
+    if (!addToMiscHead && chapNameAndNoRegExp.doesContain(paraText)) {
       addToMiscHead = true;
       chapterInfo.chapNo = chapNameAndNoRegExp.firstMatchGroupNo(paraText, 1); // Get ORS chapter number
       chapterInfo.chapName = chapNameAndNoRegExp.firstMatchGroupNo(paraText, 2); // Get chapter title alone
@@ -123,7 +122,7 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
       );
       endIndex = 1000;
       return;
-    } else if (chapNoOnlyRegExp.testMe(paraText)) {
+    } else if (chapNoOnlyRegExp.doesContain(paraText)) {
       chapterInfo.chapNo = chapNoOnlyRegExp.firstMatchGroupNo(paraText, 1); // Get ORS chapter number
       infoCS(
         `Found chapter ${chapterInfo.chapNo} only in paragraph #${index + 1}`,

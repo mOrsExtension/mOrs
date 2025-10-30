@@ -172,7 +172,7 @@ class OrLawRequest {
   }
 
   async orLegUrl() {
-    const orLawOrLegLookup = await promiseReadJsonFile("orLawLegLookup.json"); // pulls in data from /data/orLawLegLookup.json
+    const orLawOrLegLookup = await readJsonFile("orLawLegLookup.json"); // pulls in data from /data/orLawLegLookup.json
     if (this.hasSpecialSession) {
       this.year += ` s.s.${this.specialSes}`;
     }

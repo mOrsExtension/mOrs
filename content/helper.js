@@ -13,6 +13,7 @@ class RegExpHandler {
   constructor(searchFor, flags = "") {
     this.RE = this.buildRegExp(searchFor, flags);
   }
+
   buildRegExp(searchFor, flags) {
     if (typeof searchFor == "string") {
       return new RegExp(searchFor, flags);
@@ -20,27 +21,44 @@ class RegExpHandler {
       return new RegExp(searchFor.source, flags);
     } else return new RegExp("", flags);
   }
+
   replaceAll(/**@type {string} */ oldText, /** @type {string} */ replaceWith) {
+    console.log(oldText);
     return oldText.replace(new RegExp(this.RE.source, "g"), replaceWith);
   }
+
+  /** single use replacement, no storage */
+  static replaceAllWith(oldText, searchFor, replaceWith) {
+    let regExpTemp = new RegExpHandler(searchFor);
+    return regExpTemp.replaceAll(oldText, replaceWith);
+  }
+
   replacePerFlags(
     /**@type {string} */ oldText,
     /** @type {string} */ replaceWith
   ) {
     return oldText.replace(this.RE, replaceWith);
   }
-  testMe(testedString) {
+
+  /** boolean answers whether text is found this included */
+  doesContain(testedString) {
     return RegExp(this.RE.source, "").test(testedString); // no flag to prevent sticky tests (searching for add'l)
   }
+
+  static doesContainThis(searchFor, searchedText) {
+    let regExpTemp = new RegExpHandler(searchFor);
+    return regExpTemp.doesContain(searchedText);
+  }
+
   /** returns entire first match ($%), if any */
   firstMatch(testedString) {
-    return this.testMe(testedString)
+    return this.doesContain(testedString)
       ? testedString.match(RegExp(this.RE.source, "g"))[0] // global flag prevents it from returning capturing groups
       : null;
   }
   // returns the index # capturing group of the first match (starting with 1, not 0)
   firstMatchGroupNo(testedString, index) {
-    if (this.testMe(testedString)) {
+    if (this.doesContain(testedString)) {
       let match = [...testedString.match(RegExp(this.RE.source, ""))]; // no flag means it will return capturing groups
       return match[index];
     }
@@ -269,11 +287,11 @@ const storeKey = async (keyValueObj) => {
     infoCS(
       `stored user data: ${JSON.stringify(keyValueObj)}`,
       "helper.js",
-      "promiseStoreKey"
+      "StoreUserKey"
     );
     return true;
   } catch (error) {
-    warnCS(error, "helper.js", "promiseStoreKey");
+    warnCS(error, "helper.js", "storeUserKey");
     throw error;
   }
 };

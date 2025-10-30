@@ -162,7 +162,7 @@ const splitInternalAndExternalLinks = () => {
 
 /**@param {string} linkText */
 const isInternalChapLink = (linkText) => {
-  return new RegExpHandler(`\\b${chapterInfo.chapNo}\\.`).testMe(linkText);
+  return new RegExpHandler(`\\b${chapterInfo.chapNo}\\.`).doesContain(linkText);
 };
 
 const makeLinkExpandTarget = (aLink) => {

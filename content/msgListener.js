@@ -66,8 +66,8 @@ const listenToPopup = () => {
             } : ${Object.values(msgText)}`
           );
       }
-    } catch (e) {
-      warnCS(e, "addListeners.js", "listenToPopup");
+    } catch (error) {
+      warnCS(error, "addListeners.js", "listenToPopup");
       throw error;
     }
   });
