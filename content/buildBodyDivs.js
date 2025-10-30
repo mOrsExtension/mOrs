@@ -176,11 +176,20 @@ class SectionClassifier {
 }
 
 class ParentHierarchy {
-  #parentTypeList = ["body", "head", "sub", "temp", "note", "sec", "form"];
+  static parentTypeList = [
+    "body",
+    "head",
+    "sub",
+    "temp",
+    "note",
+    "sec",
+    "form",
+  ];
+
   #activeParents = {};
   /** @param {GenericDiv} bodyDiv*/
   constructor(bodyDiv) {
-    this.#parentTypeList.forEach((item) => {
+    this.parentTypeList.forEach((item) => {
       this.#activeParents[item] = null;
     });
     this.#activeParents.body = bodyDiv;
@@ -196,39 +205,38 @@ class ParentHierarchy {
 
   /**inserts item into active item object*/
   setActive(itemType, item) {
-    if (this.#parentTypeList.includes(itemType)) {
+    if (this.parentTypeList.includes(itemType)) {
       this.#activeParents[itemType] = item;
     }
   }
 
   /**removes named parent's potential children from active list (they're done having children) */
   closeParent(startWith) {
-    if (startWith in this.#parentTypeList) {
-      this.#parentTypeList
-        .slice(this.#parentTypeList.indexOf(startWith))
+    if (startWith in this.parentTypeList) {
+      this.parentTypeList
+        .slice(this.parentTypeList.indexOf(startWith))
         .forEach((parent) => {
           this.#activeParents[parent] = null;
         });
     }
   }
-  /** Cycles backwards thru potential parents list to return first existing (otherwise main body) to be div's parent */
+
+  /** Cycles backwards thru potential parents list to return first existing (otherwise main body) to be div's parent
+   * @param {string} startWith
+   */
   getParentElement(startWith) {
-    if (startWith == "body") {
-      return this.getActive("body");
+    let /** @type {GenericDiv} */ ans = this.getActive("body");
+    if (startWith != "body") {
+      let reversedList = this.parentTypeList.slice(1).reverse(); // reverses array and removes "body" (default)
+      let foundInList =
+        reversedList
+          .slice(reversedList.indexOf(startWith)) // skip those < startWith
+          .find((possibleParent) => {
+            this.#activeParents[possibleParent] != null; // finds first non-null
+          }) || "body"; // default answer if no other living parent found
+      ans = this.#activeParents[foundInList];
     }
-    let /**@type {GenericDiv} */ answer = this.#activeParents.body; // default answer
-    let reversedList = this.#parentTypeList.slice(1).reverse(); // reverses copy of array
-    reversedList
-      .slice(reversedList.indexOf(startWith))
-      .every((possibleParent) => {
-        // 'every' is "for each" that breaks on false
-        if (this.#activeParents[possibleParent] != null) {
-          answer = this.#activeParents[possibleParent]; // update possible parent
-          return false;
-        }
-        return true;
-      });
-    return answer;
+    return ans;
   }
 }
 

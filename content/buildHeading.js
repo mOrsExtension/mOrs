@@ -77,7 +77,7 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
         allParagraphs[index + 1]?.textContent
       })`; // chapter name is on following line
       titleCandidate = allParagraphs[index + 3].textContent;
-      chapterInfo.titleName = titleCandidate != null ? titleCandidate : "";
+      chapterInfo.titleName = titleCandidate || "";
       endIndex = index + 3;
       chapterInfo.miscHead.innerHTML = `<p><b>Note:</b> All former sections in chapter have been repealed or renumbered.</p>
 			<p>If "Show repealed/renumbered sections" is unchecked, the rest of the page will be blank.</p>`;

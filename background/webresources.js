@@ -33,7 +33,7 @@ const getPalletteList = async () => {
 };
 
 // volumeOutline.json specific
-/** is a list of chapters in order returning [chapter#, title#, volume#, chapterName, titleName] */
+/** builds array of chapters from json in order returning [chapter#, title#, volume#, chapterName, titleName] */
 const buildChapterList = async () => {
   const fullOutline = await readJsonFile("volumeOutline.json");
   const chapterList = Object.entries(fullOutline.Volumes).flatMap(
@@ -103,21 +103,23 @@ const getChapterList = async () => {
 
 /** returns chapter info based on json file for 'volume>title>chap' info;
  * based on matching chapter number (or offset to allow return of previous or next chapter)*/
+
 const getChapterInfo = async ({ chapNum, offset = 0 }) => {
-  const myList = await getChapterList();
-  let ans = [];
-  myList.every((chapter, index) => {
-    // every works like forEach, but breaks on "false"
-    if (chapter[0] == chapNum) {
-      let limitRange = Math.max(Math.min(index + offset, myList.length - 1), 0);
-      ans = myList[limitRange];
-    }
-    return ans.length == 0; // keeps going while true; stops as soon as we find it
+  const chapterList = await getChapterList();
+  let chapterIndex = chapterList.findIndex((chapter) => {
+    return chapter[0] == chapNum;
   });
-  const ansArray =
-    ans.length == 0
-      ? [chapNum, 0, 0, "chapter not found", "title not found"]
-      : ans;
+  chapterIndex = Math.max(
+    Math.min(chapterIndex + offset, chapterList.length - 1),
+    0
+  ); // keeps answer within range
+  let ansArray = chapterList[chapterIndex] || [
+    chapNum,
+    0,
+    0,
+    "chapter not found",
+    "title not found",
+  ];
   return {
     chapNo: ansArray[0],
     titleNo: ansArray[1],
@@ -126,6 +128,7 @@ const getChapterInfo = async ({ chapNum, offset = 0 }) => {
     titleName: ansArray[4],
   };
 };
+
 /**
  * @param {string} url
  * @param {string} encoding */

@@ -77,25 +77,17 @@ const buildFloatingMenuDiv = async () => {
 };
 
 class VolNavConstructor {
-  constructor() {}
-  async init() {
-    this.finishedDiv = await this.buildDiv();
-    return this.finishedDiv;
-  }
-
-  async buildDiv() {
+  static async buildDiv() {
     let volumeOutlineDiv = document.createElement("div");
     volumeOutlineDiv.id = "volumeOutline";
     let volJson = await sendAwait({ fetchJson: "VolumeOutline" }, true);
     volumeOutlineDiv.innerHTML = this.getHtmlFromVolOutline(volJson);
-    volumeOutlineDiv.querySelectorAll("details").forEach((detailElem) => {
-      this.highlightIfMatches(detailElem);
-    });
+    this.highlightMatch(volumeOutlineDiv, "volume");
     return volumeOutlineDiv;
   }
 
   /**  Convert the JSON data into nested HTML lists using builtin CSS "summary/details" to form dropdowns*/
-  getHtmlFromVolOutline(data) {
+  static getHtmlFromVolOutline(data) {
     let mainList = "";
     for (const volumeKey in data.Volumes) {
       const volume = data.Volumes[volumeKey];
@@ -119,31 +111,59 @@ class VolNavConstructor {
     return mainList;
   }
 
-  highlightIfMatches(/** @type {HTMLDetailsElement}*/ detailElem) {
-    if (detailElem.dataset.volume == chapterInfo.volNo) {
-      detailElem.firstElementChild
-        ? detailElem.firstElementChild?.classList.add("highlight")
-        : infoCS(
-            "No volume child to highlight",
-            "buildNewMenus.js",
-            "checkDetailForHighlighting"
-          );
-      detailElem.open = true;
-    }
-    if (detailElem.dataset.title == chapterInfo.titleNo) {
-      detailElem.open = true;
-      detailElem.firstElementChild
-        ? detailElem.firstElementChild?.classList.add("highlight")
-        : infoCS(
-            "No title child to highlight",
-            "buildNewMenus.js",
-            "checkDetailForHighlighting"
-          );
-      detailElem.querySelectorAll("span").forEach((aSpan) => {
-        if (aSpan.dataset.chapter == chapterInfo.chapNo) {
-          aSpan.classList.add("highlight");
-        }
-      });
+  static hierarchy = {
+    volume: {
+      name: "volume",
+      identity: "volNo",
+      cssSelector: "details.volume",
+      doNext: "title",
+    },
+    title: {
+      name: "title",
+      identity: "titleNo",
+      cssSelector: "details.title",
+      doNext: "chapter",
+    },
+    chapter: {
+      name: "chapter",
+      identity: "chapNo",
+      cssSelector: "span",
+      doNext: null,
+    },
+  };
+
+  /** slightly recursive function to highlight volume, title then chapters */
+  static highlightMatch(/** @type {HTMLDetailsElement}*/ searchIn, type) {
+    const { name, identity, cssSelector, doNext } = this.hierarchy[type];
+    console.log(
+      `${searchIn}, ${name}, ${chapterInfo[identity]}, ${cssSelector}`
+    );
+    const matchingElem = [...searchIn.querySelectorAll(cssSelector)].find(
+      (detailElem) => {
+        return (
+          detailElem.dataset[name].toString().trim() ==
+          chapterInfo[identity].toString().trim()
+        );
+      }
+    );
+    if (matchingElem) {
+      console.log(matchingElem);
+      if (doNext) {
+        // volume & title
+        matchingElem.firstElementChild
+          ? matchingElem.firstElementChild?.classList.add("highlight")
+          : infoCS(
+              `No ${name} child to highlight`,
+              "buildNewMenus.js",
+              "checkDetailForHighlighting",
+              true
+            );
+        matchingElem.open = true;
+        this.highlightMatch(matchingElem, doNext);
+      } else {
+        // chapter
+        matchingElem.classList.add("highlight");
+      }
     }
   }
 }
