@@ -139,7 +139,7 @@ const displayPaletteDropdownList = async () => {
   } catch (error) {
     warnPopup(
       `Error displaying css options: ${error}`,
-      "promiseRefreshOptions"
+      "displayPaletteDropdownList"
     );
   }
 };

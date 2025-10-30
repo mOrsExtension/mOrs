@@ -18,9 +18,9 @@ const implementUserParameters = async () => {
         "getInformation"
       );
       responsiveFunction(isReturnTrue);
-    } catch (e) {
+    } catch (error) {
       warnCS(
-        `Error with response to '${dataRequest}': ${e}`,
+        `Error with response to '${dataRequest}': ${error}`,
         "storedData.js",
         "getInformation"
       );
@@ -73,7 +73,7 @@ class tagFindAndSeek {
   constructor(fullUrl) {
     this.url = fullUrl;
     this.urlRegExp = new RegExpHandler("(?:\\.html\\#)([^\\/]*)"); // tag : $1
-    if (this.urlRegExp.testMe(fullUrl)) {
+    if (this.urlRegExp.doesContain(fullUrl)) {
       this.#getUpperTargetString();
       this.#setDocElement();
     }

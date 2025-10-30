@@ -52,7 +52,7 @@ browser.runtime.onInstalled.addListener(async (details) => {
   try {
     if (details.reason == "install") {
       await browser.storage.sync.clear();
-      const userInitData = await promiseReadJsonFile("userInitialData.json");
+      const userInitData = await readJsonFile("userInitialData.json");
       browser.storage.sync.set(userInitData); // no need to await this, nothing returned
       infoBG("Set initial user variables from data/userInitialData.json");
     }

@@ -37,7 +37,7 @@ const buildFloatingMenuDiv = async () => {
     );
     let url = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${fetchOffsetChapInfo.chapNo}.html`;
     // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html"):
-    return new RegExpHandler(/(ors)0+(\d{3})/).replaceAll(url, "$1$2");
+    return RegExpHandler.replaceAllWith(url, /(ors)0+(\d{3})/, "$1$2");
   };
 
   /**building button functionality to navigate to url */

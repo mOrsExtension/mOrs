@@ -194,7 +194,7 @@ const addListenerCheckboxes = () => {
 const storeAndUpdateTabs = async (newValue, storeTo, msgToTabs) => {
   try {
     if (newValue != null) {
-      await promiseStoreKey({ [storeTo]: newValue });
+      await storeUserKey({ [storeTo]: newValue });
       let newMsg = new MessageDispatch({ [msgToTabs]: newValue }, "tabs");
       newMsg.sendOneWay();
     }
@@ -208,16 +208,16 @@ const storeAndUpdateTabs = async (newValue, storeTo, msgToTabs) => {
 };
 
 /** Save user values to browser's user settings*/
-const promiseStoreKey = async (keyValueObj) => {
+const storeUserKey = async (keyValueObj) => {
   try {
     await browser.storage.sync.set(keyValueObj);
     infoPopup(
       `stored user data: ${JSON.stringify(keyValueObj)}`,
-      "promiseStoreKey"
+      "storeUserKey"
     );
     return true;
   } catch (error) {
-    warnPopup(error, "setPromiseStoreKey");
+    warnPopup(error, "storeUserKey");
     throw error;
   }
 };

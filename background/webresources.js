@@ -4,18 +4,14 @@ let retrievalObject = {};
 
 /** returns promise to retrieves JSON data from "filename" and returns javascript library
  * @param {string} fileName */
-const promiseReadJsonFile = async (fileName) => {
+const readJsonFile = async (fileName) => {
   if (retrievalObject[fileName]) {
-    infoBG(
-      `Retrieving cached ${fileName}`,
-      "webResources.js",
-      "promiseReadJsonFile"
-    );
+    infoBG(`Retrieving cached ${fileName}`, "webResources.js", "readJsonFile");
     return retrievalObject[fileName];
   }
   try {
     const jsonFile = browser.runtime.getURL(`/data/${fileName}`);
-    infoBG(`Unpacking: ${jsonFile}`, "webResources.js", "promiseReadJsonFile");
+    infoBG(`Unpacking: ${jsonFile}`, "webResources.js", "readJsonFile");
     const fetchResponse = await fetch(jsonFile);
     if (!fetchResponse.ok) {
       throw new Error(
@@ -26,20 +22,20 @@ const promiseReadJsonFile = async (fileName) => {
     retrievalObject[fileName] = fetchedJson; // caches response
     return fetchedJson;
   } catch (error) {
-    warnBG(error, "webResources.js", "promiseReadJsonFile");
+    warnBG(error, "webResources.js", "readJsonFile");
     throw error;
   }
 };
 
-const promiseGetPalletteList = async () => {
-  let presetObj = await promiseReadJsonFile("cssPresetColors.json");
+const getPalletteList = async () => {
+  let presetObj = await readJsonFile("cssPresetColors.json");
   return Object.keys(presetObj);
 };
 
 // volumeOutline.json specific
 /** is a list of chapters in order returning [chapter#, title#, volume#, chapterName, titleName] */
 const buildChapterList = async () => {
-  const fullOutline = await promiseReadJsonFile("volumeOutline.json");
+  const fullOutline = await readJsonFile("volumeOutline.json");
   const chapterList = Object.entries(fullOutline.Volumes).flatMap(
     ([volume, volumeData]) => {
       if (!volumeData.Titles) {
@@ -107,7 +103,7 @@ const getChapterList = async () => {
 
 /** returns chapter info based on json file for 'volume>title>chap' info;
  * based on matching chapter number (or offset to allow return of previous or next chapter)*/
-const promiseGetChapterInfo = async ({ chapNum, offset = 0 }) => {
+const getChapterInfo = async ({ chapNum, offset = 0 }) => {
   const myList = await getChapterList();
   let ans = [];
   myList.every((chapter, index) => {

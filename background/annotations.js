@@ -1,6 +1,10 @@
 /** Cleans up annoSecList using RegExp
  *  (instead of DOM parsing, because DOM required creating outside dummy page of temp html) */
 class AnnoCleaner {
+  /**
+   * @param {*} chapterNo
+   * @param {*} rawHtml
+   */
   constructor(chapterNo, rawHtml) {
     this.chapterNo = chapterNo;
     this.cleanHtml = rawHtml;
@@ -227,11 +231,15 @@ class AnnoSubHead {
 let annoFetchDoneResolution;
 let hasAnnoFinished;
 
+/** Passes to background helper script for logging
+ * @param {string} info
+ * @param {string} script
+ */
 const infoAnnos = (info, script) => {
   infoBG(info, "annotations.js", script, "#9df"); // light blue
 };
 
-// building promise for annoFetchDoneResolution to signal promise fulfilled
+// building promise for annoFetchDoneResolution to signal that promise was fulfilled
 const resetPromise = () => {
   hasAnnoFinished = new Promise((resolve) => {
     annoFetchDoneResolution = resolve;
@@ -241,7 +249,9 @@ const resetPromise = () => {
 // annoCollection will eventually be passed from background to content script
 let annoCollection;
 
-/** Starts getting Annos (will not be done by time rest of script runs) from msgListenerBG.js */
+/** Starts getting Annos (will not be done by time rest of script runs) from msgListenerBG.js
+ * @param {string} chapterNo
+ */
 const startAnnoRetrieval = async (chapterNo) => {
   resetPromise();
   annoCollection = new AnnoParent(chapterNo);
@@ -305,7 +315,7 @@ const startAnnoRetrieval = async (chapterNo) => {
       annoCollection.currentSection.currentSubHead.childrenList.push(
         annoParaTxt
       );
-    } catch (e) {
+    } catch (error) {
       infoAnnos(
         `No subhead found for '${annoParaTxt.slice(
           0,

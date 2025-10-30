@@ -50,7 +50,7 @@ function bodyCleanUp(/**@type {HTMLDivElement} */ docBody) {
   for (let i = paraList.length - 1; i > -1; i--) {
     aPara = paraList[i];
     firstPassClass.forEach(([searchFor, /**@type {String} */ newClass]) => {
-      if (new RegExpHandler(searchFor).testMe(aPara.innerHTML)) {
+      if (RegExpHandler.doesContainThis(searchFor, aPara.innerHTML)) {
         aPara.className = newClass;
       }
     });
@@ -165,13 +165,17 @@ function bodyCleanUp(/**@type {HTMLDivElement} */ docBody) {
   // Find leadlines...
   docBody.querySelectorAll("p.sectionStart").forEach((aPara) => {
     // for ORS:
-    aPara.innerHTML = new RegExpHandler(
-      `(\\/a>${tabRegExp})([^]{2,})`
-    ).replaceAll(aPara.innerHTML, '$1<span class="leadline">$2</span>');
+    aPara.innerHTML = RegExpHandler.replaceAllWith(
+      aPara.innerHTML,
+      `(\\/a>${tabRegExp})([^]{2,})`,
+      '$1<span class="leadline">$2</span>'
+    );
     // for Session laws:
-    aPara.innerHTML = new RegExpHandler(
-      `(Sec\\.\\s\\d{1,3}[a-f]?\\.${tabRegExp})([^]{2,})`
-    ).replaceAll(aPara.innerHTML, '$1<span class="leadline">$2</span>');
+    aPara.innerHTML = RegExpHandler.replaceAllWith(
+      aPara.innerHTML,
+      `(Sec\\.\\s\\d{1,3}[a-f]?\\.${tabRegExp})([^]{2,})`,
+      '$1<span class="leadline">$2</span>'
+    );
   });
 
   /** For units that have roman numerals change paragraphs to sub-subparagraphs

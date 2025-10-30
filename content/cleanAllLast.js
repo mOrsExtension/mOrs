@@ -34,8 +34,9 @@ const finalCleanUp = (finalDivs) => {
           // chapter was already explicitly assigned (because it's in the navigation piece)
           if (anAnchor.dataset.chapter) {
             anAnchor.href = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${anAnchor.dataset.chapter}.html`;
-            anAnchor.href = new RegExpHandler(/(ors)0+(\d{3})/).replaceAll(
+            anAnchor.href = RegExpHandler.replaceAllWith(
               anAnchor.href,
+              /(ors)0+(\d{3})/,
               "$1$2"
             ); // deletes any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
             break;
@@ -43,27 +44,29 @@ const finalCleanUp = (finalDivs) => {
 
           // link is to current chapter
           if (
-            new RegExpHandler(`^${chapterInfo.chapNo}\.`).testMe(
+            RegExpHandler.doesContainThis(
+              `^${chapterInfo.chapNo}\.`,
               anAnchor.innerText
             )
           ) {
-            anAnchor.href = new RegExpHandler(/(\S+)/).replaceAll(
+            anAnchor.href = RegExpHandler.replaceAllWith(
               anAnchor.innerText,
+              /(\S+)/,
               "#$1"
             );
             break;
           }
 
           // create link to external chapter, targets the specific chapter id
-          const chapAndSecRegExp = new RegExpHandler(
-            /[^]*?(([1-9]\d{0,2}[A-C]?)\.\S*)[^]*?/
-          );
-          anAnchor.href = chapAndSecRegExp.replaceAll(
+          const chapAndSecRegExp = new RegExpHandler();
+          anAnchor.href = RegExpHandler.replaceAllWith(
             anAnchor.textContent,
+            /[^]*?(([1-9]\d{0,2}[A-C]?)\.\S*)[^]*?/,
             `https://www.oregonlegislature.gov/bills_laws/ors/ors00$2.html#$1`
           );
-          anAnchor.href = new RegExpHandler(/(ors)0+(\d{3})/).replaceAll(
+          anAnchor.href = RegExpHandler.replaceAllWith(
             anAnchor.href,
+            /(ors)0+(\d{3})/,
             "$1$2"
           ); // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
         }
@@ -77,7 +80,9 @@ const finalCleanUp = (finalDivs) => {
   // delete empty divs
   let allElements = finalBody.getElementsByTagName("*");
   Array.from(allElements).forEach((anElement) => {
-    if (new RegExpHandler(/^(\s|&nbsp;)+$/).testMe(anElement.textContent)) {
+    if (
+      new RegExpHandler(/^(\s|&nbsp;)+$/).doesContain(anElement.textContent)
+    ) {
       infoCS(
         `Deleting ${anElement.innerHTML}`,
         "finalClean.js",

@@ -6,31 +6,29 @@ const generateCSS = async () => {
   let cssOptions;
   try {
     const userCss = await getFromStorage("cssSelector"); // find user's selected CSS style saved in popup (E.g., Dark)
-    console.assert(userCss, "User CSS doesn't exist/is false");
-    infoBG(`Loading '${userCss}' stylesheet`, "style.js", "GenerateCss");
     if (userCss == "Custom") {
       cssOptions = await getFromStorage("userColors"); // get css from synced user data for custom
     } else {
-      cssOptions = (await promiseReadJsonFile("cssPresetColors.json"))[userCss]; // get css from json defaults
+      cssOptions = (await readJsonFile("cssPresetColors.json"))[userCss]; // get css from json defaults
     }
-    console.log(JSON.stringify(cssOptions));
-    cssOptions.linkVisited = purplerLink(cssOptions.linkText);
-    cssOptions.linkInt = greenerLink(cssOptions.linkText);
-    cssOptions.buttonHover = mergeColor(
-      cssOptions.buttonColor,
-      cssOptions.altBack
-    );
+    const { linkText, buttonColor, altBack } = cssOptions; // pull out values to make calculations
     infoBG(
-      `Calculated additional values for {linkVisited:${cssOptions.linkVisited}}; {linkInt:${cssOptions.linkInt}}; {buttonHover:${cssOptions.buttonHover}}`
+      `Loaded '${userCss}' stylesheet & calculated css for linkVisited, linkInt & buttonHover`,
+      "style.js",
+      "GenerateCss"
     );
-    return cssOptions;
+    return {
+      ...cssOptions,
+      linkVisited: purplerLink(linkText),
+      linkInt: greenerLink(linkText),
+      buttonHover: mergeColor(buttonColor, altBack),
+    };
   } catch (error) {
     warnBG(`Issue retrieving styles: ${error}`, "styles.js", "generateCss");
     throw error;
   }
 };
 
-/**converts #hex string into {rgb} object*/
 /**converts #hex string into {rgb} object*/
 const hexToRGB = (hex) => {
   let h = hex.slice(hex[0] == "#" ? 1 : 0); // removes any #

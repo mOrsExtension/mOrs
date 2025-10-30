@@ -2,7 +2,7 @@
 
 //CLASSES:
 
-/** Object has list of classes & starts with a blank div named "Div" - can add paragraphs & children*/
+/** Constructs a blank <div> into which you can add paragraphs & children*/
 class GenericDiv {
   constructor(/**@type {HTMLParagraphElement} */ firstElement, classList) {
     this.classList = [];
@@ -17,12 +17,14 @@ class GenericDiv {
     return newDiv;
   }
 
+  /** put this <p> into the end of this div */
   addParagraph(paragraph) {
     this.Div.appendChild(paragraph);
   }
 
-  addChild(
-    /**@type {HTMLParagraphElement}*/ childParagraph,
+  /** Builds new div and makes it a kid of this div*/
+  addChildDiv(
+    /**@type {GenericDiv}*/ childParagraph,
     /**@type {string | string[]} */ classList
   ) {
     let newChild = new GenericDiv(childParagraph, classList);
@@ -31,9 +33,10 @@ class GenericDiv {
   }
 }
 
-class ChildParagraph {
+/** closes lower levels, determines parentage*/
+class HierarchyHelper {
   constructor(className) {
-    this.parent = parents.active.body;
+    this.parent = parents.getActive("body"); //default value
     this.buildClass = "none";
     this.buildType = "none";
     this.#sortClass(className);
@@ -41,95 +44,100 @@ class ChildParagraph {
 
   /** Build paragraph based on identified type */
   #sortClass(className) {
+    let isInForm = Boolean(parents.getActive("form")); // finds out if we're in a form
     switch (className) {
       case "headingLabel":
         {
-          if (parents.active.form == null) {
-            this.build("head", "body", "heading");
+          if (isInForm) {
+            // if it's in a form; treat as text
+            this.#setParent();
           } else {
-            this.genericPara();
+            this.#closeOldAndBuildNew("head", "body", "heading");
           }
         }
         break;
       case "subheadLabel":
         {
-          if (parents.active.form == null) {
-            this.build("sub", "head", "subhead");
+          if (isInForm) {
+            // if it's in a form; treat as text
+            this.#setParent();
           } else {
-            this.genericPara();
+            this.#closeOldAndBuildNew("sub", "head", "subhead");
           }
         }
         break;
       case "tempHeadLabel":
         {
-          this.build("temp", "sub", "tempProvision");
+          this.#closeOldAndBuildNew("temp", "sub", "tempProvision");
         }
         break;
       case "startNote":
         {
-          this.build("note", "temp", "note");
+          this.#closeOldAndBuildNew("note", "temp", "note");
         }
         break;
       case "startForm":
         {
-          this.build("form", "sec", "form");
+          this.#closeOldAndBuildNew("form", "sec", "form");
         }
         break;
       case "sectionStart":
         {
-          this.build("sec", "note", "section");
+          this.#closeOldAndBuildNew("sec", "note", "section");
         }
         break;
       default:
         {
-          this.genericPara();
+          this.#setParent();
         }
         break;
     }
   }
 
-  /** Closes other lower items based on parent to avoid */
-  build(close, parent, build) {
-    parents.closeParents(close);
+  /** Closes other lower items based on parent to avoid misfiling */
+  #closeOldAndBuildNew(close, parentItem, newItem) {
+    parents.closeParent(close);
     this.buildType = close;
-    this.parent = parents.getExistingParentElement(parent);
-    this.buildClass = build;
+    this.parent = parents.getParentElement(parentItem);
+    this.buildClass = newItem;
   }
 
-  genericPara() {
-    this.parent = parents.getExistingParentElement("form");
+  #setParent() {
+    this.parent = parents.getParentElement("form");
   }
 }
 
+/** updates parents and additional classes belonging to current section <div> (including note types) */
 class SectionClassifier {
   constructor(
-    /**@type {HTMLParagraphElement}*/ aPara,
-    /**@type {GenericDiv}*/ purportedParent
+    /**@type {HTMLParagraphElement}*/ paraElem,
+    /**@type {GenericDiv}*/ currentParent
   ) {
-    this.paraElem = aPara;
-    this.paraParent = purportedParent;
-    this.addClassList = this.getAddClasses();
+    this.paraElem = paraElem;
+    this.newParent = currentParent;
+    this.newClasses = [];
+    this.newClasses = this.getNewClasses();
   }
 
-  getAddClasses() {
-    if (this.paraParent.classList.includes("note")) {
-      let noteClasses = this.noteClasses();
+  getNewClasses() {
+    if (this.newParent.classList.includes("note")) {
+      let noteClasses = this.#noteClasses();
       if (noteClasses.length > 1) {
         return noteClasses;
       }
-      parents.closeParents("temp"); // or, it's not a child of note, but after the note. So, close note
-      this.paraParent = parents.getExistingParentElement("sub"); // and look for other potential parents
+      parents.closeParent("temp"); // else: piece following the note
+      this.newParent = parents.getParentElement("sub"); // and look for other potential parents (subdiv, div heads)
     }
-    if (this.isBurnt()) {
+    if (this.#isBurnt()) {
       return ["burnt"];
     }
-    if (this.isOrs()) {
+    if (this.#isOrs()) {
       return ["ors"];
     }
     return ["undefined"];
   }
 
-  noteClasses() {
+  #noteClasses() {
     let prevSibText = this.paraElem?.previousElementSibling?.textContent || "";
     let paraText = this.paraElem?.textContent || "";
     let noteClass = "";
@@ -154,15 +162,73 @@ class SectionClassifier {
     return [];
   }
 
-  isBurnt() {
+  /** if the first paragraph of section is a source note, section is repealed/renumbered */
+  #isBurnt() {
     let nextSibClass = this.paraElem?.nextElementSibling?.className || "";
-    // if the very next paragraph is source note, this section is repealed/renumbered
     return nextSibClass == "sourceNote";
   }
 
-  isOrs() {
+  /** if first paragraph of section contains a leadline, its a new ORS section*/
+  #isOrs() {
     let paraHtml = this.paraElem?.innerHTML || "";
     return /span\sclass="leadline"/.test(paraHtml);
+  }
+}
+
+class ParentHierarchy {
+  #parentTypeList = ["body", "head", "sub", "temp", "note", "sec", "form"];
+  #activeParents = {};
+  /** @param {GenericDiv} bodyDiv*/
+  constructor(bodyDiv) {
+    this.#parentTypeList.forEach((item) => {
+      this.#activeParents[item] = null;
+    });
+    this.#activeParents.body = bodyDiv;
+  }
+
+  /** returns the activeParent value (including null) for given item
+   * @param {string} item
+   */
+  getActive(item) {
+    let /** @type {GenericDiv|null} */ activeItem = this.#activeParents[item];
+    return activeItem;
+  }
+
+  /**inserts item into active item object*/
+  setActive(itemType, item) {
+    if (this.#parentTypeList.includes(itemType)) {
+      this.#activeParents[itemType] = item;
+    }
+  }
+
+  /**removes named parent's potential children from active list (they're done having children) */
+  closeParent(startWith) {
+    if (startWith in this.#parentTypeList) {
+      this.#parentTypeList
+        .slice(this.#parentTypeList.indexOf(startWith))
+        .forEach((parent) => {
+          this.#activeParents[parent] = null;
+        });
+    }
+  }
+  /** Cycles backwards thru potential parents list to return first existing (otherwise main body) to be div's parent */
+  getParentElement(startWith) {
+    if (startWith == "body") {
+      return this.getActive("body");
+    }
+    let /**@type {GenericDiv} */ answer = this.#activeParents.body; // default answer
+    let reversedList = this.#parentTypeList.slice(1).reverse(); // reverses copy of array
+    reversedList
+      .slice(reversedList.indexOf(startWith))
+      .every((possibleParent) => {
+        // 'every' is "for each" that breaks on false
+        if (this.#activeParents[possibleParent] != null) {
+          answer = this.#activeParents[possibleParent]; // update possible parent
+          return false;
+        }
+        return true;
+      });
+    return answer;
   }
 }
 
@@ -171,78 +237,9 @@ class SectionClassifier {
 const newMainBodyDiv = new GenericDiv(document.createElement("p"), "");
 newMainBodyDiv.Div.id = "main";
 newMainBodyDiv.Div.innerHTML = "";
+const parents = new ParentHierarchy(newMainBodyDiv);
 
-// **** under construction ****
-class CurrentParent {
-  constructor(activeParts) {
-    this.component.List = [
-      "body",
-      "head",
-      "sub",
-      "temp",
-      "note",
-      "sec",
-      "form",
-    ];
-  }
-
-  /**removes named parent it's potential children from active list; they're done having children */
-  closeParents(startWith) {
-    this.componentList.slice(this.list.indexOf(startWith)).forEach((parent) => {
-      this.active[parent] = null;
-    });
-  }
-
-  nameParent(startWith) {
-    /** Cycles backwards thru potential parents to return first existing or main body */
-    let answer = this.active.body;
-    let revList = this.list.slice().reverse();
-    revList.slice(revList.indexOf(startWith)).every((possibleParent) => {
-      if (this.active[possibleParent] != null && answer == this.active.body) {
-        answer = this.active[possibleParent];
-        return false;
-      }
-      return true;
-    });
-    return answer;
-  }
-}
-
-let parents = {
-  active: {
-    body: newMainBodyDiv,
-    head: null,
-    sub: null,
-    temp: null,
-    note: null,
-    sec: null,
-    form: null,
-  },
-  list: ["body", "head", "sub", "temp", "note", "sec", "form"],
-
-  /**removes named parent it's potential children from active list; they're done having children */
-  closeParents(startWith) {
-    this.list.slice(this.list.indexOf(startWith)).forEach((parent) => {
-      this.active[parent] = null;
-    });
-  },
-  /** Cycles backwards thru potential parents to return first existing or main body */
-  getExistingParentElement(startWith) {
-    let answer = this.active.body;
-    let revList = this.list.slice().reverse();
-    revList.slice(revList.indexOf(startWith)).every((possibleParent) => {
-      if (this.active[possibleParent] != null && answer == this.active.body) {
-        answer = this.active[possibleParent];
-        return false;
-      }
-      return true;
-    });
-    return answer;
-  },
-};
-
-//#TODO definitely should be a class
-
+//GLOBAL functions (probably could also be classes, but whatever)
 let cleanerObject = {
   /**@type {HTMLDivElement} */ body: document.createElement("div"),
   month:
@@ -358,32 +355,40 @@ let cleanerObject = {
   },
 };
 
-/** called only from mORS.js (main script).
+/** called from mORS.js (main script).
 Goes through each paragraph, creates divs for headings, note groups, sections, notes and forms;
 or adds content of each */
 const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
   bodyCopy.querySelectorAll("p").forEach((pElem) => {
-    let paraID = new ChildParagraph(pElem.className);
-    let aPara = {};
-    /**@type {GenericDiv} */ aPara.parent = paraID.parent;
-    /**@type {Array} */ aPara.buildClass = [paraID.buildClass];
-    /**@type {String} */ aPara.buildType = paraID.buildType;
+    let {
+      /**@type {GenericDiv} */ parent: aParent,
+      /**@type {String} */ buildClass: aBuildClass,
+      /**@type {String} */ buildType: aBuildType,
+    } = new HierarchyHelper(pElem.className);
+    let buildClasses = [aBuildClass];
 
-    if (aPara.buildType == "none") {
-      aPara.parent.addParagraph(pElem); // put generic paragraph into parent
+    if (aBuildType == "none") {
+      aParent.addParagraph(pElem); // put generic paragraph into parent
       if (pElem.classList.contains("endForm")) {
-        parents.closeParents("form"); // whatever comes after the end line of a form doesn't belong in form
+        parents.closeParent("form"); // whatever comes after the end line of a form doesn't belong in form
       }
       return;
     }
-    if (aPara.buildType == "sec") {
-      const secType = new SectionClassifier(pElem, aPara.parent);
-      aPara.parent = secType.paraParent;
-      aPara.buildClass = aPara.buildClass.concat(secType.addClassList);
+    if (aBuildType == "sec") {
+      // use section classifier to adjust parents & classes
+      const {
+        /** @type {Array} */ newClasses: addClassList,
+        /** @type {GenericDiv} */ newParent: newParent,
+      } = new SectionClassifier(pElem, aParent);
+      aParent = newParent;
+      buildClasses = buildClasses.concat(addClassList);
     }
-    let newDiv = aPara.parent.addChild(pElem, aPara.buildClass);
-    parents.active[aPara.buildType] = newDiv;
-    if (pElem.classList.contains("sourceNote")) parents.closeParents("sec"); // whatever comes after source notes doesn't belong in its section
+
+    let newDiv = aParent.addChildDiv(pElem, buildClasses);
+    parents.setActive(aBuildType, newDiv);
+    if (pElem.classList.contains("sourceNote")) {
+      parents.closeParent("sec"); // whatever comes after source notes doesn't belong in its section
+    }
   });
 
   let newBodyDiv = newMainBodyDiv.Div;

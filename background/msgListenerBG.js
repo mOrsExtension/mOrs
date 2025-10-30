@@ -1,50 +1,48 @@
 //background/msgListener.js
 
+/** Receives message and sends response */
 class MessageObj {
-  constructor(message, sender) {
-    if (message.message == null) {
-      this.responseMsg = new Error(
+  constructor({ message: receivedMsg }, { url }) {
+    // destructure to get msg & url in msg object
+    if (receivedMsg == null) {
+      this.responseToSend = new Error(
         "Null message received by background.js listener."
       );
       this.isLog = true;
     } else {
-      this.receivedMsg = message.message;
-      this.isLog = "log" in this.receivedMsg;
+      this.receivedMsg = receivedMsg;
+      this.isLog = Boolean("log" in this.receivedMsg);
       if (!this.isLog) {
-        this.fromName = sender.url.match(/[^\/]*\.html/);
+        this.fromName = url.match(/[^\/]*\.html/);
         this.stringyMsg = JSON.stringify(this.receivedMsg).slice(0, 60);
       }
     }
   }
 
   async doTasksAndFetchResponse() {
-    this.responseMsg =
-      "getStorage" in this.receivedMsg
-        ? await this.#retrieveUserData() // returns object(s)
-        : "fetchJson" in this.receivedMsg
-        ? await this.#fetchJson() // returns jsonItem
-        : "getChapInfo" in this.receivedMsg
-        ? await this.#getChapInfo() // returns obj(vol, title, chp)
-        : "miscTask" in this.receivedMsg
-        ? await this.#miscTasks() // returns any
-        : "newOrsTabs" in this.receivedMsg
-        ? this.#newOrsTabs() // returns true (launches new tabs)
-        : "startAnnos" in this.receivedMsg
-        ? this.#startAnnos() // returns true (starts background loading annotations)
-        : "log" in this.receivedMsg
-        ? this.#logMessage() // returns true (displays message on background service worker)
-        : new Error(
-            `message type not identified for request:/n${this.stringyMsg}`
-          );
-    try {
-      if (this.responseMsg != null) {
-        this.stringyResponse = JSON.stringify(this.responseMsg).slice(0, 60);
-        return true;
-      }
-      return false;
-    } catch {
-      return false;
+    const handlers = {
+      getStorage: () => this.#retrieveUserData(), // returns object(s)
+      fetchJson: () => this.#fetchJson(), // returns json
+      getChapInfo: () => this.#getChapInfo(), // returns obj(vol, title, chp)
+      miscTask: () => this.#miscTasks(), // returns any
+      newOrsTabs: () => this.#newOrsTabs(), //returns true & launches tab
+      startAnnos: () => this.#startAnnos(), // returns true & works in background
+      log: () => this.#logMessage(), //returns true & displays msg on service worker console
+    };
+
+    // Find which handler to use (destructuring makes this clearer)
+    const messageType = Object.keys(this.receivedMsg).find(
+      (key) => key in handlers
+    );
+    if (messageType) {
+      this.responseToSend = await handlers[messageType]();
+      return this.responseToSend != null;
     }
+
+    this.responseMsg = new Error(
+      `Message type unidentifiable: ${this.stringyMsg}`
+    );
+    return false;
   }
 
   /** get single item or array of items from storage, return either array or response */
@@ -79,7 +77,7 @@ class MessageObj {
       : task == "buildColorData"
       ? await generateCSS() // styles.js returns object (list of user prefs)
       : task == "getPaletteList"
-      ? await promiseGetPalletteList() // webResources.js returns object
+      ? await getPalletteList() // webResources.js returns object
       : task == "finishAnnoRetrieval"
       ? await finishAnnoRetrieval() // webResources.js returns object
       : new Error("unidentified misc task requested");
@@ -101,12 +99,12 @@ class MessageObj {
 
   /** Returns json file from stored resources as JS object */
   async #fetchJson() {
-    return await promiseReadJsonFile(`${this.receivedMsg.fetchJson}.json`); // webResources.js -
+    return await readJsonFile(`${this.receivedMsg.fetchJson}.json`); // webResources.js -
   }
 
   /** Retrieve volume, title and chapter/title names from json file */
   async #getChapInfo() {
-    return await promiseGetChapterInfo(this.receivedMsg.getChapInfo);
+    return await getChapterInfo(this.receivedMsg.getChapInfo);
   }
 
   /** begins annotation retrieval */
@@ -158,7 +156,7 @@ const handleMessage = async (message, sender) => {
         "handleMessage",
         "#fb8"
       );
-      return { response: newMsg.responseMsg };
+      return { response: newMsg.responseToSend };
     }
   } else {
     let error = new Error(
