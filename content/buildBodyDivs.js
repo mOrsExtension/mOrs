@@ -176,20 +176,12 @@ class SectionClassifier {
 }
 
 class ParentHierarchy {
-  static parentTypeList = [
-    "body",
-    "head",
-    "sub",
-    "temp",
-    "note",
-    "sec",
-    "form",
-  ];
+  static typeList = ["body", "head", "sub", "temp", "note", "sec", "form"];
 
   #activeParents = {};
   /** @param {GenericDiv} bodyDiv*/
   constructor(bodyDiv) {
-    this.parentTypeList.forEach((item) => {
+    ParentHierarchy.typeList.forEach((item) => {
       this.#activeParents[item] = null;
     });
     this.#activeParents.body = bodyDiv;
@@ -205,16 +197,16 @@ class ParentHierarchy {
 
   /**inserts item into active item object*/
   setActive(itemType, item) {
-    if (this.parentTypeList.includes(itemType)) {
+    if (ParentHierarchy.typeList.includes(itemType)) {
       this.#activeParents[itemType] = item;
     }
   }
 
   /**removes named parent's potential children from active list (they're done having children) */
   closeParent(startWith) {
-    if (startWith in this.parentTypeList) {
-      this.parentTypeList
-        .slice(this.parentTypeList.indexOf(startWith))
+    if (startWith in ParentHierarchy.typeList) {
+      ParentHierarchy.typeList
+        .slice(ParentHierarchy.typeList.indexOf(startWith))
         .forEach((parent) => {
           this.#activeParents[parent] = null;
         });
@@ -227,7 +219,7 @@ class ParentHierarchy {
   getParentElement(startWith) {
     let /** @type {GenericDiv} */ ans = this.getActive("body");
     if (startWith != "body") {
-      let reversedList = this.parentTypeList.slice(1).reverse(); // reverses array and removes "body" (default)
+      let reversedList = ParentHierarchy.typeList.slice(1).reverse(); // reverses array and removes "body" (default)
       let foundInList =
         reversedList
           .slice(reversedList.indexOf(startWith)) // skip those < startWith

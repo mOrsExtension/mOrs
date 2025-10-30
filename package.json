@@ -1,6 +1,6 @@
 {
   "name": "mors",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "Improves appearance of Oregon Revised Statutes on legislature's website and helps retrieve Oregon session laws.",
   "main": "backgroundLoader.js",
   "scripts": {
