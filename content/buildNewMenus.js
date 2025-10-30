@@ -133,11 +133,11 @@ class VolNavConstructor {
   };
 
   /** slightly recursive function to highlight volume, title then chapters */
-  static highlightMatch(/** @type {HTMLDetailsElement}*/ searchIn, type) {
+  static highlightMatch(
+    /** @type {HTMLDetailsElement}*/ searchIn,
+    /** @type {string} */ type
+  ) {
     const { name, identity, cssSelector, doNext } = this.hierarchy[type];
-    console.log(
-      `${searchIn}, ${name}, ${chapterInfo[identity]}, ${cssSelector}`
-    );
     const matchingElem = [...searchIn.querySelectorAll(cssSelector)].find(
       (detailElem) => {
         return (
@@ -147,7 +147,6 @@ class VolNavConstructor {
       }
     );
     if (matchingElem) {
-      console.log(matchingElem);
       if (doNext) {
         // volume & title
         matchingElem.firstElementChild
