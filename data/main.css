@@ -369,7 +369,7 @@ div#floatMenu {
    padding: .1rem;
    margin: 1px;
    width: max-content;
-   text-align: right;
+   text-align: center;
    border: 2px solid var(--mainText);
    background-color: var(--background);
 }
