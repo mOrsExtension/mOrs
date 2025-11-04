@@ -141,8 +141,8 @@ class VolNavConstructor {
     const matchingElem = [...searchIn.querySelectorAll(cssSelector)].find(
       (detailElem) => {
         return (
-          detailElem.dataset[name].toString().trim() ==
-          chapterInfo[identity].toString().trim()
+          detailElem.dataset[name].toString() ==
+          chapterInfo[identity].toString()
         );
       }
     );
