@@ -13,7 +13,7 @@ class MessageObj {
       this.receivedMsg = receivedMsg;
       this.isLog = Boolean("log" in this.receivedMsg);
       if (!this.isLog) {
-        this.fromName = url.match(/[^\/]*\.html/);
+        this.fromName = url.match(/[^/]*\.html/);
         this.stringyMsg = JSON.stringify(this.receivedMsg).slice(0, 60);
       }
     }
@@ -156,7 +156,7 @@ const handleMessage = async (message, sender) => {
       infoBG(
         `BG response to ${newMsg.stringyMsg} request: '${JSON.stringify(
           newMsg.responseToSend
-        )}'`,
+        ).slice(0, 30)}...'`,
         "msgListenerBG.js",
         "handleMessage",
         "#fb8"

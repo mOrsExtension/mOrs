@@ -45,7 +45,7 @@ const finalCleanUp = (finalDivs) => {
           // link is to current chapter
           if (
             RegExpHandler.doesContainThis(
-              `^${chapterInfo.chapNo}\.`,
+              `^${chapterInfo.chapNo}.`,
               anAnchor.innerText
             )
           ) {

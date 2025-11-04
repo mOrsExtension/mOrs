@@ -2,17 +2,21 @@
 
 //CLASSES:
 
-/** Constructs a blank <div> into which you can add paragraphs & children*/
+/** Constructs a blank <div> with opening paragraph and classList into which you can add paragraphs & children*/
 class GenericDiv {
-  constructor(/**@type {HTMLParagraphElement} */ firstElement, classList) {
-    this.classList = [];
-    this.classList = this.classList.concat(classList);
+  constructor(/**@type {HTMLParagraphElement} */ firstElement, initialClasses) {
+    this.classes = [];
+    this.addClass(initialClasses);
     this.Div = this.#constructNewDiv(firstElement);
+  }
+
+  addClass(newClass) {
+    this.classes = this.classes.concat(newClass);
   }
 
   #constructNewDiv(elem) {
     let newDiv = document.createElement("div");
-    newDiv.className = this.classList.join(" ");
+    newDiv.className = this.classes.join(" ");
     newDiv.appendChild(elem);
     return newDiv;
   }
@@ -25,81 +29,54 @@ class GenericDiv {
   /** Builds new div and makes it a kid of this div*/
   addChildDiv(
     /**@type {GenericDiv}*/ childParagraph,
-    /**@type {string | string[]} */ classList
+    /**@type {string | string[]} */ initialClasses
   ) {
-    let newChild = new GenericDiv(childParagraph, classList);
+    let newChild = new GenericDiv(childParagraph, initialClasses);
     this.Div.appendChild(newChild.Div);
     return newChild;
   }
 }
 
-/** closes lower levels, determines parentage*/
+/** based on initial classification closes lower levels, determines parentage & what to build/close */
 class HierarchyHelper {
   constructor(className) {
-    this.parent = parents.getActive("body"); //default value
-    this.buildClass = "none";
-    this.buildType = "none";
+    this.buildDivClass = "none";
+    this.buildDivPrototype = "none";
     this.#sortClass(className);
   }
 
   /** Build paragraph based on identified type */
   #sortClass(className) {
-    let isInForm = Boolean(parents.getActive("form")); // finds out if we're in a form
-    switch (className) {
-      case "headingLabel":
-        {
-          if (isInForm) {
-            // if it's in a form; treat as text
-            this.#setParent();
-          } else {
-            this.#closeOldAndBuildNew("head", "body", "heading");
-          }
-        }
-        break;
-      case "subheadLabel":
-        {
-          if (isInForm) {
-            // if it's in a form; treat as text
-            this.#setParent();
-          } else {
-            this.#closeOldAndBuildNew("sub", "head", "subhead");
-          }
-        }
-        break;
-      case "tempHeadLabel":
-        {
-          this.#closeOldAndBuildNew("temp", "sub", "tempProvision");
-        }
-        break;
-      case "startNote":
-        {
-          this.#closeOldAndBuildNew("note", "temp", "note");
-        }
-        break;
-      case "startForm":
-        {
-          this.#closeOldAndBuildNew("form", "sec", "form");
-        }
-        break;
-      case "sectionStart":
-        {
-          this.#closeOldAndBuildNew("sec", "note", "section");
-        }
-        break;
-      default:
-        {
-          this.#setParent();
-        }
-        break;
+    if (
+      (className == "headingLabel" || className == "subheadLabel") &&
+      Boolean(parents.getActive("form"))
+    ) {
+      // in a form, ignore text that looks like headings or subheadings
+      this.#setParent();
+    } else {
+      let buildMap = {
+        headingLabel: ["head", "body", "heading"],
+        subheadLabel: ["sub", "head", "subhead"],
+        tempHeadLabel: ["temp", "sub", "tempProvision"],
+        startNote: ["note", "temp", "note"],
+        startForm: ["form", "sec", "form"],
+        sectionStart: ["sec", "note", "section"],
+      };
+      if (className in buildMap) {
+        this.#build(buildMap[className]);
+      } else {
+        this.#setParent();
+      }
     }
   }
 
   /** Closes other lower items based on parent to avoid misfiling */
-  #closeOldAndBuildNew(close, parentItem, newItem) {
-    parents.closeParent(close);
-    this.buildType = close;
-    this.parent = parents.getParentElement(parentItem);
-    this.buildClass = newItem;
+  #build(/** @type {string[]} */ buildArray) {
+    const [type, parentFrom, newClass] = buildArray;
+    parents.closeParent(type);
+    this.buildDivPrototype = type;
+    this.parent = parents.getParentElement(parentFrom);
+    this.buildDivClass = newClass;
   }
 
   #setParent() {
@@ -111,16 +88,18 @@ class HierarchyHelper {
 class SectionClassifier {
   constructor(
     /**@type {HTMLParagraphElement}*/ paraElem,
-    /**@type {GenericDiv}*/ currentParent
+    /**@type {GenericDiv}*/ currentParent,
+    /**@type {HTMLParagraphElement} */ priorElem
   ) {
     this.paraElem = paraElem;
     this.newParent = currentParent;
     this.newClasses = [];
+    this.priorElem = priorElem;
     this.newClasses = this.getNewClasses();
   }
 
   getNewClasses() {
-    if (this.newParent.classList.includes("note")) {
+    if (this.newParent.classes.includes("note")) {
       let noteClasses = this.#noteClasses();
       if (noteClasses.length > 1) {
         return noteClasses;
@@ -138,25 +117,35 @@ class SectionClassifier {
   }
 
   #noteClasses() {
-    let prevSibText = this.paraElem?.previousElementSibling?.textContent || "";
+    let prevSibText = this.priorElem?.textContent || "";
     let paraText = this.paraElem?.textContent || "";
-    let noteClass = "";
-    if (/Sec\.\s\d{1,3}\w?\./.test(paraText)) {
-      noteClass = "sessionLaw";
-    } else if (/repeal[^]*user.s\sconvenience/.test(prevSibText)) {
-      noteClass = "futureRepeal";
-    } else if (
-      /amendment[^]*become[^]*after[^]*\sconvenience/.test(prevSibText) ||
-      /amendment[^]*would become[^]*\sconvenience/.test(prevSibText)
-    ) {
-      noteClass = "furtherAmend";
-    } else if (
-      /amendment[^]*become[^]*until[^]*\sconvenience/.test(prevSibText)
-    ) {
-      noteClass = "priorAmend";
-    }
-    if (noteClass != "") {
-      // if so, add classes to sec
+    const noteTypeTests = [
+      { orSessionLaw: Boolean(/Sec\.\s\d{1,3}\w?\./.test(paraText)) },
+      {
+        futureRepeal: Boolean(
+          /repeal[^]*user.s\sconvenience/.test(prevSibText)
+        ),
+      },
+      {
+        furtherAmend: Boolean(
+          /amendment[^]*(become|takes? effect)[^]*(after|\bon\b|\bat\b)[^]*\sconvenience/.test(
+            prevSibText
+          )
+        ),
+      },
+      {
+        priorAmend: Boolean(
+          /amendment[^]*(become|takes? effect)[^]*until[^]*\sconvenience/.test(
+            prevSibText
+          )
+        ),
+      },
+    ];
+    const testPassed = noteTypeTests.findIndex((test) => {
+      return Object.values(test)[0];
+    });
+    if (testPassed > -1) {
+      let noteClass = Object.keys(noteTypeTests[testPassed]);
       return [noteClass, "noteSec"];
     }
     return [];
@@ -199,17 +188,23 @@ class ParentHierarchy {
   setActive(itemType, item) {
     if (ParentHierarchy.typeList.includes(itemType)) {
       this.#activeParents[itemType] = item;
+    } else {
+      warnCS("Tried to create a div of unidentified type?");
     }
   }
 
   /**removes named parent's potential children from active list (they're done having children) */
   closeParent(startWith) {
-    if (startWith in ParentHierarchy.typeList) {
+    if (ParentHierarchy.typeList.includes(startWith)) {
       ParentHierarchy.typeList
         .slice(ParentHierarchy.typeList.indexOf(startWith))
         .forEach((parent) => {
-          this.#activeParents[parent] = null;
+          if (this.#activeParents[parent] != null) {
+            this.#activeParents[parent] = null;
+          }
         });
+    } else {
+      warnCS(`Could not close ${startWith}`);
     }
   }
 
@@ -222,9 +217,9 @@ class ParentHierarchy {
       let reversedList = ParentHierarchy.typeList.slice(1).reverse(); // reverses array and removes "body" (default)
       let foundInList =
         reversedList
-          .slice(reversedList.indexOf(startWith)) // skip those < startWith
+          .slice(reversedList.indexOf(startWith)) // skip those before startWith
           .find((possibleParent) => {
-            this.#activeParents[possibleParent] != null; // finds first non-null
+            return this.#activeParents[possibleParent] != null; // finds first non-null
           }) || "body"; // default answer if no other living parent found
       ans = this.#activeParents[foundInList];
     }
@@ -239,11 +234,10 @@ newMainBodyDiv.Div.id = "main";
 newMainBodyDiv.Div.innerHTML = "";
 const parents = new ParentHierarchy(newMainBodyDiv);
 
-//GLOBAL functions (probably could also be classes, but whatever)
+//GLOBAL object (probably could also be class, but whatever)
 let cleanerObject = {
   /**@type {HTMLDivElement} */ body: document.createElement("div"),
-  month:
-    "(?:January|February|March|April|May|June|July|August|September|October|November|December)",
+
   doAllCleanUp() {
     this.getFormParagraphs();
     this.getNoteParagraphs();
@@ -283,75 +277,80 @@ let cleanerObject = {
   },
   getNoteParagraphs() {
     this.body.querySelectorAll("div.note").forEach((noteDiv) => {
-      noteDiv.querySelectorAll("p").forEach((notePara) => {
-        this.cleanUpNotes(notePara, noteDiv);
+      noteDiv
+        .querySelectorAll(":scope>p, :scope > div")
+        .forEach((noteChild) => {
+          this.cleanUpNotes(noteChild, noteDiv);
+        });
+    });
+  },
+
+  cleanUpNotes(noteChild, noteDiv) {
+    [...noteChild.classList].find((classElem) => {
+      if (classElem == "startNote") {
+        noteChild.textContent = noteChild.textContent.trim();
+        return true;
+      }
+      const introPara = noteChild.previousElementSibling?.innerHTML || "";
+      const month =
+        "(?:January|February|March|April|May|June|July|August|September|October|November|December)";
+      const caseCheck = [
+        [
+          "furtherAmend",
+          RegExp(`on\\sand\\safter\\s(${month}\\s\\d{1,2},\\s20\\d{2})`),
+          false,
+        ],
+        [
+          "priorAmend",
+          RegExp(`until\\s(${month}\\s\\d{1,2},\\s20\\d{2})`),
+          true,
+        ],
+        [
+          "futureRepeal",
+          RegExp(`repealed\\s+(${month}\\s\\d{1,2},\\s20\\d{2})`),
+          true,
+        ],
+      ];
+      caseCheck.find((test) => {
+        if (classElem == test[0]) {
+          let { addClass, replacementHTML } = this.getNoteClassAndSpan(
+            introPara,
+            test[1],
+            test[2]
+          );
+          noteDiv.classList.add(addClass);
+          if (replacementHTML && noteChild.previousElementSibling) {
+            noteChild.previousElementSibling.innerHTML = replacementHTML;
+          }
+          return true;
+        }
+        return false;
       });
     });
   },
-  cleanUpNotes(notePara, noteDiv) {
-    switch (notePara.classList) {
-      case "startNote":
-        {
-          notePara.textContent = notePara.textContent.trim();
-        }
-        break;
-      case "furtherAmend":
-        {
-          const introPara = notePara.previousElementSibling;
-          const isDateTrue = this.colorBasedOnDate(
-            introPara,
-            `on\\sand\\safter\\s(${this.month}\\s\\d{1,2},\\s20\\d{2}),`,
-            "afterDate"
-          );
-          noteDiv.classList.add(isDateTrue ? "isTrue" : "isFalse");
-        }
-        break;
-      case "priorAmend":
-        {
-          const introPara = notePara.previousElementSibling;
-          const isDateTrue = this.colorBasedOnDate(
-            introPara,
-            `until\\s(${this.month}\\s\\d{1,2},\\s20\\d{2}),`,
-            "untilDate"
-          );
-          noteDiv.classList.add(isDateTrue ? "isTrue" : "isFalse");
-        }
-        break;
-      case "futureRepeal": {
-        const introPara = notePara.previousElementSibling;
-        const isDateTrue = this.colorBasedOnDate(
-          introPara,
-          `until\\s(${this.month}\\s\\d{1,2},\\s20\\d{2}),`,
-          "untilDate"
-        );
-        noteDiv.classList.add(isDateTrue ? "isTrue" : "isFalse");
-      }
-    }
-  },
+
   /**wraps text found by regular expression in an span and gives it a class; helper.js
-   * @param {HTMLElement} searchedElem / Element to be replaced
-   * @param {string|RegExp} searchText / entire expression to be wrapped
-   * @param {string} spanClass / assigned class */
-  colorBasedOnDate(searchedElem, searchText, spanClass) {
-    const searchFor = RegExp(searchText);
-    let elemHTML = searchedElem.innerHTML;
-    let isDateTrue = false;
-    let foundMatch = elemHTML.match(searchFor);
+   * @param {string} searchHTML innerHTML to be replaced
+   * @param {RegExp} searchFor entire expression to be wrapped
+   * @param {Boolean} isAfter is the check to see if it's after date (false = before)  */
+  getNoteClassAndSpan(searchHTML, searchFor, isAfter) {
+    let isDateTrue; // can be undefined
+    let foundMatch = searchHTML.match(searchFor);
+    let replacementHTML;
     if (foundMatch) {
-      const theDate = new Date(foundMatch[1]);
-      const theText = foundMatch[0];
-      isDateTrue = theDate > new Date() == (spanClass == "untilDate");
-      elemHTML = this.addWrap(elemHTML, theText, isDateTrue);
-    }
-    return isDateTrue;
-  },
-  addWrap(elemHTML, match, isDateTrue) {
-    const newSpan = document.createElement("span");
-    newSpan.textContent = match;
-    newSpan.classList.add(isDateTrue ? "isTrue" : "isFalse");
-    let wrappedArray = elemHTML.split(match);
-    wrappedArray.splice(1, 0, newSpan.innerHTML);
-    return wrappedArray.join("");
+      const theDate = new Date(foundMatch[1]); // first matching group
+      const matchedText = foundMatch[0];
+      let hasDateOccurred = theDate > new Date();
+      isDateTrue = hasDateOccurred == isAfter; // has occurred
+      replacementHTML = searchHTML.replace(
+        matchedText,
+        `<span class="${isDateTrue ? "isTrue" : "isFalse"}">${matchedText}</span>`
+      );
+      return {
+        addClass: isDateTrue ? "isTrue" : "isFalse",
+        replacementHTML: replacementHTML,
+      };
+    } else return { addClass: "isUnknown" };
   },
 };
 
@@ -359,37 +358,41 @@ let cleanerObject = {
 Goes through each paragraph, creates divs for headings, note groups, sections, notes and forms;
 or adds content of each */
 const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
-  bodyCopy.querySelectorAll("p").forEach((pElem) => {
+  let pList = bodyCopy.querySelectorAll("p");
+  pList.forEach((pElem, pIndex) => {
     let {
       /**@type {GenericDiv} */ parent: aParent,
-      /**@type {String} */ buildClass: aBuildClass,
-      /**@type {String} */ buildType: aBuildType,
+      /**@type {String} */ buildDivClass: aBuildClass,
+      /**@type {String} */ buildDivPrototype: divPrototype,
     } = new HierarchyHelper(pElem.className);
     let buildClasses = [aBuildClass];
 
-    if (aBuildType == "none") {
-      aParent.addParagraph(pElem); // put generic paragraph into parent
+    if (divPrototype == "none") {
+      aParent.addParagraph(pElem); // put generic paragraph into its parent and move on
       if (pElem.classList.contains("endForm")) {
-        parents.closeParent("form"); // whatever comes after the end line of a form doesn't belong in form
+        parents.closeParent("form"); // make sure whatever comes after the end line of a form doesn't get in form
       }
       return;
     }
-    if (aBuildType == "sec") {
+    if (divPrototype == "sec") {
       // use section classifier to adjust parents & classes
       const {
         /** @type {Array} */ newClasses: addClassList,
         /** @type {GenericDiv} */ newParent: newParent,
-      } = new SectionClassifier(pElem, aParent);
+      } = new SectionClassifier(pElem, aParent, pList[pIndex - 1]); // not sure why previousSibling isn't working, but just getting prior index works
       aParent = newParent;
       buildClasses = buildClasses.concat(addClassList);
     }
 
-    let newDiv = aParent.addChildDiv(pElem, buildClasses);
-    parents.setActive(aBuildType, newDiv);
+    const newDiv = aParent.addChildDiv(pElem, buildClasses); // create a child
+    parents.setActive(divPrototype, newDiv); // make child the active parent
+
+    // TODO: Does this make any sense here? source Notes aren't a builder, are they? Okay to delete?
     if (pElem.classList.contains("sourceNote")) {
+      console.log("I matter!?");
       parents.closeParent("sec"); // whatever comes after source notes doesn't belong in its section
     }
-  });
+  }); // next "p"
 
   let newBodyDiv = newMainBodyDiv.Div;
   cleanerObject.body = newBodyDiv;
