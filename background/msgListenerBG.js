@@ -154,7 +154,7 @@ const handleMessage = async (message, sender) => {
   if (await newMsg.doTasksAndFetchResponse()) {
     if (!newMsg.isLog) {
       infoBG(
-        `BG response to ${newMsg.stringyMsg} request: '${JSON.stringify(
+        `BG response to ${newMsg.stringyMsg.split(":")[0].slice(1)} request: '${JSON.stringify(
           newMsg.responseToSend
         ).slice(0, 30)}...'`,
         "msgListenerBG.js",

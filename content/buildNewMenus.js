@@ -6,14 +6,14 @@ const buildFloatingMenuDiv = async () => {
   infoCS("creating menu", "createDivs.js", "buildFloatingMenuDiv");
   let menuPanel = document.createElement("div");
   menuPanel.id = "floatMenu";
-  let verPara = document.createElement("p");
-  let buttonRow1 = document.createElement("p");
-  let buttonRow2 = document.createElement("p");
+  let versionParagraph = document.createElement("p");
+  let buttonRow1 = document.createElement("div");
+  let buttonRow2 = document.createElement("div");
   let manifest = browser.runtime.getManifest(); // apparently does not require await
   let thisVersion = manifest.version;
-  verPara.classList.add("version");
-  verPara.innerHTML = `style markup by <a href="https://github.com/mOrsExtension/mOrs/#readme">mOrs</a> v.${thisVersion}`;
-  menuPanel.appendChild(verPara);
+  versionParagraph.classList.add("version");
+  versionParagraph.innerHTML = `style markup by <a href="https://github.com/mOrsExtension/mOrs/#readme">mOrs</a> v.${thisVersion}`;
+  menuPanel.appendChild(versionParagraph);
   menuPanel.appendChild(buttonRow1);
   menuPanel.appendChild(buttonRow2);
 
@@ -31,11 +31,11 @@ const buildFloatingMenuDiv = async () => {
 
   /**calculating next/prev chapter number & returning chapter url */
   const findOffsetUrl = async (offset) => {
-    const fetchOffsetChapInfo = sendAwait(
+    const { chapNo } = await sendAwait(
       { getChapInfo: { chapNum: chapterInfo.chapNo, offset: offset } },
       true
     );
-    let url = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${fetchOffsetChapInfo.chapNo}.html`;
+    let url = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${chapNo}.html`;
     // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html"):
     return RegExpHandler.replaceAllWith(url, /(ors)0+(\d{3})/, "$1$2");
   };
@@ -62,17 +62,17 @@ const buildFloatingMenuDiv = async () => {
   buttonRow1.appendChild(
     createButton("fullWidth", "Reading Mode", toggleFullWidth)
   );
-  /*  Depreciated. #TODO item #75, volume navigation not working; offset at fault (perhaps?)
-    buttonRow2.appendChild(
-        createButton('prevChap', 'Previous Chapter', async () => {
-            await navToOffsetChap(-1)
-        })
-    )
-    buttonRow2.appendChild(
-        createButton('nextChap', 'Next Chapter', async () => {
-            await navToOffsetChap(1)
-        })
-    ) */
+  // Depreciated. #TODO item #75, volume navigation not working; offset at fault (perhaps?)
+  buttonRow2.appendChild(
+    createButton("prevChap", "Previous Chapter", async () => {
+      await navToOffsetChap(-1);
+    })
+  );
+  buttonRow2.appendChild(
+    createButton("nextChap", "Next Chapter", async () => {
+      await navToOffsetChap(1);
+    })
+  );
   return menuPanel;
 };
 
