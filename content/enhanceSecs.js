@@ -6,8 +6,8 @@ let annoUrl;
 let orsList = []; // list of ORS sections with divs in order
 
 /**main program: adds #ids; updates burnt sec text; appends annotations to sections; builds buttons to collapse secs */
-const sectionAdjustments = async () => {
-  document.body.querySelectorAll("div.section").forEach((aDiv) => {
+const sectionAdjustments = async (bodyDiv) => {
+  bodyDiv.querySelectorAll("div.section").forEach((aDiv) => {
     // cycle through div w/ class of 'section'
     addIds(aDiv);
     labelBurnt(aDiv);
@@ -18,6 +18,7 @@ const sectionAdjustments = async () => {
       "$1"
     );
   annoObject = await getAnnoList(); // fetches annoObject from background
+
   /** builds each section div and adds it to the object*/
   await Promise.all(
     annoObject.map(async (section) => {
@@ -26,11 +27,13 @@ const sectionAdjustments = async () => {
   );
 
   if (orsList.includes("Whole ORS Chapter")) {
-    if (document.body.querySelector("#main")) {
-      document.body.querySelector("#main").prepend(annoObject[0].div); // If it exists I think it has to be the first position
+    if (bodyDiv.querySelector("#main")) {
+      bodyDiv.querySelector("#main").prepend(annoObject[0].div); // If it exists I think it has to be the first position
+    } else {
+      warnCS(`Didn't add "Whole ORS Chapter" to any div`);
     }
   }
-  document.body.querySelectorAll("div.section").forEach((aDiv) => {
+  bodyDiv.querySelectorAll("div.section").forEach((aDiv) => {
     // cycle through div w/ class of 'section'
     addAnnos(aDiv);
     addButtonsToSections(aDiv);

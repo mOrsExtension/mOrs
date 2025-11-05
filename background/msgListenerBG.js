@@ -69,7 +69,6 @@ class MessageObj {
 
   /** list of one offs that could each be their own functions, but aren't */
   async #miscTasks() {
-    console.log(this.receivedMsg.miscTask);
     switch (this.receivedMsg.miscTask) {
       case "getOrsTabIds":
         return await getTabIdsFromTabQuery({
