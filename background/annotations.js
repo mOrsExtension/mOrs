@@ -160,11 +160,10 @@ class AnnoCleaner {
     ]; // $1: paragraph body
     if (!paragraphMatchList || paragraphMatchList.length < 1) {
       warnBG(
-        "Annotations file is empty or broken",
+        "Annotations file is empty or broken (not fatal error)",
         "annotations.js",
         "splitParagraphs"
       );
-      throw new Error("Annotation file is empty or broken.");
     } else {
       paragraphMatchList.forEach((match) => {
         paraList.push(match[1].trim());

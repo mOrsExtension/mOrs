@@ -26,8 +26,8 @@ const runMain = async () => {
   const floatMenuDiv = finishedPromises[0];
   const volumeNav = finishedPromises[1];
   mainDiv = finishedPromises[2]; // orLawLink.js : add links for OrLaws based on \data\orLawLegLookup.json
+  await sectionAdjustments(mainDiv); // enhancements.js : add buttons for collapsable sections; add annos; adds ids expanding links & button listeners
   finalCleanUp([headingDiv, volumeNav, tocDiv, mainDiv, floatMenuDiv]); // finalClean.js : puts together pieces, does post html rendering cleanup
-  await sectionAdjustments(); // enhancements.js : add buttons for collapsable sections; add annos; adds ids expanding links & button listeners
   await startObserver(6);
   scrollToTag(); // userData.js : scroll to tag (#) in url, if any
 };
