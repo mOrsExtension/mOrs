@@ -5,7 +5,10 @@ let /** object created by /background/annotation.js;
 let annoUrl;
 let orsList = []; // list of ORS sections with divs in order
 
-/**main program: adds #ids; updates burnt sec text; appends annotations to sections; builds buttons to collapse secs */
+/**main program: adds #ids; updates burnt sec text; appends annotations to sections; builds buttons to collapse secs
+ * @param {HTMLDivElement} bodyDiv
+ */
+
 const sectionAdjustments = async (bodyDiv) => {
   bodyDiv.querySelectorAll("div.section").forEach((aDiv) => {
     // cycle through div w/ class of 'section'
@@ -27,11 +30,8 @@ const sectionAdjustments = async (bodyDiv) => {
   );
 
   if (orsList.includes("Whole ORS Chapter")) {
-    if (bodyDiv.querySelector("#main")) {
-      bodyDiv.querySelector("#main").prepend(annoObject[0].div); // If it exists I think it has to be the first position
-    } else {
-      warnCS(`Didn't add "Whole ORS Chapter" to any div`);
-    }
+    // If it exists add to start of chapter text
+    bodyDiv.prepend(annoObject[0].div);
   }
   bodyDiv.querySelectorAll("div.section").forEach((aDiv) => {
     // cycle through div w/ class of 'section'

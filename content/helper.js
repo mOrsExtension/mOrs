@@ -144,8 +144,8 @@ const toggleFullWidth = () => {
     document.documentElement.style.getPropertyValue("--SectionWidth") == "85ch"
   );
 };
-/**set width on document (& on the menu button, if it exists) as set by popup or at startup */
-const setFullWidth = (isFull) => {
+/**set width of document & updates menu button, if it exists) as set by popup or at startup. Could store data, but I don't think that's used anywhere */
+const setFullWidth = (isFull, doStore = false) => {
   document.documentElement.style.setProperty(
     "--SectionWidth",
     isFull ? "100%" : "85ch"
@@ -154,7 +154,9 @@ const setFullWidth = (isFull) => {
   if (fwButtonLabel) {
     fwButtonLabel.textContent = isFull ? "Reading Mode" : "Full Width";
   }
-  storeKey({ showFullWidth: isFull }); // saves to user's computer. No need to await result.
+  if (doStore) {
+    storeKey({ showFullWidth: isFull }); // saves to user preferences; does not await result.
+  }
 };
 
 /** Sets visibility of query selection as set by popup or at startup*/
