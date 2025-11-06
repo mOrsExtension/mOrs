@@ -21,7 +21,7 @@ const runMain = async () => {
   const finishedPromises = await Promise.all([
     buildFloatingMenuDiv(), // newDivs.js building floating menu
     VolNavConstructor.buildDiv(), //newDivs.js building new menu for navigating through volumes
-    newOrUpdateOrLawLinks(mainDiv), //buildOrLawLinks.js adds links for session laws
+    displayOrLaws(mainDiv), //buildOrLawLinks.js adds links for session laws
   ]);
   const floatMenuDiv = finishedPromises[0];
   const volumeNav = finishedPromises[1];

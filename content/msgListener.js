@@ -24,7 +24,7 @@ const listenToPopup = () => {
           break;
 
         case "updateOrLawsReader":
-          newOrUpdateOrLawLinks(document.getElementById("main")); // orLawLink.js - popup is sending a value, but not used, looks up new stored data
+          displayOrLaws(document.getElementById("main")); // orLawLink.js - popup is sending a value, but not used, looks up new stored data
           break;
 
         case "updateCss":

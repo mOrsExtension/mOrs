@@ -1,218 +1,228 @@
 //buildOrLawLinks.js
 
-/** Returns #main id of body of document with updated links to Oregon Session Laws for HeinOnline or oregonLegislature.gov
- * @param {Node} bodyMain // already tagged with anchors classed as 'sessionLaw' */
-const newOrUpdateOrLawLinks = async (bodyMain) => {
-  try {
-    const anchorList = getAnchorList(bodyMain);
-    const orLaw = await sendAwait({ getStorage: "lawsReader" }); // check user form input for source of OrLaws lookup (Hein/OrLeg)
-    switch (orLaw.lawsReader) {
-      case "Hein":
-        {
-          buildHeinLinks(anchorList);
+class OrLawsDisplay {
+  /** @param {HTMLElement} bodyMain*/
+  constructor(bodyMain) {
+    this.bodyDiv = bodyMain;
+    this.anchorList = [];
+    this.isTagged = false;
+    this.reader = {};
+    this.sortedAnchors = {};
+    this.reader.JSON = {};
+  }
+  static async buildHandler(bodyMain) {
+    const displayMe = new OrLawsDisplay(bodyMain);
+    displayMe.getAnchorList();
+    displayMe.addDataTags();
+    await displayMe.getReaderType();
+    console.log(displayMe.reader);
+    if (displayMe.reader.name == "OrLeg") {
+      displayMe.getOrLawsList();
+    }
+    displayMe.updateLinks();
+    return displayMe;
+  }
+  getAnchorList() {
+    if (this.anchorList.length) {
+      this.anchorList = this.bodyDiv.querySelectorAll("a.sessionLaw");
+    }
+  }
+  addDataTags() {
+    if (!this.isTagged) {
+      this.anchorList.forEach((anAnchor) => {
+        const anchorText = anAnchor.textContent;
+        const isLong = /hapter/.test(anchorText); // e.g. "Chapter 13, Oregon Laws 2023" v. "2023 c.13"`
+        const shortSession = this.#setShortSession(anchorText, isLong); // specialSession number or null
+        const anchorData = anAnchor.dataset;
+        anchorData.year = anchorText.replace(/[^]*((?:20|19)\d{2})[^]*/, "$1");
+        anchorData.chapter = isLong
+          ? text.replace(/[^]*hapter (\d{1,4})[^]*/, "$1")
+          : text.replace(/[^]*c\.(\d{1,4})[^]*/, "$1");
+        if (shortSession != null) {
+          anchorData.shortSession = shortSession;
         }
+      });
+    }
+  }
+  #setShortSession = (text, isLong) => {
+    let /**@type {string} */ specialSessionNum;
+    if (isLong && /\sspecial\ssession/.test(text)) {
+      specialSessionNum = [
+        "first",
+        "second",
+        "third",
+        "forth",
+        "fifth",
+      ].findIndex((ordinal) => {
+        return RegExp(`${ordinal}\\sspecial\\ssession)[^]`).test(
+          text.toLowerCase()
+        );
+      });
+      if (specialSessionNum != null) {
+        specialSessionNum++; // add one to deal with 0 index
+      }
+    } else {
+      specialSessionNum = /s\.s\./.test(text)
+        ? text.replace(/[^]*s\.s\.(\d)[^]*/, "$1")
+        : null;
+    }
+    return specialSessionNum;
+  };
+
+  async getReaderType() {
+    const { lawsReader } = await sendAwait({ getStorage: "lawsReader" });
+    this.reader.name = lawsReader;
+    console.log(this.reader.name);
+  }
+
+  updateLinks() {
+    switch (this.reader.name.toLowerCase) {
+      case "hein":
+        this.buildHeinLinks("all");
         break;
-      case "OrLeg":
-        {
-          const sortedAnchors = sortByDate(anchorList);
-          deleteAllLinks(sortedAnchors.oldList);
-          buildOrLegLinks(sortedAnchors.newList);
-        }
+      case "orleg":
+        this.sortAnchorsByDate();
+        this.deleteLinks("old");
+        this.buildOrLegLinks();
         break;
-      case "Both":
-        {
-          const sortedAnchors = sortByDate(anchorList);
-          buildHeinLinks(sortedAnchors.oldList);
-          buildOrLegLinks(sortedAnchors.newList);
-        }
+      case "both":
+        this.sortAnchorsByDate();
+        this.buildHeinLinks("old");
+        this.buildOrLegLinks();
         break;
       default:
-        {
-          infoCS(
-            "Removing any links",
-            "buildOrLawLinks.js",
-            "newOrUpdateOrLawLinks"
-          );
-          deleteAllLinks(anchorList);
-        }
-        break;
+        infoCS(
+          "Removing any links",
+          "buildOrLawLinks.js",
+          "OrLawsDisplay.updateLinks"
+        );
+        this.deleteLinks("all");
     }
-    return bodyMain;
-  } catch (error) {
-    const warning = `Error attempting to generate OrLaws links: ${error}`;
-    warnCS(warning, "navigate.js", "OrLawLinking");
-    throw error;
   }
-};
-const sortByDate = (anchors) => {
-  let newList = [];
-  let oldList = [];
-  anchors.forEach((anAnchor) => {
-    anAnchor.dataset.year > 1998
-      ? newList.push(anAnchor)
-      : oldList.push(anAnchor);
-  });
-  return { oldList: oldList, newList: newList };
-};
 
-/**TODO: #45 Build into Class for Anchor Handling? */
-/** put info into anchors (data-year, data-chapter, data-ss) to keep data gathering & link building separate */
-const getAnchorList = (html) => {
-  const sessionLawAnchors = html.querySelectorAll("a.sessionLaw");
-  if (sessionLawAnchors.length < 1) {
-    return [];
-  }
-  if (isAnchorListTagged[0]) {
-    return sessionLawAnchors;
-  }
-  addTagsToAllAnchors(sessionLawAnchors);
-  return sessionLawAnchors;
-};
-const isAnchorListTagged = (anchor) => {
-  let isTagged = anchor.dataset.year != null;
-  infoCS(
-    `Laws ${isTagged ? "were" : "need"} tagged with data.`,
-    "orLawLinking.js",
-    "OrLawLinking"
-  );
-  return isTagged;
-};
-const addTagsToAllAnchors = (anchorList) => {
-  anchorList.forEach((anAnchor) => {
-    const anchorText = anAnchor.textContent;
-    const anchorData = anAnchor.dataset;
-    anchorData.year = setYear(anchorText);
-    const isLong = /hapter/.test(anchorText); // e.g. "Chapter 13, Oregon Laws 2023" v. "2023 c.13"`
-    anchorData.chapter = setChapter(anchorText, isLong);
-    const shortSession = setShortSession(anchorText, isLong);
-    if (shortSession != null) {
-      anchorData.shortSession = shortSession;
+  sortAnchorsByDate() {
+    if (this.sortAnchorsByDate == {}) {
+      this.sortAnchorsByDate.oldList = [];
+      this.sortAnchorsByDate.newList = [];
+      this.anchorList.forEach((anAnchor) => {
+        anAnchor.dataset.year > 1998
+          ? this.sortAnchorsByDate.newList.push(anAnchor)
+          : this.sortAnchorsByDate.oldList.push(anAnchor);
+      });
     }
-  });
-  return anchorList;
-};
-const setYear = (text) => {
-  return text.replace(/[^]*((?:20|19)\d{2})[^]*/, "$1");
-};
-const setChapter = (text, isLong) => {
-  return isLong
-    ? text.replace(/[^]*hapter (\d{1,4})[^]*/, "$1")
-    : text.replace(/[^]*c\.(\d{1,4})[^]*/, "$1");
-};
-const setShortSession = (text, isLong) => {
-  if (isLong && /\sspecial\ssession/.test(text)) {
-    let sessionOrdinal = text
-      .replace(/[^]*\(([\w]+)\sspecial\ssession\)[^]*/, "$1")
-      .toLowerCase();
-    return ["0", "first", "second", "third", "forth", "fifth"].forEach(
-      (ordinal, index) => {
-        if (ordinal == sessionOrdinal) {
-          return index.toString();
-        }
-      }
-    );
-  }
-  return /s\.s\./.test(text) ? text.replace(/[^]*s\.s\.(\d)[^]*/, "$1") : null;
-};
-
-/** building links for HeinOnline through State of Oregon Law Library for each anchor (session law reference) in chapter
- * @param {any} sessionLawAnchors // will be list of anchors */
-const buildHeinLinks = (sessionLawAnchors) => {
-  infoCS("Building HeinOnline Links", "buildOrLawLinks.js", "buildHeinLinks");
-  sessionLawAnchors.forEach((anAnchor) => {
-    const HeinUrl = buildHeinURL(
-      anAnchor.dataset.year,
-      anAnchor.dataset.chapter
-    );
-    appendLinkData(anAnchor, HeinUrl);
-  });
-};
-const buildHeinURL = (year, chapter) => {
-  return `https://heinonline-org.soll.idm.oclc.org/HOL/SSLSearchCitation?journal=ssor&yearhi=${year}&chapter=${chapter}&sgo=Search&collection=ssl&search=go`;
-};
-
-/**builds links for oregonLegislature.gov session laws for each anchor (session law reference) in chapter */
-const buildOrLegLinks = (anchorList) => {
-  infoCS("building OrLeg links", "buildOrLawLinks.js", "buildOrLegLinks");
-  anchorList.forEach(async (anAnchor) => {
-    const orLegUrl = await buildOrLegUrl(
-      anAnchor.dataset.year,
-      anAnchor.dataset.chapter,
-      anAnchor.dataset.shortSession
-    );
-    appendLinkData(anAnchor, orLegUrl);
-  });
-};
-
-/** module used for json lookup, hopefully runs once*/
-let oreLegLookupJson = null; // Caching global object
-let fetchPromise = null; // Promise to track the fetching process
-let counter = 0;
-
-const fetchOrLegLookupJson = async () => {
-  counter++;
-  if (oreLegLookupJson) {
-    return oreLegLookupJson; // Return cached data if available
   }
 
-  // If fetching is already in progress, wait for it to complete
-  if (!fetchPromise) {
-    fetchPromise = (async () => {
-      infoCS(
-        "retrieving OrLegLookup",
-        "buildOrLawLinks.js",
-        "getOrLegLookupJson"
+  buildHeinLinks(whichOnes) {
+    infoCS("Building HeinOnline Links", "buildOrLawLinks.js", "buildHeinLinks");
+    let anchorList =
+      whichOnes == "all" ? this.anchorList : this.sortAnchorsByDate.oldList;
+    anchorList.forEach((anAnchor) => {
+      const HeinUrl = this.#buildHeinURL(
+        anAnchor.dataset.year,
+        anAnchor.dataset.chapter
       );
-      oreLegLookupJson = await sendAwait({ fetchJson: "OrLawLegLookup" }, true);
-      fetchPromise = null; // Reset the promise for future calls
-      return oreLegLookupJson;
-    })();
+      appendLinkData(anAnchor, HeinUrl);
+    });
+  }
+  #buildHeinURL(year, chapter) {
+    return `https://heinonline-org.soll.idm.oclc.org/HOL/SSLSearchCitation?journal=ssor&yearhi=${year}&chapter=${chapter}&sgo=Search&collection=ssl&search=go`;
   }
 
-  return await fetchPromise; // Wait for the promise to resolve
-};
-
-/** Converts data fields in anchor <a data=''> into OrLeg urls for session law;
- * Based on lookup table for year & special session at ../data/OrLawLegLookup.json
- * @param {string} year
- * @param {string} chapter
- * @param {string} specialSession */
-const buildOrLegUrl = async (year, chapter, specialSession) => {
-  const addSpecialSession = specialSession ? ` s.s.${specialSession}` : "";
-  const yearAndSS = `${year}${addSpecialSession}`;
-  const jsonData = await fetchOrLegLookupJson();
-  const pdfFileCode = jsonData[yearAndSS];
-  if (pdfFileCode != null) {
-    let orLawFileName = pdfFileCode.replace(/~/, "000" + chapter);
-    orLawFileName = orLawFileName.replace(
-      /([^]*?\w)0*(\d{4}(?:\.|\w)*)/,
-      "$1$2"
-    ); /** trims excess zeros */
-    return `https://www.oregonlegislature.gov/bills_laws/lawsstatutes/${orLawFileName}`;
-  } else {
-    warnCS(
-      `Cannot find [${yearAndSS}] in ORS lookup.`,
+  buildOrLegLinks() {
+    infoCS(
+      "building OrLeg links",
       "buildOrLawLinks.js",
-      "buildOrLegUrl"
+      "OrLawsDisplay.buildOrLegLinks"
     );
-    return "";
+    this.sortAnchorsByDate.oldList.forEach(async (anAnchor) => {
+      const orLegUrl = await this.buildOrLegUrl(
+        anAnchor.dataset.year,
+        anAnchor.dataset.chapter,
+        anAnchor.dataset.shortSession
+      );
+      this.appendLinkData(anAnchor, orLegUrl);
+    });
   }
+
+  /** gets JSON list of session law URLs from ../data/OrLawLegLookup.json*/
+  async getOrLawsList() {
+    if (this.reader.JSON == {}) {
+      if (this.reader.JSON.fetchPromise == null) {
+        this.reader.fetchPromise = (async () => {
+          infoCS(
+            "retrieving OrLegLookup",
+            "buildOrLawLinks.js",
+            "getOrLegLookupJson"
+          );
+          this.reader.JSON = await sendAwait(
+            { fetchJson: "OrLawLegLookup" },
+            true
+          );
+          this.reader.fetchPromise = null; // Reset the promise for future calls ?? #TODO Do I need this?
+        })();
+      }
+    }
+  }
+
+  /** Converts data fields in anchor <a data=''> into OrLeg urls for session law;
+   * @param {string} chapter
+   * @param {string} year
+   * @param {string} specialSession blank/null if none */
+  async buildOrLegUrl(year, chapter, specialSession) {
+    const addSpecialSession = specialSession ? ` s.s.${specialSession}` : "";
+    const yearAndSS = `${year}${addSpecialSession}`;
+    const pdfFileCode = this.reader.JSON[yearAndSS];
+    if (pdfFileCode != null) {
+      let orLawFileName = pdfFileCode.replace(/~/, "000" + chapter);
+      orLawFileName = orLawFileName.replace(
+        /([^]*?\w)0*(\d{4}(?:\.|\w)*)/,
+        "$1$2"
+      ); /** adds leading zeros and then trims excess 0s */
+      return `https://www.oregonlegislature.gov/bills_laws/lawsstatutes/${orLawFileName}`;
+    } else {
+      warnCS(
+        `Cannot find [${yearAndSS}] in ORS lookup.`,
+        "buildOrLawLinks.js",
+        "buildOrLegUrl"
+      );
+      return "";
+    }
+  }
+
+  /** Deletes the <a> links, but tags and anchors remain to be created later without recalculating */
+  deleteLinks = (whichOnes) => {
+    let anchorList =
+      whichOnes == "all" ? this.anchorList : this.sortedAnchors.oldList;
+    anchorList.forEach((anAnchor) => {
+      anAnchor.classList.add("linkOff");
+      anAnchor.removeAttribute("rel");
+      anAnchor.removeAttribute("href");
+    });
+  };
+
+  /** Adds a single <a> link from either Hein or OrLeg pathway */
+  appendLinkData(anchor, url) {
+    if (url.length > 0) {
+      anchor.rel = "noopener";
+      anchor.classList.remove("linkOff");
+      anchor.href = url;
+    }
+  }
+} // end class OrLawsDisplay
+
+/**  triggered by main.js or msgListener.js; gets anchor list; builds anchor data if needed; retrieves anchor data & reader; builds anchor urls, returns updated htmlElement
+ * @param {HTMLElement} bodyMain */
+displayOrLaws = async (bodyMain) => {
+  let /** @type {OrLawsDisplay} */ newBody =
+      await OrLawsDisplay.buildHandler(bodyMain);
+  return newBody.bodyDiv;
 };
 
-/** Deletes the <a> links, keeps the tags so they can be created later without recalculating */
-const deleteAllLinks = (anchors) => {
-  anchors.forEach((anAnchor) => {
-    anAnchor.classList.add("linkOff");
-    anAnchor.removeAttribute("rel");
-    anAnchor.removeAttribute("href");
-  });
-};
-
-/** Adds a single <a> link from either Hein or OrLeg pathway */
-const appendLinkData = (anchor, url) => {
-  if (url.length > 0) {
-    anchor.rel = "noopener";
-    anchor.classList.remove("linkOff");
-    anchor.href = url;
-  }
-};
+// ...
+//     return bodyMain;
+//   } catch (error) {
+//     const warning = `Error attempting to generate OrLaws links: ${error}`;
+//     warnCS(warning, "navigate.js", "OrLawLinking");
+//     throw error;
+//   }
+// };
