@@ -3,3 +3,5 @@
 /.git
 /node_modules
 /debug/help
+*.zip
+.DS_Store

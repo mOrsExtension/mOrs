@@ -1,66 +1,62 @@
-//storedData.js
+//userData.js
 
-const infoStoredData = (infoMsg, functionName) => {
-  infoCS(infoMsg, `storedData.js`, functionName, "#dd44ff");
+/** info logging for use of user data in this script */
+const infoUserData = (infoMsg, functionName) => {
+  infoCS(infoMsg, `userData.js`, functionName, "#dd44ff");
 };
 
-//TODO: #95 Make into object, retrieve items as list, begin before page load completed.
-const implementUserParameters = async () => {
-  /** returns promise to take in a command and executes function if true (or false if any)
-   * @param {string} dataRequest
-   * @param {any} responsiveFunction */
-  const getInformation = async (dataRequest, responsiveFunction) => {
-    try {
-      const response = await sendAwait({ getStorage: dataRequest });
-      const isReturnTrue = response[dataRequest];
-      infoStoredData(
-        `Content script received response: '${dataRequest}'='${isReturnTrue}'`,
-        "getInformation"
-      );
-      responsiveFunction(isReturnTrue);
-    } catch (error) {
-      warnCS(
-        `Error with response to '${dataRequest}': ${error}`,
-        "storedData.js",
-        "getInformation"
-      );
-      throw error;
-    }
-  };
-
-  // MAIN Implement User Parameters
-  await getInformation("doShowVerbose", (isTrue) => {
-    showVerbose(isTrue); // in helper.js
-  });
-  await getInformation("isCollapseDefault", (doCollapse) => {
-    doCollapse ? collapseAllSections() : expandAllSections(); // in helper.js
-  });
-  await getInformation("doShowFullWidth", (isTrue) => {
-    setFullWidth(isTrue); // in helper.js
-  });
-  await getInformation("doShowBurnt", (doShow) => {
-    showBurnt(doShow); // in helper.js
-  });
-  await getInformation("doShowSourceNotes", (isTrue) => {
-    showSourceNotes(isTrue); //  in helper.js
-  });
-  await getInformation("doShowMenu", (isTrue) => {
-    showMenu(isTrue); // in helper.js
-  });
-  await getInformation("doShowVolNav", (isTrue) => {
-    showVolumeOutline(isTrue); // in helper.js
-  });
-  await getInformation("doShowTOC", (isTrue) => {
-    showTOC(isTrue); // in helper.js
-  });
-  await getInformation("doShowAnnos", (isTrue) => {
-    showAnnos(isTrue); // in helper.js
-  });
-  return true;
+/** returns promises to take in a command and executes function using result
+ * @param {string} dataRequest
+ * @param {function} doAfterRetrieval*/
+const getAndUseData = async (dataRequest, doAfterRetrieval) => {
+  try {
+    const response = await sendAwait({ getStorage: dataRequest });
+    const responseTruth = response[dataRequest];
+    infoUserData(
+      `Content script received: '${dataRequest}'='${responseTruth}'`,
+      "getAndUseData"
+    );
+    await functionCreator(doAfterRetrieval, responseTruth);
+  } catch (error) {
+    warnCS(
+      `Error with response to '${dataRequest}': ${error}`,
+      "userData.js",
+      "getAndUseData"
+    );
+    throw error;
+  }
+};
+/** creates an async function an runs data through it
+ * @param {function} aFunction
+ * @param {boolean} isTrue*/
+const functionCreator = async (aFunction, isTrue) => {
+  return await aFunction(isTrue);
 };
 
-/** determines section from url (based on #xxx) */
-/** scroll to html id tag in url, if any */
+const showCollapse = (isTrue) => {
+  isTrue ? collapseAllSections() : expandAllSections();
+};
+
+const userData = async () => {
+  const finishedData = await Promise.all(
+    // functions in helper.js
+    [
+      ["isCollapseDefault", showCollapse],
+      ["doShowFullWidth", setFullWidth],
+      ["doShowBurnt", showBurnt],
+      ["doShowSourceNotes", showSourceNotes],
+      ["doShowMenu", showMenu],
+      ["doShowVolNav", showVolumeOutline],
+      ["doShowTOC", showTOC],
+      ["doShowAnnos", showAnnos],
+    ].map((item) => {
+      return getAndUseData(item[0], item[1]);
+    })
+  );
+};
+
+/** determines section from url (based on #xxx)
+ * scroll to html id tag in url, if any */
 const scrollToTag = async () => {
   let toTag = new tagFindAndSeek(window.location.toString());
   if (toTag.hasTarget) {
@@ -96,7 +92,7 @@ class tagFindAndSeek {
     if (elem != null) {
       this.targetDocElement = elem;
     } else {
-      infoStoredData(
+      infoUserData(
         `Could not find element with id = '#${this.targetIdString}' to scroll to.`,
         "urlHandler/#setDocElement"
       );
@@ -108,7 +104,7 @@ class tagFindAndSeek {
     if (!this.hasTarget || this.targetDocElement == null) {
       return;
     }
-    infoStoredData(
+    infoUserData(
       `Scrolling to element id = '#${this.targetIdString}'`,
       "urlHandler/scrollToTarget"
     );
@@ -125,21 +121,19 @@ class tagFindAndSeek {
   }
 }
 
-const buildColors = async () => {
+const buildColors = async () => {};
+
+/**replaces parts of stylesheet; called at launch or via msg from popup or options when user changes stylesheet */
+const userStylesRefresh = async () => {
   const theRootStyle = document.documentElement.style;
   const replacementSheet = await sendAwait({ miscTask: "buildColorData" }); // calls /background/style.js
   for (let key in replacementSheet) {
     theRootStyle.setProperty(`--${key}`, replacementSheet[key]);
   }
-  infoStoredData(
+  infoUserData(
     `Added user css properties to stylesheet: ${JSON.stringify(
       replacementSheet
     )}`,
     "buildColors"
   );
-};
-
-/**replaces part of stylesheet - called on launch or on msg from popup.js or options.js when user data changes re: stylesheet */
-const userStylesRefresh = async () => {
-  buildColors();
 };

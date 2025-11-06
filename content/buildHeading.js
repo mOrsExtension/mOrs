@@ -155,7 +155,7 @@ const buildHeading = async () => {
   headingChildrenList.push(buildH1());
   headingChildrenList.concat([...buildH3()]);
   let htmlMainHead = document.createElement("div");
-  if (Boolean(chapterInfo.miscHead.textContent)) {
+  if (chapterInfo.miscHead.textContent) {
     // must be non-falsy content
     chapterInfo.miscHead.classList.add("note");
     headingChildrenList.push(chapterInfo.miscHead);
