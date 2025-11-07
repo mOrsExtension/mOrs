@@ -15,16 +15,15 @@ class OrLawsDisplay {
     displayMe.getAnchorList();
     displayMe.addDataTags();
     await displayMe.getReaderType();
-    console.log(displayMe.reader);
     if (displayMe.reader.name == "OrLeg") {
-      displayMe.getOrLawsList();
+      await displayMe.getOrLawsList();
     }
     displayMe.updateLinks();
     return displayMe;
   }
   getAnchorList() {
-    if (this.anchorList.length) {
-      this.anchorList = this.bodyDiv.querySelectorAll("a.sessionLaw");
+    if (this.anchorList.length < 1) {
+      this.anchorList = this.bodyDiv.querySelectorAll("a.sessionlaw");
     }
   }
   addDataTags() {
@@ -36,8 +35,8 @@ class OrLawsDisplay {
         const anchorData = anAnchor.dataset;
         anchorData.year = anchorText.replace(/[^]*((?:20|19)\d{2})[^]*/, "$1");
         anchorData.chapter = isLong
-          ? text.replace(/[^]*hapter (\d{1,4})[^]*/, "$1")
-          : text.replace(/[^]*c\.(\d{1,4})[^]*/, "$1");
+          ? anchorText.replace(/[^]*hapter (\d{1,4})[^]*/, "$1")
+          : anchorText.replace(/[^]*c\.(\d{1,4})[^]*/, "$1");
         if (shortSession != null) {
           anchorData.shortSession = shortSession;
         }
@@ -72,11 +71,10 @@ class OrLawsDisplay {
   async getReaderType() {
     const { lawsReader } = await sendAwait({ getStorage: "lawsReader" });
     this.reader.name = lawsReader;
-    console.log(this.reader.name);
   }
 
   updateLinks() {
-    switch (this.reader.name.toLowerCase) {
+    switch (this.reader.name.toLowerCase()) {
       case "hein":
         this.buildHeinLinks("all");
         break;
@@ -101,27 +99,26 @@ class OrLawsDisplay {
   }
 
   sortAnchorsByDate() {
-    if (this.sortAnchorsByDate == {}) {
-      this.sortAnchorsByDate.oldList = [];
-      this.sortAnchorsByDate.newList = [];
+    if (!this.sortedAnchors.oldList || this.sortedAnchors.oldList.length < 1) {
+      this.sortedAnchors.oldList = [];
+      this.sortedAnchors.newList = [];
       this.anchorList.forEach((anAnchor) => {
         anAnchor.dataset.year > 1998
-          ? this.sortAnchorsByDate.newList.push(anAnchor)
-          : this.sortAnchorsByDate.oldList.push(anAnchor);
+          ? this.sortedAnchors.newList.push(anAnchor)
+          : this.sortedAnchors.oldList.push(anAnchor);
       });
     }
   }
-
   buildHeinLinks(whichOnes) {
     infoCS("Building HeinOnline Links", "buildOrLawLinks.js", "buildHeinLinks");
     let anchorList =
-      whichOnes == "all" ? this.anchorList : this.sortAnchorsByDate.oldList;
+      whichOnes == "all" ? this.anchorList : this.sortedAnchors.oldList;
     anchorList.forEach((anAnchor) => {
       const HeinUrl = this.#buildHeinURL(
         anAnchor.dataset.year,
         anAnchor.dataset.chapter
       );
-      appendLinkData(anAnchor, HeinUrl);
+      this.appendLinkData(anAnchor, HeinUrl);
     });
   }
   #buildHeinURL(year, chapter) {
@@ -134,7 +131,7 @@ class OrLawsDisplay {
       "buildOrLawLinks.js",
       "OrLawsDisplay.buildOrLegLinks"
     );
-    this.sortAnchorsByDate.oldList.forEach(async (anAnchor) => {
+    this.sortedAnchors.newList.forEach(async (anAnchor) => {
       const orLegUrl = await this.buildOrLegUrl(
         anAnchor.dataset.year,
         anAnchor.dataset.chapter,
@@ -146,21 +143,13 @@ class OrLawsDisplay {
 
   /** gets JSON list of session law URLs from ../data/OrLawLegLookup.json*/
   async getOrLawsList() {
-    if (this.reader.JSON == {}) {
-      if (this.reader.JSON.fetchPromise == null) {
-        this.reader.fetchPromise = (async () => {
-          infoCS(
-            "retrieving OrLegLookup",
-            "buildOrLawLinks.js",
-            "getOrLegLookupJson"
-          );
-          this.reader.JSON = await sendAwait(
-            { fetchJson: "OrLawLegLookup" },
-            true
-          );
-          this.reader.fetchPromise = null; // Reset the promise for future calls ?? #TODO Do I need this?
-        })();
-      }
+    if (!this.reader.JSON || Object.keys(this.reader.JSON) < 1) {
+      infoCS(
+        "retrieving OrLegLookup",
+        "buildOrLawLinks.js",
+        "getOrLegLookupJson"
+      );
+      this.reader.JSON = await sendAwait({ fetchJson: "OrLawLegLookup" }, true);
     }
   }
 
