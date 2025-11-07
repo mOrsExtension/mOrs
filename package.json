@@ -1,10 +1,14 @@
 {
   "name": "mors",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "Improves appearance of Oregon Revised Statutes on legislature's website and helps retrieve Oregon session laws.",
   "main": "backgroundLoader.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write .",
+    "lint": "eslint .",
+    "zip": "zip -r mOrs-$npm_package_version.zip . -x '*.git*' 'node_modules/*' '*.zip'",
+    "version": "node scripts/sync-version.js && git add manifest.json"
   },
   "repository": {
     "type": "git",
@@ -14,13 +18,16 @@
     "oregon",
     "statutes",
     "law",
-    "legislation"
+    "legislation",
+    "ors",
+    "chrome-extension"
   ],
   "author": "mOrsExtension@gmail.com",
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.2.0",
     "eslint": "^9.2.0",
-    "globals": "^15.1.0"
+    "globals": "^15.1.0",
+    "prettier": "^3.6.2"
   }
 }

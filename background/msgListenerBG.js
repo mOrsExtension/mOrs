@@ -13,7 +13,7 @@ class MessageObj {
       this.receivedMsg = receivedMsg;
       this.isLog = Boolean("log" in this.receivedMsg);
       if (!this.isLog) {
-        this.fromName = url.match(/[^\/]*\.html/);
+        this.fromName = url.match(/[^/]*\.html/);
         this.stringyMsg = JSON.stringify(this.receivedMsg).slice(0, 60);
       }
     }
@@ -69,7 +69,6 @@ class MessageObj {
 
   /** list of one offs that could each be their own functions, but aren't */
   async #miscTasks() {
-    console.log(this.receivedMsg.miscTask);
     switch (this.receivedMsg.miscTask) {
       case "getOrsTabIds":
         return await getTabIdsFromTabQuery({
@@ -154,9 +153,9 @@ const handleMessage = async (message, sender) => {
   if (await newMsg.doTasksAndFetchResponse()) {
     if (!newMsg.isLog) {
       infoBG(
-        `BG response to ${newMsg.stringyMsg} request: '${JSON.stringify(
+        `BG response to ${newMsg.stringyMsg.split(":")[0].slice(1)} request: '${JSON.stringify(
           newMsg.responseToSend
-        )}'`,
+        ).slice(0, 30)}...'`,
         "msgListenerBG.js",
         "handleMessage",
         "#fb8"

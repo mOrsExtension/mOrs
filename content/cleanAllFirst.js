@@ -1,5 +1,6 @@
 //firstClean.js
 
+/** erata fixes, clean html junk & get raw into raw paragraphs */
 const firstClean = async (bodyNode) => {
   let bodyHtml = await errataFixes(bodyNode.innerHTML);
   bodyHtml = regExpCleanUp(bodyHtml);
