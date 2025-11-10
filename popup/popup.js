@@ -1,3 +1,4 @@
+/* global browser, MessageDispatch, displayPaletteDropdownList*/
 //popup.js
 //dependant on popAndOpHelper.js
 
@@ -128,15 +129,7 @@ const addListenerOptions = () => {
   });
 };
 
-/** sends message in popup text field to user - NOTE: currently unused */
-const userMsg = (
-  /**@type {string} */ msgText,
-  /**@type {string} */ color = "default"
-) => {
-  htmlMsgBox.innerHTML = `<span style='color:${color}'>${msgText}</span>`;
-};
 /** Setup all event listeners for form drop downs & buttons */
-
 const addListenerCheckboxes = () => {
   cssDropDown?.addEventListener("change", () => {
     storeAndUpdateTabs(cssDropDown.value, "cssSelector", "updateCss");
@@ -225,7 +218,7 @@ const storeUserKey = async (keyValueObj) => {
 // Constant global variables for popup.js
 // set variables to match elements on popup.html
 const helpButton = document.getElementById("helpButton");
-const htmlMsgBox = document.getElementById("userMsg");
+// const htmlMsgBox = document.getElementById("userMsg"); depreciated space to flash user msgs
 const cssDropDown = document.getElementById("cssSelector");
 const colorOptionsButton = document.getElementById("colorOptions");
 const orLawDropDown = document.getElementById("OrLaws");

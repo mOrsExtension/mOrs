@@ -1,4 +1,6 @@
 //enhanceSecs.js
+/* exported sectionAdjustments */
+/* global chapterInfo, sendAwait, warnCS, diff_match_patch, RegExpHandler, expandSingle, infoCS */
 
 let /** object created by /background/annotation.js;
 {'Chapter XX : [annos] , 'xx.xxx' : [annos]} */ annoObject;
@@ -10,10 +12,11 @@ let orsList = []; // list of ORS sections with divs in order
  */
 
 const sectionAdjustments = async (bodyDiv) => {
-  bodyDiv.querySelectorAll("div.section").forEach((aDiv) => {
+  bodyDiv.querySelectorAll("div.section").forEach((secDiv) => {
     // cycle through div w/ class of 'section'
-    addIds(aDiv);
-    labelBurnt(aDiv);
+    addIds(secDiv);
+    labelBurnt(secDiv);
+    addDiffButtons(secDiv);
   });
   annoUrl =
     `https://www.oregonlegislature.gov/bills_laws/ors/ano00${chapterInfo.chapNo}.html`.replace(
@@ -74,6 +77,101 @@ const labelBurnt = (aDiv) => {
   }
 };
 
+/** @param {HTMLDivElement} aDiv */
+const addDiffButtons = (aDiv) => {
+  if (
+    aDiv.classList.contains("priorAmend") ||
+    aDiv.classList.contains("furtherAmend")
+  ) {
+    const mainORS = getPriorORS(aDiv);
+    if (mainORS) {
+      const compareDiv = document.createElement("details");
+      compareDiv.classList.add("compare");
+      const compareSummary = document.createElement("SUMMARY");
+      compareSummary.textContent = "See changes from base ORS";
+      const details = document.createElement("div");
+      const acknowledgement = document.createElement("div");
+      acknowledgement.classList.add("acknowledgement");
+      acknowledgement.innerHTML = `<p>Comparison text generated with <a href="https://github.com/JackuB/diff-match-patch/">Diff-Match-Patch</a></p><p>(Apache License 2.0; Copyright Google Inc.)</p>`;
+
+      details.innerHTML = makeCompareHtml(
+        buildTextByParas(mainORS), // innerText preserves paragraph breaks; textContent doesn't
+        buildTextByParas(aDiv)
+      );
+      compareDiv.appendChild(compareSummary);
+      compareDiv.appendChild(details);
+      compareDiv.appendChild(acknowledgement);
+      compareDiv.coll;
+      aDiv.appendChild(compareDiv);
+    }
+  }
+};
+
+/** Not sure why innerText didn't preserve paragraphs, but this will + screens out source notes & leadlines
+ * @param {HTMLDivElement} aDiv */
+const buildTextByParas = (aDiv) => {
+  let /**@type {string} */ textString = "";
+  aDiv
+    .querySelectorAll("p:not(.sourceNote):not(.sectionStart)")
+    .forEach((p) => {
+      textString += p.textContent + "\n";
+    });
+  return textString;
+};
+
+const getPriorORS = (aDiv) => {
+  const /** @type {HTMLElement} */ parent = aDiv.parentElement || null;
+  let /** @type {HTMLElement} */ lastChild = parent.previousElementSibling;
+  try {
+    while (
+      !lastChild.classList.contains("section") ||
+      !lastChild.classList.contains("ors")
+    ) {
+      lastChild = lastChild.previousElementSibling;
+    }
+  } catch (error) {
+    warnCS`No prior ORS section before ${aDiv.textContent.slice(0, 50)}. Error: ${error}`;
+    return;
+  }
+  return lastChild;
+};
+
+const makeCompareHtml = (oldTxt, newTxt) => {
+  console.log(oldTxt);
+  console.log(newTxt);
+  const dmp = new diff_match_patch(); // from /diff-match-patch/diff_match_patch_uncompressed.js
+  const diffs = dmp.diff_main(oldTxt, newTxt);
+  dmp.diff_cleanupSemantic(diffs);
+  let html = [];
+  const swapPatterns = {
+    "&amp": /&/g,
+    "&lt": /</g,
+    "&gt": />/g,
+    "<br>&nbsp;&nbsp;": /\n/g,
+  };
+  const spanOptions = {
+    0: `class="delete"`,
+    1: "",
+    2: `class="insert"`,
+  };
+  for (var x = 0; x < diffs.length; x++) {
+    const operation = (diffs[x][0] + 1).toString(); // 0=DIFF_EQUAL, 1: INSERT or -1:DELETE)
+    let /**@type {string} */ text = diffs[x][1]; // Text of change.
+    console.log(text);
+    for (const swap in swapPatterns) {
+      text = text.replaceAll(swapPatterns[swap], swap);
+    }
+    console.log(`v2: ${text}`);
+    for (const spanType in spanOptions) {
+      if (spanType == operation) {
+        html.push(`<span ${spanOptions[spanType]}>${text}</span>`);
+        break;
+      }
+    }
+  }
+  return html.join("");
+};
+
 const addChildrenToDiv = (subHead) => {
   let childList = [];
   if (subHead.childrenList.length > 0) {
@@ -121,6 +219,7 @@ const addAnnos = async (aDiv) => {
   }
 };
 
+/** adds functionality to make section divs collapsible when clicking on heads  */
 const addButtonsToSections = (aDiv) => {
   const newButton = document.createElement("button"); // creating button functionality for collapsible divs that will include the section head
   newButton.className = "collapser";
@@ -128,7 +227,6 @@ const addButtonsToSections = (aDiv) => {
   collapsibleDiv.className = "collapsible";
   let childrenList = [...aDiv.children];
   childrenList.forEach((childOfDiv, index) => {
-    // cycling through the section div's children
     if (index == 0) {
       newButton.appendChild(childOfDiv); // first line becomes the button
     } else {

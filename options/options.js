@@ -1,5 +1,5 @@
+/* global browser, MessageDispatch */
 //options.js
-//depends on ../popup/popAndOpHelper.js
 
 window.addEventListener("load", async () => {
   await browser.storage.sync.set({ cssSelector: "Custom" });
@@ -229,26 +229,6 @@ window.addEventListener("load", async () => {
   });
 
   //helper functions:
-
-  //Message passing to background.js (send message, no need (yet) for responses)
-  const sendMessageToBackground = (messageContent) => {
-    /**return*/ browser.runtime.sendMessage({ message: messageContent }); // should be able to remove return
-  };
-
-  const sendAndReceiveFromBackground = async (messageContent) => {
-    try {
-      const response = await browser.runtime.sendMessage({
-        message: messageContent,
-      });
-      return response.response;
-    } catch (error) {
-      warnOptions(
-        `Error sending & awaiting response to '${messageContent}': ${error}`,
-        "exampleColorsRefresh"
-      );
-      return false;
-    }
-  };
 
   /** Sends "information" message to console; viewable in "inspect service worker"
    * @param {string} infoMsg

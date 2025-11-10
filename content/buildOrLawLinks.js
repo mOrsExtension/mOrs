@@ -1,3 +1,5 @@
+/* exported displayOrLaws */
+/* global infoCS, sendAwait, warnCS */
 //buildOrLawLinks.js
 
 class OrLawsDisplay {
@@ -15,7 +17,7 @@ class OrLawsDisplay {
     displayMe.getAnchorList();
     displayMe.addDataTags();
     await displayMe.getReaderType();
-    if (displayMe.reader.name == "OrLeg") {
+    if (displayMe.reader.name == "OrLeg" || displayMe.reader.name == "Both") {
       await displayMe.getOrLawsList();
     }
     displayMe.updateLinks();
@@ -23,7 +25,7 @@ class OrLawsDisplay {
   }
   getAnchorList() {
     if (this.anchorList.length < 1) {
-      this.anchorList = this.bodyDiv.querySelectorAll("a.sessionlaw");
+      this.anchorList = this.bodyDiv.querySelectorAll("a.sessionLaw");
     }
   }
   addDataTags() {
@@ -50,8 +52,9 @@ class OrLawsDisplay {
         "first",
         "second",
         "third",
-        "forth",
+        "fourth",
         "fifth",
+        "sixth",
       ].findIndex((ordinal) => {
         return RegExp(`${ordinal}\\sspecial\\ssession)[^]`).test(
           text.toLowerCase()
@@ -61,9 +64,12 @@ class OrLawsDisplay {
         specialSessionNum++; // add one to deal with 0 index
       }
     } else {
-      specialSessionNum = /s\.s\./.test(text)
-        ? text.replace(/[^]*s\.s\.(\d)[^]*/, "$1")
-        : null;
+      if (/s\.s\./.test(text)) {
+        specialSessionNum = text.replace(/[^]*s\.s\.(\d)[^]*/, "$1");
+        if (specialSessionNum.length > 1) {
+          specialSessionNum = "1"; // if there was no special session number, presume ss1
+        }
+      }
     }
     return specialSessionNum;
   };
@@ -201,17 +207,8 @@ class OrLawsDisplay {
 
 /**  triggered by main.js or msgListener.js; gets anchor list; builds anchor data if needed; retrieves anchor data & reader; builds anchor urls, returns updated htmlElement
  * @param {HTMLElement} bodyMain */
-displayOrLaws = async (bodyMain) => {
+const displayOrLaws = async (bodyMain) => {
   let /** @type {OrLawsDisplay} */ newBody =
       await OrLawsDisplay.buildHandler(bodyMain);
   return newBody.bodyDiv;
 };
-
-// ...
-//     return bodyMain;
-//   } catch (error) {
-//     const warning = `Error attempting to generate OrLaws links: ${error}`;
-//     warnCS(warning, "navigate.js", "OrLawLinking");
-//     throw error;
-//   }
-// };

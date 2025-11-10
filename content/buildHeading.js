@@ -1,3 +1,5 @@
+/* exported buildHeading, addToHead, extractChapterInfo */
+/* global infoCS, RegExpHandler, sendAwait*/
 //buildHeading.js
 
 /** Global constant with information about the ORS chapter being viewed*/
@@ -28,7 +30,6 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
 
   const /**@type {HTMLParagraphElement[]} */ removalList = [];
   let /**@type {boolean} */ addToMiscHead = false;
-  let /**@type {boolean} */ isDone = false;
   const allParagraphs = docBody.querySelectorAll("p");
   let endIndex = 1000;
 
@@ -76,7 +77,7 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
       chapterInfo.chapName = `(Former Provisions: ${
         allParagraphs[index + 1]?.textContent
       })`; // chapter name is on following line
-      titleCandidate = allParagraphs[index + 3].textContent;
+      let titleCandidate = allParagraphs[index + 3].textContent;
       chapterInfo.titleName = titleCandidate || "";
       endIndex = index + 3;
       chapterInfo.miscHead.innerHTML = `<p><b>Note:</b> All former sections in chapter have been repealed or renumbered.</p>

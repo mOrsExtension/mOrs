@@ -1,3 +1,5 @@
+/* exported buildBodyDivs */
+/* global warnCS */
 //createDivs.js
 
 //CLASSES:
@@ -105,7 +107,7 @@ class SectionClassifier {
         return noteClasses;
       }
       parents.closeParent("temp"); // else: piece following the note
-      this.newParent = parents.getParentElement("sub"); // and look for other potential parents (subdiv, div heads)
+      this.newParent = parents.getParentElement("sub"); // and look for other potential parents (sub-div, div heads)
     }
     if (this.#isBurnt()) {
       return ["burnt"];

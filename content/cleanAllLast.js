@@ -1,3 +1,5 @@
+/* exported finalCleanUp, chapAndSecRegExp */
+/* globals RegExpHandler, chapterInfo, infoCS */
 //finalClean.js
 
 /**
@@ -58,7 +60,6 @@ const finalCleanUp = (finalDivs) => {
           }
 
           // create link to external chapter, targets the specific chapter id
-          const chapAndSecRegExp = new RegExpHandler();
           anAnchor.href = RegExpHandler.replaceAllWith(
             anAnchor.textContent,
             /[^]*?(([1-9]\d{0,2}[A-C]?)\.\S*)[^]*?/,

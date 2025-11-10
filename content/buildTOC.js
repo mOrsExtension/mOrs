@@ -1,3 +1,5 @@
+/* exported buildTOC */
+/* global infoCS */
 //buildTOC.js
 
 /** Returns Div of table of contents, formatted */

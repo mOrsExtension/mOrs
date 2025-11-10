@@ -1,3 +1,5 @@
+/* exported userData, scrollToTag, userStylesRefresh, exportSingle, */
+/* global infoCS, warnCS, RegExpHandler, sendAwait, collapseAllSections, expandAllSections ,setFullWidth, showBurnt, showSourceNotes, showMenu, showVolumeOutline, showTOC, showAnnos,  expandSingle*/
 //userData.js
 
 /** info logging for use of user data in this script */
@@ -38,7 +40,7 @@ const showCollapse = (isTrue) => {
 };
 
 const userData = async () => {
-  const finishedData = await Promise.all(
+  await Promise.all(
     // functions in helper.js
     [
       ["isCollapseDefault", showCollapse],
@@ -82,7 +84,8 @@ class tagFindAndSeek {
       if (this.targetIdString.length > 0) {
         this.hasTarget = true;
       }
-    } catch (error) {
+    } catch {
+      // handle "error" silently
       this.hasTarget = false;
     }
   }
@@ -121,8 +124,6 @@ class tagFindAndSeek {
   }
 }
 
-const buildColors = async () => {};
-
 /**replaces parts of stylesheet; called at launch or via msg from popup or options when user changes stylesheet */
 const userStylesRefresh = async () => {
   const theRootStyle = document.documentElement.style;
@@ -134,6 +135,6 @@ const userStylesRefresh = async () => {
     `Added user css properties to stylesheet: ${JSON.stringify(
       replacementSheet
     )}`,
-    "buildColors"
+    "userStylesRefresh"
   );
 };

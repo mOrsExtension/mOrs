@@ -1,3 +1,5 @@
+/* exported browser */
+/* global chrome, importScripts, infoBG */
 //backgroundLoader.js
 
 const browser = chrome;
