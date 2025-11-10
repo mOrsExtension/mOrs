@@ -1,5 +1,5 @@
 /* exported VolNavConstructor, buildFloatingMenuDiv */
-/* global infoCS, browser, chapterInfo, sendAwait, RegExpHandler, expandAllSections, collapseAllSections, toggleFullWidth*/
+/* global infoCS, browser, chapterInfo, sendAwait, RegExpHandler, expandAllSections, collapseAllSections, makeVisible, toggleFullWidth */
 
 //buildNewMenus.js
 
@@ -10,8 +10,10 @@ const buildFloatingMenuDiv = async () => {
   let menuPanel = document.createElement("div");
   menuPanel.id = "floatMenu";
   let versionParagraph = document.createElement("p");
+
   let buttonRow1 = document.createElement("div");
   let buttonRow2 = document.createElement("div");
+  let buttonRow3 = document.createElement("div");
   let manifest = browser.runtime.getManifest(); // apparently does not require await
   let thisVersion = manifest.version;
   versionParagraph.classList.add("version");
@@ -19,6 +21,7 @@ const buildFloatingMenuDiv = async () => {
   menuPanel.appendChild(versionParagraph);
   menuPanel.appendChild(buttonRow1);
   menuPanel.appendChild(buttonRow2);
+  menuPanel.appendChild(buttonRow3);
 
   /** adding buttons
    * @param {string} id
@@ -65,7 +68,6 @@ const buildFloatingMenuDiv = async () => {
   buttonRow1.appendChild(
     createButton("fullWidth", "Reading Mode", toggleFullWidth)
   );
-  // Depreciated. #TODO item #75, volume navigation not working; offset at fault (perhaps?)
   buttonRow2.appendChild(
     createButton("prevChap", "Previous Chapter", async () => {
       await navToOffsetChap(-1);
@@ -76,6 +78,19 @@ const buildFloatingMenuDiv = async () => {
       await navToOffsetChap(1);
     })
   );
+  buttonRow3.appendChild(
+    createButton("TOC_link", "Table of Contents", async () => {
+      makeVisible("div#toc", true);
+      document.getElementById("toc").scrollIntoView();
+    })
+  );
+  buttonRow3.appendChild(
+    createButton("Vol_link", "Volume Navigation", async () => {
+      makeVisible("div#volumeOutline", true);
+      document.getElementById("volumeOutline").scrollIntoView();
+    })
+  );
+
   return menuPanel;
 };
 
