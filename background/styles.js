@@ -1,3 +1,5 @@
+/* exported generateCSS,*/
+/* global getFromStorage, infoBG, warnBG, readJsonFile*/
 //background/style.js
 
 /**  retrieves CSS, either from sync.storage for User Custom or from css.json file for preset options

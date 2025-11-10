@@ -1,3 +1,5 @@
+/* exported firstClean */
+/* global sendAwait, warnCS, RegExpHandler */
 //firstClean.js
 
 /** erata fixes, clean html junk & get raw into raw paragraphs */

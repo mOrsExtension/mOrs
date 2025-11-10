@@ -1,3 +1,5 @@
+/* exported */
+/* global getFromStorage, getTabIdsFromTabQuery, generateCSS, getPalletteList, finishAnnoRetrieval, warnBG, infoBG, readJsonFile, getChapterInfo, startAnnoRetrieval, buildAndNavigateToUrls, browser, */
 //background/msgListener.js
 
 /** Receives message and sends response */
@@ -139,7 +141,7 @@ const handleMessage = async (message, sender) => {
     newMsg.receivedMsg == null ||
     newMsg.receivedMsg == undefined
   ) {
-    throw new error("Received null/undefined message");
+    throw new Error("Received null/undefined message");
   }
   if (!newMsg.isLog) {
     // don't want a create duplicate log messages

@@ -1,3 +1,5 @@
+/* exported */
+/* global orsRegExp, getFromStorage, browser, warnBG, infoBG, readJsonFile */
 //background/navigate.js
 
 /** constants for OrsSearch*/

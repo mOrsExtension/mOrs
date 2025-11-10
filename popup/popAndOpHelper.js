@@ -1,3 +1,6 @@
+/* exported displayPaletteDropdownList */
+/* global chrome, cssDropDown, warnPopup */
+//popAndOpHelper.js//
 let browser;
 try {
   browser = chrome;

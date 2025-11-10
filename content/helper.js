@@ -1,3 +1,5 @@
+/* exported RegExpHandler, showVerbose, toggleFullWidth, showBurnt, showMenu, showVolumeOutline, showSourceNotes, showTOC, showAnnos, expandSingle, collapseAllSections, expandAllSections */
+/* global chrome */
 //helper.js
 
 let browser;

@@ -1,3 +1,6 @@
+/* exported VolNavConstructor, buildFloatingMenuDiv */
+/* global infoCS, browser, chapterInfo, sendAwait, RegExpHandler, expandAllSections, collapseAllSections, toggleFullWidth*/
+
 //buildNewMenus.js
 
 /** add floating div menu with version info & select buttons */

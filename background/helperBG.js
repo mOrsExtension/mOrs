@@ -1,3 +1,5 @@
+/* exported orsRegExp, tabRegExp,  */
+/* global browser, readJsonFile */
 //background/helperBG.js
 
 // background global constants used within folder

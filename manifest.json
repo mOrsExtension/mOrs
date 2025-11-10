@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "mORS Extension",
     "description": "Improves appearance of Oregon Revised Statutes on legislature's website and helps retrieve Oregon session laws.",
-    "version": "0.9.7",
+    "version": "0.9.8",
     "action": {
         "default_icon": {
             "16": "/images/icon16.png",
@@ -36,7 +36,8 @@
                 "/content/helper.js",
                 "/content/mORS.js",
                 "/content/msgListener.js",
-                "/content/userData.js"
+                "/content/userData.js",
+                "/diff-match-patch/diff_match_patch_uncompressed.js"
             ],
             "css": [
                 "data/main.css"

@@ -1,3 +1,6 @@
+/* exported startAnnoRetrieval, finishAnnoRetrieval */
+/* global warnBG, infoBG, orsRegExp, getTextFromHtml, tabRegExp */
+
 /** Cleans up annoSecList using RegExp
  *  (instead of DOM parsing, because DOM required creating outside dummy page of temp html) */
 class AnnoCleaner {
@@ -314,7 +317,7 @@ const startAnnoRetrieval = async (chapterNo) => {
       annoCollection.currentSection.currentSubHead.childrenList.push(
         annoParaTxt
       );
-    } catch (error) {
+    } catch {
       infoAnnos(
         `No subhead found for '${annoParaTxt.slice(
           0,

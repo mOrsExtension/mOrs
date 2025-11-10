@@ -1,3 +1,5 @@
+/* exported startObserver */
+/* global infoCS */
 // mutations.js
 
 /**  forces redraw after changes are all finished;

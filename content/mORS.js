@@ -1,3 +1,4 @@
+/* global firstClean, extractChapterInfo, addToHead, sendAwait, chapterInfo, buildTOC, bodyCleanUp, buildBodyDivs, buildHeading, buildFloatingMenuDiv, VolNavConstructor, displayOrLaws, sectionAdjustments, finalCleanUp, infoCS, getAndUseData, showVerbose, userStylesRefresh, userData, scrollToTag, listenToPopup */
 //mORS.js
 
 const runMain = async () => {
@@ -6,7 +7,7 @@ const runMain = async () => {
   Array.from(document.body.attributes).forEach((attr) => {
     docBody.setAttribute(attr.name, attr.value);
   });
-  docBody = await firstClean(docBody); // firstclean.js
+  docBody = await firstClean(docBody); // firstClean.js
   const extractHeadingInfo = extractChapterInfo(docBody); // buildHeading.js
   addToHead(); // buildHeading.js
   sendAwait({ startAnnos: chapterInfo.chapNo }, false); // open annos page in background, don't await response or completion
@@ -37,6 +38,7 @@ window.addEventListener("load", async () => {
     "helpChrome.js",
     "on 'load'"
   );
+
   getAndUseData("doShowVerbose", showVerbose);
   userStylesRefresh(); // stylesheet.js
   await runMain(); // mORS.js (above) - implements changes to page

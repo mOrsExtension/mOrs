@@ -1,3 +1,4 @@
+/* global require */
 // Sync package.json version to manifest.json
 const fs = require("fs");
 const packageJson = require("../package.json");

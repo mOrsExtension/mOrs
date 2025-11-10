@@ -1,3 +1,5 @@
+/* exported getPalletteList, getChapterInfo, getTextFromHtml */
+/* global infoBG, warnBG, browser */
 //webResources.js
 
 let retrievalObject = {};

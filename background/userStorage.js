@@ -1,3 +1,5 @@
+/* exported getTabIdsFromTabQuery*/
+/* globals browser, infoBG, warnBG */
 //background/userStorage.js
 
 /**

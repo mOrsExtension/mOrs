@@ -1,6 +1,9 @@
+/* exported bodyCleanUp */
+/* global RegExpHandler, infoCS */
+
 //bodyClean.js
 
-function bodyCleanUp(/**@type {HTMLDivElement} */ docBody) {
+const bodyCleanUp = (docBody) => {
   const tabRegExp = "(?:&nbsp;|\\s){0,20}"; //regExp for a tab/blank space (extending to 20 to capture chapter 3 long tabs)
 
   /** First pass tagging paragraphs [SearchString, classParagraphAs]
@@ -26,7 +29,7 @@ function bodyCleanUp(/**@type {HTMLDivElement} */ docBody) {
 
       // source notes
       [
-        `^${tabRegExp}\\[(<a class="sessionLaw"|Para|Sub|Former|Repeal|Renum|Am|Enacted)`,
+        `^${tabRegExp}\\[(<a class="sessionLaw"|Para|Sub|Former|Repeal|Renumbered|Am|Enacted)`,
         "sourceNote",
       ],
 
@@ -48,7 +51,7 @@ function bodyCleanUp(/**@type {HTMLDivElement} */ docBody) {
   let paraList = docBody.querySelectorAll("p");
   // iterates backwards through list in order to filter double headings
   for (let i = paraList.length - 1; i > -1; i--) {
-    aPara = paraList[i];
+    let aPara = paraList[i];
     firstPassClass.forEach(([searchFor, /**@type {String} */ newClass]) => {
       if (RegExpHandler.doesContainThis(searchFor, aPara.innerHTML)) {
         aPara.className = newClass;
@@ -131,7 +134,7 @@ function bodyCleanUp(/**@type {HTMLDivElement} */ docBody) {
   let formParas = docBody.querySelectorAll(
     "p.startForm, p.endForm, p.sectionStart"
   );
-  formParas.forEach((aPara, index) => {
+  formParas.forEach((aPara) => {
     switch (aPara.className) {
       case "startForm": // iterate the number of forms
         priorEnd = null;
@@ -183,12 +186,12 @@ function bodyCleanUp(/**@type {HTMLDivElement} */ docBody) {
    * @param {String} changeFrom
    * @param {String} changeTo */
   const romanizeParagraphs = (changeFrom, changeTo) => {
-    let findFirstParenz = new RegExpHandler(/^\(([^]+?)\)/);
+    let findFirstParent = new RegExpHandler(/^\(([^]+?)\)/);
     /**Returns lower case value in the leading parenthesis as lowercase
      * E.g. '(B) Example text' ==> 'b'; '(ii) thing' ==> 'ii' *
      * @param {String} theText */
     const inParensLowerCase = (theText) => {
-      let result = findFirstParenz.firstMatchGroupNo(theText, 1);
+      let result = findFirstParent.firstMatchGroupNo(theText, 1);
       if (typeof result == "string") {
         return result.toLowerCase();
       }
@@ -249,4 +252,4 @@ function bodyCleanUp(/**@type {HTMLDivElement} */ docBody) {
   romanizeParagraphs("subPara", "subSubSubPara"); // then check subparagraphs
 
   return docBody;
-}
+};
