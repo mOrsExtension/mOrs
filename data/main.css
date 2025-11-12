@@ -359,7 +359,6 @@ h3 {
    margin-block: 0.2rem auto 0 auto;
 }
 
-
 .subSec,
 .para,
 .subPara,
@@ -383,6 +382,11 @@ h3 {
 .subSubSubPara {
    padding-left: 11ch;
 }
+.copyOnly {
+   font-size: 0;
+   line-height: 0;
+}
+
 /* floating button div */
 
 div#floatMenu {

@@ -92,5 +92,27 @@ const finalCleanUp = (finalDivs) => {
       anElement.remove();
     }
   });
+
+  const addCopyOnlySpaces = () => {
+    const spacesToAdd = {
+      subSec: 2,
+      para: 4,
+      subPara: 7,
+      subSubPara: 10,
+      subSubSubPara: 13,
+    };
+    for (const unit in spacesToAdd) {
+      let spaces = "";
+      for (var i = 0; i < spacesToAdd[unit]; i++) {
+        spaces += "&nbsp;";
+      }
+      finalBody.querySelectorAll(`.${unit}`).forEach((item) => {
+        item.innerHTML =
+          `<span class="copyOnly">${spaces}</span>` + item.innerHTML;
+      });
+    }
+  };
+  addCopyOnlySpaces();
+
   document.body = finalBody; // putting it all live and in front of user
 };

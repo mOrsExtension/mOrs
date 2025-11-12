@@ -7,26 +7,26 @@ const listenToPopup = () => {
   /*** NOTE ***
    * onMessage.addListener *needs* to make it's response to promise through a callback. Don't use async/await */
   browser.runtime.onMessage.addListener((msg) => {
-    const msgText = msg.toMORS;
+    const { toMORS: msgText } = msg.toMORS;
+    const msgType = Object.keys(msgText)[0];
+    const msgValue = Object.values(msgText)[0];
     try {
       infoCS(
-        `Query from popup: "${Object.keys(msgText)}: ${Object.values(
-          msgText
-        )}"`,
+        `From popup: "${msgType}: ${msgValue}"`,
         "addListeners.js",
-        "listenToPopup"
+        "listenToPopup(callback)"
       );
-      switch (Object.keys(msgText)[0]) {
+      switch (msgType) {
         case "showBurnt":
-          showBurnt(msgText["showBurnt"]); // helper.js
+          showBurnt(msgValue); // helper.js
           break;
 
         case "showSourceNote":
-          showSourceNotes(msgText["showSourceNote"]); // helper.js
+          showSourceNotes(msgValue); // helper.js
           break;
 
         case "updateOrLawsReader":
-          displayOrLaws(document.getElementById("main")); // orLawLink.js - popup is sending a value, but not used, looks up new stored data
+          displayOrLaws(document.getElementById("main")); // orLawLink.js - popup is signaling change, but change is value looked up from stored data
           break;
 
         case "updateCss":
@@ -34,38 +34,36 @@ const listenToPopup = () => {
           break;
 
         case "collapseAll":
-          msgText["collapseAll"] ? collapseAllSections() : expandAllSections(); // helper.js
+          msgValue ? collapseAllSections() : expandAllSections(); // helper.js
           break;
 
         case "displayFullWidth":
-          setFullWidth(msgText["displayFullWidth"]); // helper.js
+          setFullWidth(msgValue); // helper.js
           break;
 
         case "showMenu":
-          showMenu(msgText["showMenu"]); // helper.js
+          showMenu(msgValue); // helper.js
           break;
 
         case "showNav":
-          showVolumeOutline(msgText["showNav"]);
+          showVolumeOutline(msgValue);
           break;
 
         case "showTOC":
-          showTOC(msgText["showTOC"]);
+          showTOC(msgValue);
           break;
 
         case "showAnnos":
-          showAnnos(msgText["showAnnos"]);
+          showAnnos(msgValue);
           break;
 
         case "showVerbose":
-          showVerbose(msgText["showVerbose"]);
+          showVerbose(msgValue);
           break;
 
         default:
           throw new Error(
-            `Unidentified message from popup.html: ${
-              Object.keys(msgText)[0]
-            } : ${Object.values(msgText)}`
+            `Unidentified message from popup.html: ${msgType} : ${msgValue}`
           );
       }
     } catch (error) {
