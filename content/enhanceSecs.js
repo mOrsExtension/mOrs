@@ -137,8 +137,6 @@ const getPriorORS = (aDiv) => {
 };
 
 const makeCompareHtml = (oldTxt, newTxt) => {
-  console.log(oldTxt);
-  console.log(newTxt);
   const dmp = new diff_match_patch(); // from /diff-match-patch/diff_match_patch_uncompressed.js
   const diffs = dmp.diff_main(oldTxt, newTxt);
   dmp.diff_cleanupSemantic(diffs);
@@ -157,11 +155,9 @@ const makeCompareHtml = (oldTxt, newTxt) => {
   for (var x = 0; x < diffs.length; x++) {
     const operation = (diffs[x][0] + 1).toString(); // 0=DIFF_EQUAL, 1: INSERT or -1:DELETE)
     let /**@type {string} */ text = diffs[x][1]; // Text of change.
-    console.log(text);
     for (const swap in swapPatterns) {
       text = text.replaceAll(swapPatterns[swap], swap);
     }
-    console.log(`v2: ${text}`);
     for (const spanType in spanOptions) {
       if (spanType == operation) {
         html.push(`<span ${spanOptions[spanType]}>${text}</span>`);

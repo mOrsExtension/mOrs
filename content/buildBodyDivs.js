@@ -121,34 +121,25 @@ class SectionClassifier {
   #noteClasses() {
     let prevSibText = this.priorElem?.textContent || "";
     let paraText = this.paraElem?.textContent || "";
-    const noteTypeTests = [
-      { orSessionLaw: Boolean(/Sec\.\s\d{1,3}\w?\./.test(paraText)) },
-      {
-        futureRepeal: Boolean(
-          /repeal[^]*user.s\sconvenience/.test(prevSibText)
-        ),
-      },
-      {
-        furtherAmend: Boolean(
-          /amendment[^]*(become|takes? effect)[^]*(after|\bon\b|\bat\b)[^]*\sconvenience/.test(
-            prevSibText
-          )
-        ),
-      },
-      {
-        priorAmend: Boolean(
-          /amendment[^]*(become|takes? effect)[^]*until[^]*\sconvenience/.test(
-            prevSibText
-          )
-        ),
-      },
-    ];
-    const testPassed = noteTypeTests.findIndex((test) => {
-      return Object.values(test)[0];
-    });
-    if (testPassed > -1) {
-      let noteClass = Object.keys(noteTypeTests[testPassed]);
-      return [noteClass, "noteSec"];
+    const noteTypeTests = {
+      orSessionLaw: Boolean(/Sec\.\s\d{1,3}\w?\./.test(paraText)),
+      futureRepeal: Boolean(/repeal[^]*user.s\sconvenience/.test(prevSibText)),
+      furtherAmend: Boolean(
+        /amendment[^]*(become|takes? effect)[^]*(after|\bon\b|\bat\b)[^]*\sconvenience/.test(
+          prevSibText
+        )
+      ),
+      priorAmend: Boolean(
+        /amendment[^]*(become|takes? effect)[^]*until[^]*\sconvenience/.test(
+          prevSibText
+        )
+      ),
+    };
+    for (const test in noteTypeTests) {
+      if (noteTypeTests[test]) {
+        const noteClass = test;
+        return [noteClass, "noteSec"];
+      }
     }
     return [];
   }
