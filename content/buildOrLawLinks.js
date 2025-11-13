@@ -56,7 +56,7 @@ class OrLawsDisplay {
         "fifth",
         "sixth",
       ].findIndex((ordinal) => {
-        return RegExp(`${ordinal}\\sspecial\\ssession)[^]`).test(
+        return RegExp(`(${ordinal}\\sspecial\\ssession)[^]`).test(
           text.toLowerCase()
         );
       });
