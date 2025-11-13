@@ -29,5 +29,9 @@
     "eslint": "^9.2.0",
     "globals": "^15.1.0",
     "prettier": "^3.6.2"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "puppeteer": "^24.29.1"
   }
 }
