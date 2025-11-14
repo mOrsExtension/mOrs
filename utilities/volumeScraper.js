@@ -44,7 +44,7 @@ class ORScraper {
   async navigate() {
     await this.page.goto(this.pageUrl, {
       waitUntil: "networkidle2",
-      timeout: 30000,
+      timeout: 20000,
     });
   }
 
@@ -63,8 +63,16 @@ class ORScraper {
       const links = Array.from(document.querySelectorAll(cssSelector));
       for (var link of links) {
         link.click();
-        await wait(50);
+        await wait(90);
       }
+    });
+  }
+
+  // Wait for expanded content to be visible
+  async waitForChapters() {
+    await this.page.waitForFunction(() => {
+      const expandedElements = document.querySelectorAll(".ms-itmHoverEnabled");
+      return expandedElements.length > 650; // wait until there's 650 chapters visible
     });
   }
 
@@ -101,6 +109,9 @@ class ORScraper {
       }
       if (elem.title) {
         let { number, text } = this.makeTitle(elem.title);
+        if (/\d\b/.test(number)) {
+          number += " "; // make sure titles that are just numbers have trailing space
+        }
         curVol.titles[number] = {};
         curTitle = curVol.titles[number];
         curTitle.heading = text;
@@ -108,7 +119,9 @@ class ORScraper {
       }
       if (elem.chapter) {
         let { number, text } = this.makeChap(elem.chapter);
-        console.log(`${number} and ${text}`);
+        if (/\d\b/.test(number)) {
+          number += " "; // make sure chapters that are just numbers have trailing space
+        }
         curTitle.chapters[number] = text;
       }
     });
@@ -146,7 +159,8 @@ class ORScraper {
   findMatch(text, re) {
     let match = text.match(re);
     if (match) {
-      return match[1];
+      let ans = match[1];
+      return ans.trim();
     } else {
       console.log(`No match for ${re.source} in ${text}`);
       return "null";
@@ -173,9 +187,10 @@ async function main() {
   const scraper = new ORScraper();
   await scraper.init();
   await scraper.navigate();
-  await scraper.wait(1000);
+  await scraper.wait(1500);
   await scraper.clickLinks();
-  await scraper.wait(500);
+  await scraper.waitForChapters();
+  await scraper.wait(1000);
   await scraper.getRawData();
   await scraper.parseData();
   await scraper.saveToFile(`volNav.json`);

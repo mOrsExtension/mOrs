@@ -98,29 +98,36 @@ class VolNavConstructor {
   static async buildDiv() {
     let volumeOutlineDiv = document.createElement("div");
     volumeOutlineDiv.id = "volumeOutline";
-    let volJson = await sendAwait({ fetchJson: "VolumeOutline" }, true);
-    volumeOutlineDiv.innerHTML = this.getHtmlFromVolOutline(volJson);
+    let /** @type {JSON} raw JSON in /data */ volJson = await sendAwait(
+        { fetchJson: "VolumeOutline" },
+        true
+      );
+    volumeOutlineDiv.innerHTML = this.#getHtmlFromVolOutline(volJson);
     this.highlightMatch(volumeOutlineDiv, "volume");
     return volumeOutlineDiv;
   }
 
   /**  Convert the JSON data into nested HTML lists using builtin CSS "summary/details" to form dropdowns*/
-  static getHtmlFromVolOutline(data) {
-    let mainList = "";
-    for (const volumeKey in data.Volumes) {
-      const volume = data.Volumes[volumeKey];
+  static #getHtmlFromVolOutline(data) {
+    let /** @type {string} cumulative HTML in text */ mainList = "";
+    for (const volumeKey in data.volumes) {
+      const curVolume = data.volumes[volumeKey];
       mainList += `<details class="volume" data-volume="${volumeKey}">`; // Volume dropdown info
-      mainList += `<summary>Volume ${volumeKey}</summary><ul>`; // Volume header, start list of titles
-      for (const titleKey in volume.Titles) {
-        const title = volume.Titles[titleKey];
+      mainList += `<summary>Volume ${volumeKey}: ${curVolume.heading}</summary><ul>`; // Volume header, start list of titles
+      for (const titleKey in curVolume.titles) {
+        const curTitle = curVolume.titles[titleKey];
         mainList += `<li><details class="title" data-title="${titleKey.trim()}">`; // Title dropdown info
         mainList += `<summary>Title ${titleKey.trim()}: ${
-          title.Heading
+          curTitle.heading
         }</summary><ul>`; // Title header, start list of chapters
-        for (const chapterKey in title.Chapters) {
-          const chapter = title.Chapters[chapterKey];
-          mainList += `<li class="chapter"><a class="orsLink" data-chapter="${chapterKey.trim()}">`; // ORS chapter link
-          mainList += `ORS ${chapterKey.trim()}</a>:<span data-chapter="${chapterKey.trim()}">${chapter}</span></li>`; // Chapter info
+        for (const chapterKey in curTitle.chapters) {
+          const /**@type {string} */ curChapter = curTitle.chapters[chapterKey];
+          let formerProvisions = "";
+          if (/Former Provisions/.test(curChapter)) {
+            formerProvisions = " former_provisions";
+          }
+          mainList += `<li class="chapter"><a class="orsLink${formerProvisions}" data-chapter="${chapterKey.trim()}">`; // ORS chapter link
+          mainList += `ORS ${chapterKey.trim()}</a>: <span data-chapter="${chapterKey.trim()}">${curChapter}</span></li>`; // Chapter info
         }
         mainList += "</ul></details></li>"; // Close the title's <ul> & <details>
       }
