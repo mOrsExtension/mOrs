@@ -379,13 +379,7 @@ const buildBodyDivs = (/**@type {HTMLDivElement}*/ bodyCopy) => {
 
     const newDiv = aParent.addChildDiv(pElem, buildClasses); // create a child
     parents.setActive(divPrototype, newDiv); // make child the active parent
-
-    // TODO: Does this make any sense here? source Notes aren't a builder, are they? Okay to delete?
-    if (pElem.classList.contains("sourceNote")) {
-      console.log("I matter!?");
-      parents.closeParent("sec"); // whatever comes after source notes doesn't belong in its section
-    }
-  }); // next "p"
+  }); // next "pElem"
 
   let newBodyDiv = newMainBodyDiv.Div;
   cleanerObject.body = newBodyDiv;

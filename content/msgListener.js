@@ -7,7 +7,7 @@ const listenToPopup = () => {
   /*** NOTE ***
    * onMessage.addListener *needs* to make it's response to promise through a callback. Don't use async/await */
   browser.runtime.onMessage.addListener((msg) => {
-    const { toMORS: msgText } = msg.toMORS;
+    const msgText = msg.toMORS;
     const msgType = Object.keys(msgText)[0];
     const msgValue = Object.values(msgText)[0];
     try {
