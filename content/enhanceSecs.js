@@ -4,7 +4,7 @@
 
 let /** object created by /background/annotation.js;
 {'Chapter XX : [annos] , 'xx.xxx' : [annos]} */ annoObject;
-let annoUrl;
+let /** @type {string} */ annoUrl;
 let orsList = []; // list of ORS sections with divs in order
 
 /**main program: adds #ids; updates burnt sec text; appends annotations to sections; builds buttons to collapse secs
@@ -41,14 +41,17 @@ const sectionAdjustments = async (bodyDiv) => {
     addAnnos(aDiv);
     addButtonsToSections(aDiv);
   });
-  addCollapseToggleButtons();
-  const links = splitInternalAndExternalLinks();
-  links.externalOrs.forEach((aLink) => {
+  bodyDiv.querySelectorAll("button.collapser").forEach((button) => {
+    addCollapseToggleButton(button);
+  });
+  const { externalOrs, internalOrs } = splitLinks(bodyDiv);
+  externalOrs.forEach((aLink) => {
     aLink.classList.add("linkExt");
   });
-  links.internalOrs.forEach((aLink) => {
+  internalOrs.forEach((aLink) => {
     aLink.anchor.classList.add("linkInt");
-    makeLinkExpandTarget(aLink);
+    const target = getCollapsibleTarget(aLink.text, bodyDiv);
+    makeLinkExpandTarget(aLink, target);
   });
 };
 
@@ -233,37 +236,34 @@ const addButtonsToSections = (aDiv) => {
   aDiv.appendChild(collapsibleDiv); // and collapsible to current div
 };
 
-/** Adds functionality for each section leadline button to toggle expand/collapse following section */
-const addCollapseToggleButtons = () => {
-  document.querySelectorAll("button.collapser").forEach((buttonElement) => {
-    buttonElement.addEventListener("click", () => {
-      buttonElement.nextElementSibling.classList.toggle("invisibility");
-    });
+/** Adds functionality for each section leadline button to toggle expand/collapse following section
+ * @param {HTMLButtonElement} button */
+const addCollapseToggleButton = (button) => {
+  button.addEventListener("click", () => {
+    button.nextElementSibling.classList.toggle("invisibility");
   });
 };
 
-/** cycles through each internal ORS link adds button element to force target to expand on click */
-const splitInternalAndExternalLinks = () => {
-  let externalOrs = [];
-  let internalOrs = [];
-  document.querySelectorAll("a.orsLink").forEach((aLink) => {
+/** Classifies each ORS link based on whether it's internal link; used to create button element to force expand on click
+ * @param {HTMLDivElement} bodyDiv */
+const splitLinks = (bodyDiv) => {
+  let result = { externalOrs: [], internalOrs: [] };
+  bodyDiv.querySelectorAll("a.orsLink").forEach((aLink) => {
     let linkText = aLink.textContent;
     if (isInternalChapLink(linkText)) {
-      internalOrs.push({ text: linkText, anchor: aLink });
+      result.internalOrs.push({ text: linkText, anchor: aLink });
     } else {
-      externalOrs.push(aLink);
+      result.externalOrs.push(aLink);
     }
   });
-  return { externalOrs: externalOrs, internalOrs: internalOrs };
+  return { result };
 };
-
 /**@param {string} linkText */
 const isInternalChapLink = (linkText) => {
   return new RegExpHandler(`\\b${chapterInfo.chapNo}\\.`).doesContain(linkText);
 };
 
-const makeLinkExpandTarget = (aLink) => {
-  let target = getCollapsibleTarget(aLink.text);
+const makeLinkExpandTarget = (aLink, target) => {
   if (target != null) {
     aLink.anchor.addEventListener("click", () => {
       expandSingle(target);
@@ -276,14 +276,25 @@ const makeLinkExpandTarget = (aLink) => {
   }
 };
 
-const getCollapsibleTarget = (linkText) => {
-  const targetSection = document.getElementById(linkText);
+/** returns target for creating internal ORS links
+ * @param {string} linkText
+ * @param {HTMLDivElement} bodyDiv */
+const getCollapsibleTarget = (linkText, bodyDiv) => {
+  let linkCleaned = linkText.replace(
+    /([!"#$%&'()*+,./:;<=>?@[\]^`{|}~])/g,
+    "\\$1"
+  ); // querySelector doesn't like unescaped punctuation
+  if (/\b\d/.test(linkCleaned)) {
+    linkCleaned = `\\3${linkCleaned.slice(0, 1)} ${linkCleaned.slice(1)}`; // it also doesn't like initial numbers
+  }
+  const targetSection = bodyDiv.querySelector(`#${linkCleaned}`);
+
   const collapsible = targetSection?.children[1];
   if (collapsible?.classList.contains("collapsible")) {
     return targetSection;
   }
   warnCS(
-    `Link target: '${linkText}' does not exist; or lacks collapsible children:\n Target is '${targetSection?.tagName}'. Child is '${collapsible?.tagName}'.`,
+    `Link target: '${linkCleaned}' does not exist; or lacks collapsible children:\n Target is '${targetSection?.tagName}'. Child is '${collapsible?.tagName}'.`,
     "enhanceSecs.js",
     "getCollapsibleTarget"
   );

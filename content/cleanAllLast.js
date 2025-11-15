@@ -16,66 +16,49 @@ const finalCleanUp = (finalDivs) => {
 
   finalBody.querySelectorAll("a").forEach((anAnchor) => {
     anAnchor.rel = "noopener";
-    switch (anAnchor.className) {
-      case "cst":
-        {
-          anAnchor.href =
-            "https://www.oregonlegislature.gov/bills_laws/Pages/ORS.aspx";
-        }
-        break;
+    anAnchor.classList.forEach((nameOfClass) => {
+      switch (nameOfClass) {
+        case "cst":
+          {
+            anAnchor.href =
+              "https://www.oregonlegislature.gov/bills_laws/Pages/ORS.aspx";
+          }
+          break;
 
-      case "preface":
-        {
-          anAnchor.href =
-            "https://www.oregonlegislature.gov/bills_laws/BillsLawsEDL/ORS_Preface.pdf";
-        }
-        break;
+        case "preface":
+          {
+            anAnchor.href =
+              "https://www.oregonlegislature.gov/bills_laws/BillsLawsEDL/ORS_Preface.pdf";
+          }
+          break;
 
-      case "orsLink":
-        {
+        case "linkExt":
           // chapter was already explicitly assigned (because it's in the navigation piece)
           if (anAnchor.dataset.chapter) {
             anAnchor.href = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${anAnchor.dataset.chapter}.html`;
+          } else {
+            // create link to external chapter, targets the specific chapter id
             anAnchor.href = RegExpHandler.replaceAllWith(
-              anAnchor.href,
-              /(ors)0+(\d{3})/,
-              "$1$2"
-            ); // deletes any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
-            break;
-          }
-
-          // link is to current chapter
-          if (
-            RegExpHandler.doesContainThis(
-              `^${chapterInfo.chapNo}.`,
-              anAnchor.innerText
-            )
-          ) {
-            anAnchor.href = RegExpHandler.replaceAllWith(
-              anAnchor.innerText,
-              /(\S+)/,
-              "#$1"
+              anAnchor.textContent,
+              /[^]*?(([1-9]\d{0,2}[A-C]?)\.\S*)[^]*?/,
+              `https://www.oregonlegislature.gov/bills_laws/ors/ors00$2.html#$1`
             );
-            break;
           }
-
-          // create link to external chapter, targets the specific chapter id
-          anAnchor.href = RegExpHandler.replaceAllWith(
-            anAnchor.textContent,
-            /[^]*?(([1-9]\d{0,2}[A-C]?)\.\S*)[^]*?/,
-            `https://www.oregonlegislature.gov/bills_laws/ors/ors00$2.html#$1`
-          );
           anAnchor.href = RegExpHandler.replaceAllWith(
             anAnchor.href,
             /(ors)0+(\d{3})/,
             "$1$2"
           ); // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
-        }
-        break;
+          break;
 
-      default:
-        break;
-    }
+        case "linkInt":
+          anAnchor.href = `#${anAnchor.innerText}`;
+          break;
+
+        default:
+          break;
+      }
+    });
   });
 
   // delete empty divs
