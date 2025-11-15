@@ -38,53 +38,35 @@ const getPalletteList = async () => {
 /** builds array of chapters from json in order returning [chapter#, title#, volume#, chapterName, titleName] */
 const buildChapterList = async () => {
   const fullOutline = await readJsonFile("volumeOutline.json");
-  const chapterList = Object.entries(fullOutline.Volumes).flatMap(
+  const chapterList = Object.entries(fullOutline.volumes).flatMap(
     ([volume, volumeData]) => {
-      if (!volumeData.Titles) {
+      if (!volumeData.titles) {
         warnBG(`Note: Volume ${volume} has no titles`);
         return [];
       }
-      return Object.entries(volumeData.Titles).flatMap(([title, titleData]) => {
-        if (!titleData.Chapters) {
+      return Object.entries(volumeData.titles).flatMap(([title, titleData]) => {
+        if (!titleData.chapters) {
           warnBG(`Note: Title ${title} has no chapters`);
           return [];
         }
-        return Object.entries(titleData.Chapters).map(
+        return Object.entries(titleData.chapters).map(
           ([chapter, chapterName]) => [
             chapter.trim(),
             title.trim(),
             volume,
             chapterName,
-            titleData.Heading,
+            titleData.heading,
+            volumeData.heading,
           ]
         );
       });
     }
   );
-
-  /* let chapterList = [];
-  const Volumes = fullOutline.Volumes;
-
-  for (let volume in fullOutline.Volumes) {
-    const Titles = Volumes[volume].Titles;
-    for (let title in Titles) {
-      const Chapters = Titles[title].Chapters;
-      for (let chapter in fullOutline.Volumes[volume].Titles[title].Chapters) {
-        chapterList.push([
-          chapter.trim(),
-          title.trim(),
-          volume,
-          Chapters[chapter],
-          Titles[title].Heading,
-        ]);
-      }
-    }
-    }*/
   return chapterList;
 };
 
 //caching chapterList
-let chapter = null;
+let chapter = null; //first time executing function only
 const getChapterList = async () => {
   if (chapter == null) {
     infoBG(
@@ -121,6 +103,7 @@ const getChapterInfo = async ({ chapNum, offset = 0 }) => {
     0,
     "chapter not found",
     "title not found",
+    "volume not found",
   ];
   return {
     chapNo: ansArray[0],
@@ -128,6 +111,7 @@ const getChapterInfo = async ({ chapNum, offset = 0 }) => {
     volNo: ansArray[2],
     chapName: ansArray[3],
     titleName: ansArray[4],
+    volName: ansArray[5],
   };
 };
 

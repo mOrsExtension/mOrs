@@ -1,42 +1,52 @@
 {
-   "Volumes": {
+   "volumes": {
       "1": {
-         "Titles": {
+         "heading": "Courts, Oregon Rules of Civil Procedure",
+         "titles": {
             "1 ": {
-               "Heading": "Courts of Record; Court Officers; Juries",
-               "Chapters": {
+               "heading": "Courts of Record; Court Officers; Juries",
+               "chapters": {
                   "1 ": "Courts and Judicial Officers Generally",
                   "2 ": "Supreme Court; Court of Appeals",
                   "3 ": "Circuit Courts Generally",
+                  "4 ": "(Former Provisions)",
                   "5 ": "County Courts (Judicial Functions)",
                   "7 ": "Records and Files of Courts",
                   "8 ": "Court Officers and District Attorneys",
-                  "9 ": "Attorneys; Law Libraries",
-                  "10 ": "Juries"
+                  "9 ": "Oregon State Bar; Attorneys; Law Libraries",
+                  "10 ": "Juries",
+                  "11 ": "(Former Provisions)"
                }
             },
             "2 ": {
-               "Heading": "Procedure in Civil Proceedings",
-               "Chapters": {
+               "heading": "Procedure in Civil Proceedings",
+               "chapters": {
                   "12 ": "Limitations of Actions and Suits",
+                  "13 ": "(Former Provisions)",
                   "14 ": "Jurisdiction; Venue; Change of Judge",
                   "15 ": "Choice of Laws",
+                  "16 ": "(Former Provisions)",
                   "17 ": "Compromise; Settlement",
                   "18 ": "Judgments",
                   "19 ": "Appeals",
                   "20 ": "Attorney Fees; Costs and Disbursements",
                   "21 ": "State Court Fees",
                   "22 ": "Bonds and Other Security Deposits",
+                  "23 ": "(Former Provisions)",
                   "24 ": "Enforcement and Recognition of Foreign Judgments; Foreign-Money Claims",
-                  "25 ": "Support Enforcement"
+                  "25 ": "Support Enforcement",
+                  "26 ": "(Former Provisions)",
+                  "27 ": "(Former Provisions)"
                }
             },
             "3 ": {
-               "Heading": "Remedies and Special Actions and Proceedings",
-               "Chapters": {
+               "heading": "Remedies and Special Actions and Proceedings",
+               "chapters": {
                   "28 ": "Declaratory Judgments; Certification of Questions of Law",
+                  "29 ": "(Former Provisions)",
                   "30 ": "Actions and Suits in Particular Cases",
                   "31 ": "Tort Actions",
+                  "32 ": "(Former Provisions)",
                   "33 ": "Special Proceedings and Procedures",
                   "34 ": "Writs",
                   "35 ": "Eminent Domain; Public Acquisition of Property",
@@ -45,8 +55,8 @@
                }
             },
             "4 ": {
-               "Heading": "Evidence and Witnesses",
-               "Chapters": {
+               "heading": "Evidence and Witnesses",
+               "chapters": {
                   "40 ": "Evidence Code",
                   "41 ": "Evidence Generally",
                   "42 ": "Execution, Formalities and Interpretation of Writings",
@@ -56,14 +66,14 @@
                }
             },
             "5 ": {
-               "Heading": "Small Claims Department of Circuit Court",
-               "Chapters": {
+               "heading": "Small Claims Department of Circuit Court",
+               "chapters": {
                   "46 ": "Small Claims Department of Circuit Court"
                }
             },
             "6 ": {
-               "Heading": "Justice Courts",
-               "Chapters": {
+               "heading": "Justice Courts",
+               "chapters": {
                   "51 ": "Justice Courts; Jurisdiction",
                   "52 ": "Civil Actions",
                   "53 ": "Appeals in Civil Actions",
@@ -74,24 +84,30 @@
          }
       },
       "2": {
-         "Titles": {
+         "heading": "Business Organizations, Commercial Code",
+         "titles": {
             "7 ": {
-               "Heading": "Corporations and Partnerships",
-               "Chapters": {
+               "heading": "Corporations and Partnerships",
+               "chapters": {
                   "56 ": "Duties of Secretary of State",
+                  "57 ": "(Former Provisions)",
                   "58 ": "Professional Corporations",
                   "59 ": "Securities Regulation",
                   "60 ": "Private Corporations",
+                  "61 ": "(Former Provisions)",
                   "62 ": "Cooperatives",
                   "63 ": "Limited Liability Companies",
+                  "64 ": "(Former Provisions)",
                   "65 ": "Nonprofit Corporations",
                   "67 ": "Partnerships; Limited Liability Partnerships",
+                  "68 ": "(Former Provisions)",
+                  "69 ": "(Former Provisions)",
                   "70 ": "Limited Partnerships"
                }
             },
             "8 ": {
-               "Heading": "Commercial Transactions",
-               "Chapters": {
+               "heading": "Commercial Transactions",
+               "chapters": {
                   "71 ": "General Provisions for Uniform Commercial Code",
                   "72 ": "Sales",
                   "72A": "Leases",
@@ -99,6 +115,7 @@
                   "74 ": "Bank Deposits and Collections",
                   "74A": "Funds Transfers",
                   "75 ": "Letters of Credit",
+                  "76 ": "(Former Provisions)",
                   "77 ": "Warehouse Receipts, Bills of Lading and Other Documents of Title",
                   "78 ": "Investment Securities",
                   "79 ": "Secured Transactions",
@@ -110,8 +127,8 @@
                }
             },
             "9 ": {
-               "Heading": "Mortgages and Liens",
-               "Chapters": {
+               "heading": "Mortgages and Liens",
+               "chapters": {
                   "86 ": "Mortgages; Trust Deeds",
                   "86A": "Mortgage Lending",
                   "87 ": "Statutory Liens",
@@ -121,18 +138,19 @@
          }
       },
       "3": {
-         "Titles": {
+         "heading": "Landlord-Tenant, Domestic Relations, Probate",
+         "titles": {
             "10 ": {
-               "Heading": "Property Rights and Transactions",
-               "Chapters": {
+               "heading": "Property Rights and Transactions",
+               "chapters": {
                   "90 ": "Residential Landlord and Tenant",
                   "91 ": "Tenancy",
                   "92 ": "Subdivisions and Partitions",
                   "93 ": "Conveyancing and Recording",
                   "94 ": "Real Property Development",
-                  "95 ": "Fraudulent Transfers and Conveyances",
+                  "95 ": "Uniform Voidable Transactions Act",
                   "96 ": "Line and Partition Fences",
-                  "97 ": "Rights and Duties Relating to Cemeteries, Human Bodies and Anatomical Gifts",
+                  "97 ": "Rights and Duties Relating to Cemeteries, Human Bodies and Anatomical Gift",
                   "98 ": "Lost, Unclaimed or Abandoned Property; Vehicle Towing",
                   "99 ": "Property Removed by High Water",
                   "100 ": "Condominiums",
@@ -141,8 +159,8 @@
                }
             },
             "11 ": {
-               "Heading": "Domestic Relations",
-               "Chapters": {
+               "heading": "Domestic Relations",
+               "chapters": {
                   "106 ": "Marriage; Domestic Partnership",
                   "107 ": "Marital Dissolution, Annulment and Separation; Mediation and Conciliation Services; Family Abuse Prevention",
                   "108 ": "Spousal Relationships; Property Rights; Premarital Agreements",
@@ -151,8 +169,8 @@
                }
             },
             "12 ": {
-               "Heading": "Probate Law",
-               "Chapters": {
+               "heading": "Probate Law",
+               "chapters": {
                   "111 ": "General Provisions",
                   "112 ": "Intestate Succession and Wills",
                   "113 ": "Initiation of Estate Proceedings",
@@ -161,16 +179,18 @@
                   "116 ": "Accounting, Distribution and Closing",
                   "117 ": "Estates of Absentees",
                   "118 ": "Estate Tax",
-                  "119 ": "Revised Uniform Fiduciary Access to Digital Assets Act"
+                  "119 ": "Revised Uniform Fiduciary Access to Digital Assets Act",
+                  "120 ": "(Former Provisions)",
+                  "121 ": "(Former Provisions)"
                }
             },
             "13 ": {
-               "Heading": "Protective Proceedings; Powers of Attorney; Trusts",
-               "Chapters": {
+               "heading": "Protective Proceedings; Powers of Attorney; Trusts",
+               "chapters": {
                   "124 ": "Abuse Prevention and Reporting; Civil Action for Abuse",
                   "125 ": "Protective Proceedings",
                   "126 ": "Property Held for the Benefit of Minors; Uniform Transfers to Minors Act",
-                  "127 ": "Powers of Attorney; Advance Directives for Health Care; Physician Orders for Life-Sustaining Treatment Registry; Declarations for Mental Health Treatment; Death with Dignity",
+                  "127 ": "Powers of Attorney; Advance Directives for Health Care; Physician Orders for Life-Sustaining Treatment Registry; Declarations for Mental Health Treatment; Death With Dignity",
                   "128 ": "Trusts; Charitable Activities",
                   "129 ": "Uniform Principal and Income Act",
                   "130 ": "Uniform Trust Code"
@@ -179,36 +199,45 @@
          }
       },
       "4": {
-         "Titles": {
+         "heading": "Criminal Procedure, Crimes",
+         "titles": {
             "14 ": {
-               "Heading": "Procedure in Criminal Matters Generally",
-               "Chapters": {
+               "heading": "Procedure in Criminal Matters Generally",
+               "chapters": {
                   "131 ": "Preliminary Provisions; Limitations; Jurisdiction; Venue; Criminal Forfeiture; Crime Prevention",
                   "131A": "Civil Forfeiture",
                   "132 ": "Grand Jury, Indictments and Other Accusatory Instruments",
                   "133 ": "Arrest and Related Procedures; Search and Seizure; Extradition",
+                  "134 ": "(Former Provisions)",
                   "135 ": "Arraignment and Pretrial Provisions",
                   "136 ": "Criminal Trials",
                   "137 ": "Judgment and Execution; Parole and Probation by the Court",
                   "138 ": "Appeals; Post-Conviction Relief",
+                  "139 ": "(Former Provisions)",
+                  "140 ": "(Former Provisions)",
+                  "141 ": "(Former Provisions)",
                   "142 ": "Stolen Property",
+                  "143 ": "(Former Provisions)",
                   "144 ": "Parole; Post-Prison Supervision; Work Release; Executive Clemency; Standards for Prison Terms and Parole; Presentence Reports",
+                  "145 ": "(Former Provisions)",
                   "146 ": "Investigations of Deaths, Injuries and Missing Persons",
                   "147 ": "Victims of Crime and Acts of Mass Destruction",
+                  "148 ": "(Former Provisions)",
+                  "149 ": "(Former Provisions)",
                   "151 ": "Public Defenders; Counsel for Financially Eligible Persons",
                   "153 ": "Violations and Fines"
                }
             },
             "15 ": {
-               "Heading": "Procedure in Criminal Actions in Justice Courts",
-               "Chapters": {
+               "heading": "Procedure in Criminal Actions in Justice Courts",
+               "chapters": {
                   "156 ": "Proceedings and Judgment in Criminal Actions",
                   "157 ": "Appeals in Criminal Actions; Writ of Review"
                }
             },
             "16 ": {
-               "Heading": "Crimes and Punishments",
-               "Chapters": {
+               "heading": "Crimes and Punishments",
+               "chapters": {
                   "161 ": "General Provisions",
                   "162 ": "Offenses Against the State and Public Justice",
                   "163 ": "Offenses Against Persons",
@@ -217,16 +246,18 @@
                   "165 ": "Offenses Involving Fraud or Deception",
                   "166 ": "Offenses Against Public Order; Firearms and Other Weapons; Racketeering",
                   "167 ": "Offenses Against General Welfare and Animals",
+                  "168 ": "(Former Provisions)",
                   "169 ": "Local and Regional Correctional Facilities; Prisoners; Juvenile Facilities"
                }
             }
          }
       },
       "5": {
-         "Titles": {
+         "heading": "State Government, Government Procedures, Land Use",
+         "titles": {
             "17 ": {
-               "Heading": "State Legislative Department and Laws",
-               "Chapters": {
+               "heading": "State Legislative Department and Laws",
+               "chapters": {
                   "171 ": "State Legislature",
                   "172 ": "Commission on Uniform Laws; Commission on Indian Services",
                   "173 ": "Legislative Service Agencies",
@@ -234,64 +265,69 @@
                }
             },
             "18 ": {
-               "Heading": "Executive Branch; Organization",
-               "Chapters": {
+               "heading": "Executive Branch; Organization",
+               "chapters": {
                   "176 ": "Governor",
                   "177 ": "Secretary of State",
                   "178 ": "State Treasurer; Oregon Retirement Savings Plan; Oregon 529 Savings Network",
                   "179 ": "Administration of State Institutions",
                   "180 ": "Attorney General; Department of Justice",
-                  "181A": "State Police; Crime Reporting and Records; Public Safety Standards and Training; Private Security Services",
+                  "181 ": "(Former Provisions)",
+                  "181A": "State Police; Crime Reporting and Records; Public Safety Standards and Training; Private Security",
                   "182 ": "State Administrative Agencies",
                   "183 ": "Administrative Procedures Act; Review of Rules; Civil Penalties",
                   "184 ": "Administrative Services and Transportation Departments",
-                  "185 ": "Oregon Disabilities Commission; Commissions on Hispanic Affairs, Black Affairs and Asian and Pacific Islander Affairs; Commission for Women"
+                  "185 ": "State Advocacy Commissions and Offices"
                }
             },
             "19 ": {
-               "Heading": "Miscellaneous Matters Related to Government and Public Affairs",
-               "Chapters": {
+               "heading": "Miscellaneous Matters Related to Government and Public Affairs",
+               "chapters": {
                   "186 ": "State Emblems; State Boundary",
                   "187 ": "Holidays; Standard of Time; Commemorations",
                   "188 ": "Congressional and Legislative Districts; Reapportionment",
+                  "189 ": "(Former Provisions)",
                   "190 ": "Cooperation of Governmental Units; State Census; Arbitration",
-                  "191 ": "United States' Surveys",
+                  "191 ": "United States’ Surveys",
                   "192 ": "Records; Public Reports and Meetings",
                   "193 ": "Legal Notices",
                   "194 ": "Uniform Law on Notarial Acts; Unsworn Foreign Declarations",
                   "195 ": "Local Government Planning Coordination",
-                  "196 ": "Columbia River Gorge; Ocean Resource Planning; Wetlands; Removal and Fill",
-                  "197 ": "Comprehensive Land Use Planning I",
-                  "197A": "Comprehensive Land Use Planning II",
+                  "196 ": "State Waters and Ocean Resources; Wetlands; Removal and Fill",
+                  "197 ": "Comprehensive Land Use Planning",
+                  "197A": "Land Use Planning: Housing and Urbanization",
                   "198 ": "Special Districts Generally",
                   "199 ": "Local Government Boundary Commissions; City-County Consolidation",
-                  "200 ": "Disadvantaged Business Enterprises; Minority-Owned Businesses; Woman-Owned Businesses; Businesses Owned by Service-Disabled Veterans; Emerging Small Businesses"
+                  "200 ": "Disadvantaged Business Enterprises;  Minority-Owned Businesses; Woman-Owned Businesses; Veteran-Owned Businesses; Emerging Small Businesses"
                }
             }
          }
       },
       "6": {
-         "Titles": {
+         "heading": "Local Government, Public Employees, Elections",
+         "titles": {
             "20 ": {
-               "Heading": "Counties and County Officers",
-               "Chapters": {
+               "heading": "Counties and County officers",
+               "chapters": {
                   "201 ": "Boundaries of Counties",
                   "202 ": "Establishment of New Counties; Change of Boundaries",
                   "203 ": "County Governing Bodies; County Home Rule",
                   "204 ": "County Officers",
                   "205 ": "County Clerks",
                   "206 ": "Sheriffs",
+                  "207 ": "(Former Provisions)",
                   "208 ": "County Treasurers",
                   "209 ": "County Surveyors",
                   "210 ": "County Accountants",
-                  "215 ": "County Planning; Zoning; Housing Codes"
+                  "214 ": "(Former Provisions)",
+                  "215 ": "County Land Use Planning; Resource Lands"
                }
             },
             "21 ": {
-               "Heading": "Cities",
-               "Chapters": {
+               "heading": "Cities",
+               "chapters": {
                   "221 ": "Organization and Government of Cities",
-                  "222 ": "City Boundary Changes; Mergers; Consolidations; Withdrawals",
+                  "222 ": "City Boundary Changes; Annexations; Consolidations; Withdrawals; Mergers",
                   "223 ": "Local Improvements and Works Generally",
                   "224 ": "City Sewers and Sanitation",
                   "225 ": "Municipal Utilities",
@@ -300,12 +336,13 @@
                }
             },
             "22 ": {
-               "Heading": "Public Officers and Employees",
-               "Chapters": {
+               "heading": "Public officers and Employees",
+               "chapters": {
                   "236 ": "Eligibility; Resignations, Removals and Vacancies; Discipline; Transfers",
                   "237 ": "Public Employee Retirement Generally",
                   "238 ": "Public Employees Retirement System",
                   "238A": "Oregon Public Service Retirement Plan",
+                  "239 ": "(Former Provisions)",
                   "240 ": "State Personnel Relations",
                   "241 ": "Civil Service for County Employees",
                   "242 ": "Civil Service for City or School District Employees and Firefighters",
@@ -314,14 +351,15 @@
                }
             },
             "23 ": {
-               "Heading": "Elections",
-               "Chapters": {
+               "heading": "Elections",
+               "chapters": {
                   "246 ": "Administration of Election Laws; Vote Recording Systems",
                   "247 ": "Qualification and Registration of Electors",
                   "248 ": "Political Parties; Presidential Electors",
                   "249 ": "Candidates; Recall",
                   "250 ": "Initiative and Referendum",
-                  "251 ": "Voters' Pamphlet",
+                  "251 ": "Voters’ Pamphlet",
+                  "252 ": "(Former Provisions)",
                   "253 ": "Absent Electors",
                   "254 ": "Conduct of Elections",
                   "255 ": "Special District Elections",
@@ -333,23 +371,24 @@
          }
       },
       "7": {
-         "Titles": {
+         "heading": "Public Facilities and Finance",
+         "titles": {
             "24 ": {
-               "Heading": "Public Organizations for Community Service",
-               "Chapters": {
-                  "261 ": "People's Utility Districts",
+               "heading": "Public Organizations for Community Service",
+               "chapters": {
+                  "261 ": "People’s Utility Districts",
                   "262 ": "Joint Operating Agencies for Electric Power",
                   "263 ": "Convention Facilities",
                   "264 ": "Domestic Water Supply Districts",
                   "265 ": "Cemetery Maintenance Districts",
                   "266 ": "Park and Recreation Districts",
                   "267 ": "Mass Transit Districts; Transportation Districts",
-                  "268 ": "Metropolitan Service Districts"
+                  "268 ": "Metropolitan Service District"
                }
             },
             "25 ": {
-               "Heading": "Public Lands",
-               "Chapters": {
+               "heading": "Public Lands",
+               "chapters": {
                   "270 ": "State Real Property",
                   "271 ": "Use and Disposition of Public Lands Generally; Easements",
                   "272 ": "Federal Lands",
@@ -359,8 +398,8 @@
                }
             },
             "26 ": {
-               "Heading": "Public Facilities; Contracting and Insurance",
-               "Chapters": {
+               "heading": "Public Facilities, Contracting and insurance",
+               "chapters": {
                   "276 ": "Public Facilities",
                   "276A": "Information Technology",
                   "278 ": "Insurance for Public Bodies",
@@ -369,30 +408,35 @@
                   "279B": "Public Contracting - Public Procurements",
                   "279C": "Public Contracting - Public Improvements and Related Contracts",
                   "280 ": "Financing of Local Public Projects and Improvements; City and County Economic Development",
+                  "281 ": "(Former Provisions)",
                   "282 ": "Public Printing",
                   "283 ": "Interagency Services"
                }
             },
-            "26A": {
-               "Heading": "Economic Development",
-               "Chapters": {
+            "26a": {
+               "heading": "Economic Development",
+               "chapters": {
                   "284 ": "Organizations for Economic Development",
+                  "285 ": "(Former Provisions)",
                   "285A": "Economic Development I",
                   "285B": "Economic Development II",
-                  "285C": "Economic Development III"
+                  "285C": "Economic Development III",
+                  "286 ": "(Former Provisions)"
                }
             },
             "27 ": {
-               "Heading": "Public Borrowing",
-               "Chapters": {
+               "heading": "Public Borrowing",
+               "chapters": {
                   "286A": "State Borrowing",
+                  "287 ": "(Former Provisions)",
                   "287A": "Local Government Borrowing",
+                  "288 ": "(Former Provisions)",
                   "289 ": "Oregon Facilities Financing"
                }
             },
             "28 ": {
-               "Heading": "Public Financial Administration",
-               "Chapters": {
+               "heading": "Public Financial Administration",
+               "chapters": {
                   "291 ": "State Financial Administration",
                   "292 ": "Salaries and Expenses of State Officers and Employees",
                   "293 ": "Administration of Public Funds",
@@ -404,19 +448,20 @@
          }
       },
       "8": {
-         "Titles": {
+         "heading": "Revenue and Taxation",
+         "titles": {
             "29 ": {
-               "Heading": "Revenue and Taxation",
-               "Chapters": {
+               "heading": "Revenue and Taxation",
+               "chapters": {
                   "305 ": "Administration of Revenue and Tax Laws; Appeals",
                   "306 ": "Property Taxation Generally",
                   "307 ": "Property Subject to Taxation; Exemptions",
                   "308 ": "Assessment of Property for Taxation",
                   "308A": "Land Special Assessments",
-                  "309 ": "Board of Property Tax Appeals; Ratio Studies",
+                  "309 ": "Property Value Appeals Board; Ratio Studies",
                   "310 ": "Property Tax Rates and Amounts; Tax Limitations; Tax Reduction Programs",
                   "311 ": "Collection of Property Taxes",
-                  "312 ": "Foreclosure of Property Liens",
+                  "312 ": "Foreclosure of Property Tax Liens",
                   "314 ": "Taxes Imposed Upon or Measured by Net Income",
                   "315 ": "Personal and Corporate Income or Excise Tax Credits",
                   "316 ": "Personal Income Tax",
@@ -433,17 +478,20 @@
          }
       },
       "9": {
-         "Titles": {
+         "heading": "Education and Culture",
+         "titles": {
             "30 ": {
-               "Heading": "Education and Cultures",
-               "Chapters": {
+               "heading": "Education and Culture",
+               "chapters": {
                   "326 ": "State Administration of Education",
-                  "327 ": "State Financing of Elementary and Secondary Education",
+                  "327 ": "State Financing of Early Learning and Elementary and Secondary Education",
                   "328 ": "Local Financing of Education",
                   "329 ": "Oregon Educational Act for the 21st Century; Educational Improvement and Reform",
                   "329A": "Child Care",
                   "330 ": "Boundary Changes; Mergers",
+                  "331 ": "(Former Provisions)",
                   "332 ": "Local Administration of Education",
+                  "333 ": "(Former Provisions)",
                   "334 ": "Education Service Districts",
                   "335 ": "High Schools",
                   "336 ": "Conduct of Schools Generally",
@@ -459,21 +507,24 @@
                   "346 ": "Programs for Persons Who Are Blind or Deaf",
                   "348 ": "Student Aid; Education Stability Fund; Planning",
                   "350 ": "Statewide Coordination of Higher Education",
+                  "351 ": "(Former Provisions)",
                   "352 ": "Public Universities",
                   "353 ": "Oregon Health and Science University",
                   "354 ": "Educational Television and Radio; Distance Learning; Translator Districts",
                   "357 ": "Libraries; State Archivist; Poet Laureate",
                   "358 ": "Oregon Historical and Heritage Agencies, Programs and Tax Provisions; Museums; Local Symphonies and Bands; Archaeological Objects and Sites",
-                  "359 ": "Art and Culture"
+                  "359 ": "Art and Culture",
+                  "360 ": "(Former Provisions)"
                }
             }
          }
       },
       "10": {
-         "Titles": {
+         "heading": "Highways, Military",
+         "titles": {
             "31 ": {
-               "Heading": "Highways, Roads, Bridges and Ferries",
-               "Chapters": {
+               "heading": "Highways, Roads, Bridges and Ferries",
+               "chapters": {
                   "366 ": "State Highways and State Highway Fund",
                   "367 ": "Transportation Financing; Projects",
                   "368 ": "County Roads",
@@ -483,20 +534,23 @@
                   "372 ": "Highway Lighting Districts",
                   "373 ": "Roads and Highways Through Cities",
                   "374 ": "Control of Access to Public Highways",
+                  "375 ": "(Former Provisions)",
                   "376 ": "Ways of Necessity; Special Ways; Pedestrian Malls",
                   "377 ": "Highway Beautification; Motorist Information Signs",
                   "381 ": "Interstate Bridges",
                   "382 ": "Intrastate Bridges",
                   "383 ": "Tollways",
                   "384 ": "Ferries",
+                  "385 ": "(Former Provisions)",
                   "390 ": "State and Local Parks; Recreation Programs; Scenic Waterways; Recreation Trails",
                   "391 ": "Mass Transportation"
                }
             },
             "32 ": {
-               "Heading": "Military Affairs; Emergency Services",
-               "Chapters": {
+               "heading": "Military Affairs; Emergency Services",
+               "chapters": {
                   "396 ": "Militia Generally",
+                  "397 ": "(Former Provisions)",
                   "398 ": "Military Justice",
                   "399 ": "Organized Militia",
                   "401 ": "Emergency Management and Services",
@@ -506,9 +560,9 @@
                }
             },
             "33 ": {
-               "Heading": "Privileges and Benefits of Veterans and Service Personnel",
-               "Chapters": {
-                  "406 ": "Department of Veterans' Affairs",
+               "heading": "Privileges and Benefits of Veterans and Service Personnel",
+               "chapters": {
+                  "406 ": "Department of Veterans’ Affairs",
                   "407 ": "Veterans Loans",
                   "408 ": "Miscellaneous Benefits for Veterans and Service Personnel"
                }
@@ -516,20 +570,22 @@
          }
       },
       "11": {
-         "Titles": {
+         "heading": "Juvenile Code, Human Services",
+         "titles": {
             "34 ": {
-               "Heading": "Human Services; Juvenile Code; Corrections",
-               "Chapters": {
+               "heading": "Human Services; Juvenile Code; Corrections",
+               "chapters": {
                   "409 ": "Department of Human Services",
                   "410 ": "Senior and Disability Services",
                   "411 ": "Public Assistance and Medical Assistance",
                   "412 ": "Temporary Assistance for Needy Families",
                   "413 ": "Oregon Health Authority",
                   "414 ": "Medical Assistance",
-                  "415 ": "Financial Regulation of Coordinated Care Organizations",
-                  "416 ": "Recovery of Aid and Child Support",
+                  "415 ": "Regulation of Health Care Entities",
+                  "416 ": "Recovery and Reimbursement of Aid",
                   "417 ": "Interstate Compacts on Juveniles and Children; Children and Family Services",
                   "418 ": "Child Welfare Services",
+                  "419 ": "(Former Provisions)",
                   "419A": "Juvenile Code: General Provisions and Definitions",
                   "419B": "Juvenile Code: Dependency",
                   "419C": "Juvenile Code: Delinquency",
@@ -540,29 +596,32 @@
                }
             },
             "35 ": {
-               "Heading": "Mental Health and Developmental Disabilities; Substance Abuse Treatment",
-               "Chapters": {
-                  "426 ": "Persons with Mental Illness; Dangerous Persons; Commitment; Housing",
-                  "427 ": "Persons with Intellectual or Developmental Disabilities",
-                  "428 ": "Nonresident Persons with Mental Illness or Intellectual Disabilities",
-                  "430 ": "Mental Health; Developmental Disabilities; Substance Abuse Treatment Programs"
+               "heading": "Mental Health and Developmental Disabilities; Substance Use Disorder Treatment",
+               "chapters": {
+                  "426 ": "Persons With Mental Illness; Dangerous Persons; Commitment; Housing",
+                  "427 ": "Persons With Intellectual or Developmental Disabilities",
+                  "428 ": "Nonresident Persons With Mental Illness or Intellectual Disabilities",
+                  "430 ": "Mental and Behavioral Health Treatment; Developmental Disabilities"
                }
             }
          }
       },
       "12": {
-         "Titles": {
+         "heading": "Public Health",
+         "titles": {
             "36 ": {
-               "Heading": "Public Health and Safety",
-               "Chapters": {
+               "heading": "Public Health and Safety",
+               "chapters": {
                   "431 ": "State and Local Administration and Enforcement of Public Health Laws",
                   "431A": "Public Health Programs and Activities",
                   "432 ": "Vital Statistics",
                   "433 ": "Disease and Condition Control; Mass Gatherings; Indoor Air",
-                  "435 ": "Birth Control; Termination of Pregnancy",
+                  "434 ": "(Former Provisions)",
+                  "435 ": "Reproductive Health Care and Rights",
                   "436 ": "Sterilization",
+                  "437 ": "(Former Provisions)",
                   "438 ": "Laboratories; Anatomical Material",
-                  "440 ": "Regional Health Entities",
+                  "440 ": "Health Districts; Port Hospitals",
                   "441 ": "Health Care Facilities",
                   "442 ": "Health Planning",
                   "443 ": "Residential Care; Adult Foster Homes; Hospice Programs",
@@ -571,6 +630,7 @@
                   "446 ": "Manufactured Dwellings and Structures; Parks; Tourist Facilities; Ownership Records; Dealers and Dealerships",
                   "447 ": "Plumbing; Architectural Barriers",
                   "448 ": "Pool Facilities; Water and Sewage Systems",
+                  "449 ": "(Former Provisions)",
                   "450 ": "Sanitary Districts and Authorities; Water Authorities",
                   "451 ": "County Service Facilities",
                   "452 ": "Vector Control",
@@ -581,10 +641,11 @@
          }
       },
       "13": {
-         "Titles": {
+         "heading": "Housing, Games, Environment",
+         "titles": {
             "36A": {
-               "Heading": "Housing; Lottery and Games; Environment",
-               "Chapters": {
+               "heading": "Housing; Lottery and Games; Environment",
+               "chapters": {
                   "455 ": "Building Code",
                   "456 ": "Housing",
                   "457 ": "Urban Renewal",
@@ -604,47 +665,62 @@
                   "468B": "Water Quality",
                   "469 ": "Energy; Conservation Programs; Energy Facilities",
                   "469A": "Renewable Portfolio Standards",
-                  "469B": "Energy Tax Credits; Grants",
+                  "469B": "Energy Incentives; Tax Credits; Grants",
                   "470 ": "Small Scale Local Energy Projects"
                }
             }
          }
       },
       "14": {
-         "Titles": {
+         "heading": "Drugs and Alcohol, Fire Protection, Natural Resources",
+         "titles": {
             "37 ": {
-               "Heading": "Alcoholic Liquors; Controlled Substances; Drugs",
-               "Chapters": {
+               "heading": "Alcoholic Liquors; Controlled Substances; Drugs",
+               "chapters": {
                   "471 ": "Alcoholic Liquors Generally",
+                  "472 ": "(Former Provisions)",
                   "473 ": "Wine, Cider and Malt Beverage Privilege Tax",
                   "474 ": "Trade Practices Relating to Malt Beverages",
-                  "475 ": "Controlled Substances; Illegal Drug Cleanup; Miscellaneous Drugs; Paraphernalia; Precursors",
+                  "475 ": "Controlled Substances; Illegal Drug Cleanup; Miscellaneous",
                   "475A": "Psilocybin Regulation",
+                  "475B": "(Former Provisions)",
                   "475C": "Cannabis Regulation"
                }
             },
             "38 ": {
-               "Heading": "Protection from Fire",
-               "Chapters": {
+               "heading": "Protection from Fire",
+               "chapters": {
                   "476 ": "State Fire Marshal; Protection From Fire Generally",
                   "477 ": "Fire Protection of Forests and Vegetation",
                   "478 ": "Rural Fire Protection Districts",
                   "479 ": "Protection of Buildings From Fire; Electrical Safety Law",
-                  "480 ": "Explosives; Flammable Materials; Pressure Vessels"
+                  "480 ": "Explosives; Flammable Materials; Pressure Vessels",
+                  "481 ": "(Former Provisions)",
+                  "482 ": "(Former Provisions)",
+                  "483 ": "(Former Provisions)",
+                  "484 ": "(Former Provisions)",
+                  "485 ": "(Former Provisions)",
+                  "486 ": "(Former Provisions)",
+                  "487 ": "(Former Provisions)",
+                  "488 ": "(Former Provisions)",
+                  "491 ": "(Former Provisions)",
+                  "492 ": "(Former Provisions)",
+                  "493 ": "(Former Provisions)",
+                  "494 ": "(Former Provisions)"
                }
             },
             "41 ": {
-               "Heading": "Wildlife",
-               "Chapters": {
+               "heading": "Wildlife",
+               "chapters": {
                   "496 ": "Application, Administration and Enforcement of Wildlife Laws",
-                  "497 ": "Licenses and Permits",
+                  "497 ": "Licenses, Tags and Permits",
                   "498 ": "Hunting, Angling and Trapping Regulations; Miscellaneous Wildlife Protective Measures",
                   "501 ": "Refuges and Closures"
                }
             },
             "42 ": {
-               "Heading": "Commercial Fishing and Fisheries",
-               "Chapters": {
+               "heading": "Commercial Fishing and Fisheries",
+               "chapters": {
                   "506 ": "Application, Administration and Enforcement of Commercial Fishing Laws",
                   "507 ": "Compacts with Other States",
                   "508 ": "Licenses and Permits",
@@ -654,8 +730,8 @@
                }
             },
             "43 ": {
-               "Heading": "Mineral Resources",
-               "Chapters": {
+               "heading": "Mineral Resources",
+               "chapters": {
                   "516 ": "Department of Geology and Mineral Industries",
                   "517 ": "Mining and Mining Claims",
                   "520 ": "Conservation of Gas and Oil",
@@ -664,10 +740,11 @@
                }
             },
             "44 ": {
-               "Heading": "Forestry and Forest Products",
-               "Chapters": {
+               "heading": "Forestry and Forest Products",
+               "chapters": {
                   "526 ": "Forestry Administration",
                   "527 ": "Pest Control; Forest Practices",
+                  "528 ": "(Former Provisions)",
                   "530 ": "State Forests; Community Forests",
                   "532 ": "Branding of Forest Products and Booming Equipment"
                }
@@ -675,24 +752,26 @@
          }
       },
       "15": {
-         "Titles": {
+         "heading": "Water Resources, Agriculture and Food",
+         "titles": {
             "45 ": {
-               "Heading": "Water Resources; Irrigation, Drainage, Flood Control, Reclamation",
-               "Chapters": {
+               "heading": "Water Resources: Irrigation, Drainage, Flood Control, Reclamation",
+               "chapters": {
                   "536 ": "Water Resources Administration",
                   "537 ": "Appropriation of Water Generally",
-                  "538 ": "Withdrawal of Certain Waters from Appropriation; Special Municipal and County Water Rights",
-                  "539 ": "Determination of Water Rights Initiated before February 24, 1909; Determination of Water Rights of Federally Recognized Indian Tribes",
-                  "540 ": "Distribution of Water; Watermasters; Change in Use; Transfer or Forfeiture of Water Rights",
+                  "538 ": "Withdrawal of Certain Waters From Appropriation; Special Municipal and County Water Rights",
+                  "539 ": "Chapter 539. Determination of Water Rights Initiated Before February 24, 1909; Determination of Water Rights of Federally Recognized Indian Tribes",
+                  "540 ": "Distribution and Storage of Water; Watermasters; Water Right Changes, Transfers and Forfeitures",
                   "541 ": "Water Distributors; Water Releases; Conservation and Storage; Water Development Projects; Watershed Management and Enhancement",
                   "542 ": "Water Resource Surveys and Projects; Compacts",
                   "543 ": "Hydroelectric Projects",
                   "543A": "Reauthorizing and Decommissioning Hydroelectric Projects",
+                  "544 ": "(Former Provisions)",
                   "545 ": "Irrigation Districts",
                   "547 ": "Drainage Districts",
                   "548 ": "Provisions Applicable Both to Drainage Districts and to Irrigation Districts",
                   "549 ": "Drainage and Flood Control Generally",
-                  "550 ": "Urban Flood Safety and Water Quality Districts",
+                  "550 ": "Urban Flood Safety and Water Quality District",
                   "551 ": "Diking Districts",
                   "552 ": "Water Improvement Districts",
                   "553 ": "Water Control Districts",
@@ -702,39 +781,53 @@
                }
             },
             "46 ": {
-               "Heading": "Agriculture",
-               "Chapters": {
+               "heading": "Agriculture",
+               "chapters": {
                   "561 ": "State Department of Agriculture",
+                  "562 ": "(Former Provisions)",
+                  "563 ": "(Former Provisions)",
                   "564 ": "Wildflowers; Threatened or Endangered Plants",
                   "565 ": "Fairs and Exhibits",
                   "566 ": "Extension and Field Work; Rural Rehabilitation",
                   "567 ": "Experiment Stations",
-                  "568 ": "Soil and Water Conservation; Water Quality Management",
+                  "568 ": "Soil and Water Conservation; Agricultural Water Management",
                   "569 ": "Weed Control",
                   "570 ": "Plant Pest Control; Invasive Species",
-                  "571 ": "Nursery Stock; Licensed Agricultural Crops"
+                  "571 ": "Nursery Stock; Licensed Agricultural Crops",
+                  "572 ": "(Former Provisions)",
+                  "573 ": "(Former Provisions)"
                }
             },
             "47 ": {
-               "Heading": "Agricultural Meetings and Warehousing",
-               "Chapters": {
+               "heading": "Agricultural Marketing and Warehousing",
+               "chapters": {
                   "576 ": "Agricultural Marketing Generally",
                   "577 ": "Oregon Beef Council",
                   "578 ": "Oregon Wheat Commission",
+                  "579 ": "(Former Provisions)",
+                  "580 ": "(Former Provisions)",
+                  "582 ": "(Former Provisions)",
+                  "583 ": "(Former Provisions)",
+                  "584 ": "(Former Provisions)",
+                  "585 ": "(Former Provisions)",
                   "586 ": "Warehouses",
                   "587 ": "Storage of Grain as Basis of Farm Credit"
                }
             },
             "48 ": {
-               "Heading": "Animals",
-               "Chapters": {
+               "heading": "Animals",
+               "chapters": {
                   "596 ": "Disease Control Generally",
+                  "597 ": "(Former Provisions)",
+                  "598 ": "(Former Provisions)",
                   "599 ": "Livestock Auction Markets; Stockyards; Auction Sales",
                   "600 ": "Swine",
                   "601 ": "Dead Animals",
                   "602 ": "Bees",
                   "603 ": "Meat Sellers and Slaughterers",
                   "604 ": "Brands and Marks; Feedlots",
+                  "605 ": "(Former Provisions)",
+                  "606 ": "(Former Provisions)",
                   "607 ": "Livestock Districts; Stock Running at Large",
                   "608 ": "Fences to Prevent Damage by or to Animals",
                   "609 ": "Dogs; Exotic Animals; Dealers",
@@ -742,15 +835,18 @@
                }
             },
             "49 ": {
-               "Heading": "Food and Other Commodities: Purity, Sanitation, Grades, Standards, Labels, Weights and Measures",
-               "Chapters": {
+               "heading": "Food and Other Commodities; Purity, Sanitation, Grades, Standards, Labels, Weights and Measures",
+               "chapters": {
                   "616 ": "General and Miscellaneous Provisions",
                   "618 ": "Weights and Measures",
                   "619 ": "Labeling and Inspection of Meat and Meat Food Products",
+                  "620 ": "(Former Provisions)",
                   "621 ": "Milk; Dairy Products; Substitutes",
                   "622 ": "Shellfish",
                   "624 ": "Food Service Facilities",
                   "625 ": "Bakeries and Bakery Products",
+                  "626 ": "(Former Provisions)",
+                  "627 ": "(Former Provisions)",
                   "628 ": "Refrigerated Locker Plants",
                   "632 ": "Production, Grading and Labeling Standards for Agricultural and Horticultural Products",
                   "633 ": "Grades, Standards and Labels for Feeds, Soil Enhancers and Seeds",
@@ -761,34 +857,36 @@
          }
       },
       "16": {
-         "Titles": {
+         "heading": "Trade Practices, Labor and Employment",
+         "titles": {
             "50 ": {
-               "Heading": "Trade Regulations and Practices",
-               "Chapters": {
+               "heading": "Trade Regulations and Practices",
+               "chapters": {
                   "645 ": "Commodity Transactions",
                   "646 ": "Trade Practices and Antitrust Regulation",
                   "646A": "Trade Regulation",
                   "647 ": "Trademarks and Service Marks; Music Royalties",
                   "648 ": "Assumed Business Names",
                   "649 ": "Insignia and Names of Organizations",
-                  "650 ": "Franchise Transactions",
-                  "651 ": "Bureau of Labor and Industries",
-                  "652 ": "Hours; Wages; Wage Claims; Records",
-                  "653 ": "Minimum Wages; Employment Conditions; Minors",
-                  "654 ": "Occupational Safety and Health"
+                  "650 ": "Franchise Transactions"
                }
             },
             "51 ": {
-               "Heading": "Labor and Employment; Unlawful Discrimination",
-               "Chapters": {
-                  "655 ": "Benefits for Injured Trainees and Inmates",
+               "heading": "Labor and Employment; Unlawful Discrimination",
+               "chapters": {
+                  "651 ": "Bureau of Labor and Industries",
+                  "652 ": "Hours; Wages; Wage Claims; Records",
+                  "653 ": "Minimum Wages; Employment Conditions; Minors",
+                  "654 ": "Occupational Safety and Health",
+                  "655 ": "Injured Trainees and Adults in Custody",
                   "656 ": "Workers’ Compensation",
                   "657 ": "Unemployment Insurance",
+                  "657A": "(Former Provisions)",
                   "657B": "Family and Medical Leave Insurance",
                   "658 ": "Employment Agencies; Farm Labor Contractors and Construction Labor Contractors; Farmworker Camps",
                   "659 ": "Miscellaneous Prohibitions Relating to Employment and Discrimination",
                   "659A": "Unlawful Discrimination in Employment, Public Accommodations and Real Property Transactions; Administrative and Civil Enforcement",
-                  "660 ": "Apprenticeship and Training; Workforce Development",
+                  "660 ": "Apprenticeship and Training; Workforce Development; Volunteerism",
                   "661 ": "Organized Labor; Union Labels",
                   "662 ": "Labor Disputes",
                   "663 ": "Labor Relations Generally"
@@ -797,33 +895,34 @@
          }
       },
       "17": {
-         "Titles": {
+         "heading": "Occupations",
+         "titles": {
             "52 ": {
-               "Heading": "Occupations and Professions",
-               "Chapters": {
+               "heading": "Occupations and Professions",
+               "chapters": {
                   "670 ": "Occupations and Professions Generally",
                   "671 ": "Architects; Landscape Professions and Business",
                   "672 ": "Professional Engineers; Land Surveyors; Photogrammetrists; Geologists",
                   "673 ": "Accountants; Other Tax Professionals",
                   "674 ": "Real Estate Appraisers and Appraisal",
-                  "675 ": "Psychologists; Occupational Therapists; Certified Sex Offender Therapists; Regulated Social Workers; Licensed Professional Counselors and Marriage and Family Therapists",
+                  "675 ": "Psychologists; Occupational Therapists; Certified Sexual Offense Therapists; Regulated Social Workers; Licensed Professional Counselors and Marriage and Family Therapists",
                   "676 ": "Health Professions Generally",
                   "677 ": "Regulation of Medicine, Podiatry and Acupuncture",
-                  "678 ": "Nurses; Nursing Home Administrators",
+                  "678 ": "Nurses; Long Term Care Administrators",
                   "679 ": "Dentists",
                   "680 ": "Dental Hygienists; Denturists",
                   "681 ": "Hearing, Speech, Music Therapy and Art Therapy Professionals",
                   "682 ": "Regulation of Ambulance Services and Emergency Medical Services Providers",
                   "683 ": "Optometrists; Opticians",
                   "684 ": "Chiropractors",
-                  "685 ": "Naturopaths",
+                  "685 ": "Naturopathic Physicians",
                   "686 ": "Veterinarians; Veterinary Technicians",
                   "687 ": "Massage Therapists; Direct Entry Midwives",
                   "688 ": "Therapeutic and Technical Services: Physical Therapists; Medical Imaging Practitioners and Limited X-Ray Machine Operators; Hemodialysis Technicians; Athletic Trainers; Respiratory Therapists and Polysomnographic Technologists",
                   "689 ": "Pharmacists; Drug Outlets; Drug Sales",
                   "690 ": "Cosmetic Professionals",
                   "691 ": "Dietitians",
-                  "692 ": "Funeral Service Practitioners; Embalmers; Death Care Consultants; Funeral Establishments; Cemetery and Crematory Operators",
+                  "692 ": "Funeral Service Practitioners; Embalmers; Death Care Consultants; Funeral Establishments; Cemetery Operators; Crematory Operators and Alternative Disposition Facilities",
                   "693 ": "Plumbers",
                   "694 ": "Hearing Aid Specialists",
                   "695 ": "Watch Dealers",
@@ -833,7 +932,7 @@
                   "699 ": "Innkeepers and Hotelkeepers",
                   "700 ": "Environmental Health Specialists; Waste Water Specialists",
                   "701 ": "Construction Contractors and Contracts",
-                  "702 ": "Student Athlete Agents",
+                  "702 ": "Student Athlete",
                   "703 ": "Truth Verification and Deception Detection; Investigators",
                   "704 ": "Outfitters and Guides"
                }
@@ -841,18 +940,20 @@
          }
       },
       "18": {
-         "Titles": {
+         "heading": "Financial Institutions, Insurance",
+         "titles": {
             "52A": {
-               "Heading": "Insurance and Finance Administration",
-               "Chapters": {
+               "heading": "Insurance and Finance Administration",
+               "chapters": {
                   "705 ": "Department of Consumer and Business Services"
                }
             },
             "53 ": {
-               "Heading": "Financial Institutions",
-               "Chapters": {
+               "heading": "Financial Institutions",
+               "chapters": {
                   "706 ": "Administration and Enforcement of Banking Laws Generally",
                   "707 ": "Organization to Conduct Banking Business; Stockholders, Directors and Officers",
+                  "708 ": "(Former Provisions)",
                   "708A": "Regulation of Institutions Generally",
                   "709 ": "Regulation of Trust Business",
                   "711 ": "Merger; Conversion; Share Exchange; Acquisition; Liquidation; Insolvency",
@@ -860,68 +961,92 @@
                   "714 ": "Branch Banking; Automated Teller Machines",
                   "715 ": "Bank Holding Companies; Financial Holding Companies",
                   "716 ": "Savings Banks",
-                  "717 ": "Money Transmission"
+                  "717 ": "Money Transmission",
+                  "721 ": "(Former Provisions)",
+                  "722 ": "(Former Provisions)"
                }
             },
             "54 ": {
-               "Heading": "Credit Unions, Lending Institutions and Pawnbrokers",
-               "Chapters": {
+               "heading": "Credit Unions, Lending Institutions and Pawnbrokers",
+               "chapters": {
                   "723 ": "Credit Unions",
+                  "724 ": "(Former Provisions)",
                   "725 ": "Consumer Finance",
-                  "725A": "Title and Payday Loans",
-                  "726 ": "Pawnbrokers"
+                  "725A": "Short-Term Loans and Student Loan Servicing",
+                  "726 ": "Pawnbrokers",
+                  "727 ": "(Former Provisions)"
                }
             },
             "56 ": {
-               "Heading": "Insurance",
-               "Chapters": {
+               "heading": "Insurance",
+               "chapters": {
                   "731 ": "Administration and General Provisions",
                   "732 ": "Organization and Corporate Procedures of Domestic Insurers; Regulation of Insurers Generally",
                   "733 ": "Accounting and Investments",
                   "734 ": "Rehabilitation, Liquidation and Conservation of Insurers",
                   "735 ": "Alternative Insurance",
+                  "736 ": "(Former Provisions)",
                   "737 ": "Rates and Rating Organizations",
+                  "738 ": "(Former Provisions)",
+                  "739 ": "(Former Provisions)",
+                  "740 ": "(Former Provisions)",
                   "741 ": "Health Insurance Exchange",
                   "742 ": "Insurance Policies Generally; Property and Casualty Policies",
-                  "743 ": "Health and Life Insurance",
+                  "743 ": "Health and Life Insurance and Annuities",
                   "743A": "Health Insurance: Reimbursement of Claims",
                   "743B": "Health Benefit Plans: Individual and Group",
                   "744 ": "Insurance Producers; Life Settlement Providers, Brokers and Contracts; Adjusters; Consultants; Third Party Administrators; Reinsurance Intermediaries; Limited Licenses",
+                  "745 ": "(Former Provisions)",
                   "746 ": "Trade Practices",
-                  "748 ": "Fraternal Benefits Societies",
+                  "747 ": "(Former Provisions)",
+                  "748 ": "Fraternal Benefit Societies",
+                  "749 ": "(Former Provisions)",
                   "750 ": "Health Care Service Contractors; Multiple Employer Welfare Arrangements; Legal Expense Organizations",
-                  "751 ": "Universal Health Plan",
+                  "751 ": "Universal Health Care System",
                   "752 ": "Professional Liability Funds"
                }
             }
          }
       },
       "19": {
-         "Titles": {
+         "heading": "Utilities, Vehicle Code, Watercraft, Aviation",
+         "titles": {
             "57 ": {
-               "Heading": "Utility Regulation",
-               "Chapters": {
+               "heading": "Utility Regulation",
+               "chapters": {
                   "756 ": "Public Utility Commission",
                   "757 ": "Utility Regulation Generally",
                   "758 ": "Utility Rights of Way and Territory Allocation; Cogeneration",
                   "759 ": "Telecommunications Utility Regulation",
+                  "760 ": "(Former Provisions)",
+                  "761 ": "(Former Provisions)",
+                  "763 ": "(Former Provisions)",
+                  "764 ": "(Former Provisions)",
+                  "767 ": "(Former Provisions)",
+                  "768 ": "(Former Provisions)",
+                  "769 ": "(Former Provisions)",
+                  "770 ": "(Former Provisions)",
+                  "771 ": "(Former Provisions)",
                   "772 ": "Rights of Way for Public Uses",
-                  "774 ": "Citizens' Utility Board"
+                  "773 ": "(Former Provisions)",
+                  "774 ": "Citizens’ Utility Board"
                }
             },
             "58 ": {
-               "Heading": "Shipping and Navigation",
-               "Chapters": {
+               "heading": "Shipping and Navigation",
+               "chapters": {
                   "776 ": "Maritime Pilots and Pilotage",
                   "777 ": "Ports Generally",
                   "778 ": "Port of Portland",
                   "780 ": "Improvement and Use of Navigable Streams",
-                  "783 ": "Liabilities and Offenses Connected with Shipping and Navigation; Shipbreaking; Ballast Water"
+                  "781 ": "(Former Provisions)",
+                  "782 ": "(Former Provisions)",
+                  "783 ": "Liabilities and Offenses Connected With Shipping and Navigation; Shipbreaking; Ballast Water"
                }
             },
             "59 ": {
-               "Heading": "Oregon Vehicle Code",
-               "Chapters": {
+               "heading": "Oregon Vehicle Code",
+               "chapters": {
                   "801 ": "General Provisions and Definitions for Oregon Vehicle Code",
                   "802 ": "Administrative Provisions",
                   "803 ": "Vehicle Title and Registration",
@@ -947,14 +1072,14 @@
                }
             },
             "61 ": {
-               "Heading": "Small Watercraft",
-               "Chapters": {
+               "heading": "Small Watercraft",
+               "chapters": {
                   "830 ": "Small Watercraft"
                }
             },
             "62 ": {
-               "Heading": "Aviation",
-               "Chapters": {
+               "heading": "Aviation",
+               "chapters": {
                   "835 ": "Aviation Administration",
                   "836 ": "Airports and Landing Fields",
                   "837 ": "Aircraft Operation",
