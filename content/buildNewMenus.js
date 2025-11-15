@@ -126,7 +126,7 @@ class VolNavConstructor {
           if (/Former Provisions/.test(curChapter)) {
             formerProvisions = " former_provisions";
           }
-          mainList += `<li class="chapter"><a class="orsLink${formerProvisions}" data-chapter="${chapterKey.trim()}">`; // ORS chapter link
+          mainList += `<li class="chapter${formerProvisions}"><a class="orsLink" data-chapter="${chapterKey.trim()}">`; // ORS chapter link
           mainList += `ORS ${chapterKey.trim()}</a>: <span data-chapter="${chapterKey.trim()}">${curChapter}</span></li>`; // Chapter info
         }
         mainList += "</ul></details></li>"; // Close the title's <ul> & <details>

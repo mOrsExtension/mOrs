@@ -55,7 +55,8 @@ const buildChapterList = async () => {
             title.trim(),
             volume,
             chapterName,
-            titleData.Heading,
+            titleData.heading,
+            volumeData.heading,
           ]
         );
       });
@@ -102,6 +103,7 @@ const getChapterInfo = async ({ chapNum, offset = 0 }) => {
     0,
     "chapter not found",
     "title not found",
+    "volume not found",
   ];
   return {
     chapNo: ansArray[0],
@@ -109,6 +111,7 @@ const getChapterInfo = async ({ chapNum, offset = 0 }) => {
     volNo: ansArray[2],
     chapName: ansArray[3],
     titleName: ansArray[4],
+    volName: ansArray[5],
   };
 };
 

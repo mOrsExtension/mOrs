@@ -154,7 +154,7 @@ const extractChapterInfo = (/**@type {HTMLBodyElement}*/ docBody) => {
 const buildHeading = async () => {
   let headingChildrenList = [...(await buildH2())];
   headingChildrenList.push(buildH1());
-  headingChildrenList.concat([...buildH3()]);
+  headingChildrenList.push(buildH3());
   let htmlMainHead = document.createElement("div");
   if (chapterInfo.miscHead.textContent) {
     // must be non-falsy content
@@ -170,19 +170,19 @@ const buildHeading = async () => {
 };
 const buildH2 = async () => {
   if (!chapterInfo.isFormerProvisions) {
-    const h2Volume = document.createElement("h2");
-    const h2Title = document.createElement("h2");
-    const extraChapInfo = await sendAwait(
+    const h1Volume = document.createElement("h3");
+    const h1Title = document.createElement("h2");
+    const { titleNo, volNo, titleName, volName } = await sendAwait(
       { getChapInfo: { chapNum: chapterInfo.chapNo } },
       true
     );
-    chapterInfo.titleNo = extraChapInfo.titleNo;
-    chapterInfo.volNo = extraChapInfo.volNo;
-    chapterInfo.titleName = extraChapInfo.titleName;
-    h2Title.textContent = `Title ${chapterInfo.titleNo}: ${chapterInfo.titleName},`;
-    h2Volume.textContent = `Volume ${extraChapInfo.volNo},`;
+    chapterInfo.titleNo = titleNo;
+    chapterInfo.volNo = volNo;
+    chapterInfo.titleName = titleName;
+    h1Title.textContent = `Title ${titleNo}: ${titleName}`;
+    h1Volume.textContent = `Volume ${volNo}: ${volName}`;
 
-    return [h2Volume, h2Title];
+    return [h1Volume, h1Title];
   } else {
     return [];
   }
@@ -193,12 +193,11 @@ const buildH1 = () => {
   return h1Chapter;
 };
 const buildH3 = () => {
+  const h3Edition = document.createElement("h3");
   if (chapterInfo.isFormerProvisions != null) {
-    const h3Edition = document.createElement("h3");
     h3Edition.textContent = `Oregon Revised Statutes (${chapterInfo.thisEdition} Edition)`; // edition
-    return [h3Edition];
   }
-  return [];
+  return h3Edition;
 };
 
 /** @function addToHead */
