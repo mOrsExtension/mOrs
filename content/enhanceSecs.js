@@ -44,7 +44,7 @@ const sectionAdjustments = async (bodyDiv) => {
   bodyDiv.querySelectorAll("button.collapser").forEach((button) => {
     addCollapseToggleButton(button);
   });
-  const { externalOrs, internalOrs } = splitLinks(bodyDiv);
+  const { externalOrs, internalOrs } = splitLinks(bodyDiv).result;
   externalOrs.forEach((aLink) => {
     aLink.classList.add("linkExt");
   });
