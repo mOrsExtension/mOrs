@@ -1,0 +1,24 @@
+{
+   "cssSelector": "Dark",
+   "lawsReader": "OrLeg",
+   "doShowBurnt": true,
+   "doShowSourceNotes": true,
+   "doFullWidth": false,
+   "isCollapseDefault": false,
+   "doShowMenu": true,
+   "doShowVolNav": true,
+   "doShowTOC": true,
+   "doShowAnno": true,
+   "userColors": {
+      "background": "#336677",
+      "altBack": "#222233",
+      "formBack": "#223344",
+      "buttonColor": "#335b70",
+      "note": "#3030cc",
+      "mainText": "#f1d6d0",
+      "heading": "#fde849",
+      "subheading": "#cab302",
+      "sourceNote": "#c77543",
+      "linkText": "#37d2d2"
+   }
+}
