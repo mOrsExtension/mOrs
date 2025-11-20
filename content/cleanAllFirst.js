@@ -30,7 +30,7 @@ const wrapAnchorText = (bodyHTML) => {
   bodyHTML = anchorWrap(
     /**add links for ORS chapter references (class="orsLink") */
     bodyHTML,
-    /\b[1-9]\d{0,2}[A-C]?\b\.(\d{3}\b|\b7\dA?\.\d{4})\b/,
+    /\b[1-9]\d{0,2}[A-C]?\b\.(\d{3,4}\b|\b7\dA?\.\d{4})\b/,
     "orsLink"
   );
   bodyHTML = anchorWrap(

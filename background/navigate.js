@@ -34,7 +34,7 @@ class UrlBuilderFromSearch {
       return errorUrl;
     }
     let orsUrl = this.search.replace(orsRegExp, "00$1.html#$1$3"); // add more than enough zeros
-    orsUrl = orsUrl.replace(/^0{1,2}(\d{3})/, "$1"); // trim any excess leading 0s to 3 digits
+    orsUrl = orsUrl.replace(/^0+(\d{3})/, "$1"); // trim any excess leading 0s to 3 digits
 
     infoNav(`Creating new ORS tab for '${orsUrl}'`, "getOrsUrl");
     return `https://www.oregonlegislature.gov/bills_laws/ors/ors${orsUrl}`;

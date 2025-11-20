@@ -58,11 +58,12 @@ const buildTOC = (/**@type {HTMLBodyElement}*/ docBody) => {
       aPara.className = "subHead";
     } else if (
       /**  Heading (4+ non-lower case letters) (E.g., "PENALTIES") */
-      /^[^a-z(_]{4,}/.test(paraText)
+      /^[^a-z(_.]{4,}/.test(paraText)
     ) {
       aPara.className = "head";
     }
     aPara.classList.add("toc");
   });
+
   return tocDiv;
 };

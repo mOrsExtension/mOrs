@@ -1,5 +1,5 @@
 /* exported finalCleanUp, chapAndSecRegExp */
-/* globals RegExpHandler, chapterInfo, infoCS */
+/* globals RegExpHandler, chapterInfo, infoCS, expandSingle, warnCS */
 //finalClean.js
 
 /**
@@ -14,51 +14,56 @@ const finalCleanUp = (finalDivs) => {
     }
   });
 
-  finalBody.querySelectorAll("a").forEach((anAnchor) => {
-    anAnchor.rel = "noopener";
-    anAnchor.classList.forEach((nameOfClass) => {
+  finalBody.querySelectorAll("a").forEach((anchor) => {
+    anchor.rel = "noopener";
+    anchor.classList.forEach((nameOfClass) => {
       switch (nameOfClass) {
         case "cst":
           {
-            anAnchor.href =
+            anchor.href =
               "https://www.oregonlegislature.gov/bills_laws/Pages/ORS.aspx";
           }
           break;
 
         case "preface":
           {
-            anAnchor.href =
+            anchor.href =
               "https://www.oregonlegislature.gov/bills_laws/BillsLawsEDL/ORS_Preface.pdf";
           }
-          break;
-
-        case "linkExt":
-          // chapter was already explicitly assigned (because it's in the navigation piece)
-          if (anAnchor.dataset.chapter) {
-            anAnchor.href = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${anAnchor.dataset.chapter}.html`;
-          } else {
-            // create link to external chapter, targets the specific chapter id
-            anAnchor.href = RegExpHandler.replaceAllWith(
-              anAnchor.textContent,
-              /[^]*?(([1-9]\d{0,2}[A-C]?)\.\S*)[^]*?/,
-              `https://www.oregonlegislature.gov/bills_laws/ors/ors00$2.html#$1`
-            );
-          }
-          anAnchor.href = RegExpHandler.replaceAllWith(
-            anAnchor.href,
-            /(ors)0+(\d{3})/,
-            "$1$2"
-          ); // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
-          break;
-
-        case "linkInt":
-          anAnchor.href = `#${anAnchor.innerText}`;
           break;
 
         default:
           break;
       }
     });
+  });
+
+  const { externalOrs, internalOrs } = splitLinks(finalBody).result;
+  externalOrs.forEach((anchor) => {
+    anchor.classList.add("linkExt");
+    if (anchor.dataset.chapter) {
+      // chapter was already explicitly assigned (because it's in the navigation piece)
+      anchor.href = `https://www.oregonlegislature.gov/bills_laws/ors/ors00${anchor.dataset.chapter}.html`;
+    } else {
+      // create link to external chapter, targets the specific chapter id
+      anchor.href = RegExpHandler.replaceAllWith(
+        anchor.textContent,
+        /[^]*?(([1-9]\d{0,2}[A-C]?)\.\S*)[^]*?/,
+        `https://www.oregonlegislature.gov/bills_laws/ors/ors00$2.html#$1`
+      );
+    }
+    anchor.href = RegExpHandler.replaceAllWith(
+      anchor.href,
+      /(ors)0+(\d{3})/,
+      "$1$2"
+    ); // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
+  });
+  internalOrs.forEach((aLink) => {
+    const { anchor, text } = aLink;
+    anchor.classList.add("linkInt");
+    anchor.href = `#${text}`;
+    const target = getCollapsibleTarget(text, finalBody);
+    makeLinkExpandTarget(anchor, target);
   });
 
   // delete empty divs
@@ -90,12 +95,74 @@ const finalCleanUp = (finalDivs) => {
         spaces += "&nbsp;";
       }
       finalBody.querySelectorAll(`.${unit}`).forEach((item) => {
-        item.innerHTML =
-          `<span class="copyOnly">${spaces}</span>` + item.innerHTML;
+        const span = document.createElement("span");
+        span.className = "copyOnly";
+        span.textContent = spaces;
+        item.insertBefore(span, item.firstChild);
       });
     }
   };
   addCopyOnlySpaces();
 
   document.body = finalBody; // putting it all live and in front of user
+};
+
+/** Classifies each ORS link based on whether it's internal link; used to create button element to force expand on click
+ * @param {HTMLBodyElement} bodyElem */
+const splitLinks = (bodyElem) => {
+  let result = { externalOrs: [], internalOrs: [] };
+  bodyElem.querySelectorAll("a.orsLink").forEach((aLink) => {
+    let linkText = aLink.textContent;
+    if (isInternalChapLink(linkText)) {
+      result.internalOrs.push({ text: linkText, anchor: aLink });
+    } else {
+      result.externalOrs.push(aLink);
+    }
+  });
+  return { result };
+};
+/**@param {string} linkText */
+const isInternalChapLink = (linkText) => {
+  return new RegExpHandler(`\\b${chapterInfo.chapNo}\\.`).doesContain(linkText);
+};
+
+/**
+ * @param {HTMLAnchorElement} anchor
+ * @param {Element} target */
+const makeLinkExpandTarget = (anchor, target) => {
+  if (target != null) {
+    anchor.addEventListener("click", () => {
+      expandSingle(target);
+      infoCS(
+        `Scrolling to element id = '#${anchor.innerHTML}'`,
+        "cleanAllLast.js",
+        "makeLinkExpandTarget"
+      );
+    });
+  }
+};
+
+/** returns target of internal ORS links
+ * @param {string} linkText
+ * @param {HTMLDivElement} bodyDiv */
+const getCollapsibleTarget = (linkText, bodyDiv) => {
+  let linkCleaned = linkText.replace(
+    /([!"#$%&'()*+,./:;<=>?@[\]^`{|}~])/g,
+    "\\$1"
+  ); // querySelector doesn't like unescaped punctuation
+  if (/\b\d/.test(linkCleaned)) {
+    linkCleaned = `\\3${linkCleaned.slice(0, 1)} ${linkCleaned.slice(1)}`; // it also doesn't like initial numbers
+  }
+  const targetSection = bodyDiv.querySelector(`#${linkCleaned}`);
+
+  const collapsible = targetSection?.children[1];
+  if (collapsible?.classList.contains("collapsible")) {
+    return targetSection;
+  }
+  warnCS(
+    `Link target: '${linkCleaned}' does not exist; or lacks collapsible children:\n Target is '${targetSection?.tagName}'. Child is '${collapsible?.tagName}'.`,
+    "enhanceSecs.js",
+    "getCollapsibleTarget"
+  );
+  return null;
 };

@@ -1,6 +1,6 @@
 //enhanceSecs.js
 /* exported sectionAdjustments */
-/* global chapterInfo, sendAwait, warnCS, diff_match_patch, RegExpHandler, expandSingle, infoCS */
+/* global chapterInfo, sendAwait, warnCS, diff_match_patch */
 
 let /** object created by /background/annotation.js;
 {'Chapter XX : [annos] , 'xx.xxx' : [annos]} */ annoObject;
@@ -43,15 +43,6 @@ const sectionAdjustments = async (bodyDiv) => {
   });
   bodyDiv.querySelectorAll("button.collapser").forEach((button) => {
     addCollapseToggleButton(button);
-  });
-  const { externalOrs, internalOrs } = splitLinks(bodyDiv).result;
-  externalOrs.forEach((aLink) => {
-    aLink.classList.add("linkExt");
-  });
-  internalOrs.forEach((aLink) => {
-    aLink.anchor.classList.add("linkInt");
-    const target = getCollapsibleTarget(aLink.text, bodyDiv);
-    makeLinkExpandTarget(aLink, target);
   });
 };
 
@@ -242,61 +233,4 @@ const addCollapseToggleButton = (button) => {
   button.addEventListener("click", () => {
     button.nextElementSibling.classList.toggle("invisibility");
   });
-};
-
-/** Classifies each ORS link based on whether it's internal link; used to create button element to force expand on click
- * @param {HTMLDivElement} bodyDiv */
-const splitLinks = (bodyDiv) => {
-  let result = { externalOrs: [], internalOrs: [] };
-  bodyDiv.querySelectorAll("a.orsLink").forEach((aLink) => {
-    let linkText = aLink.textContent;
-    if (isInternalChapLink(linkText)) {
-      result.internalOrs.push({ text: linkText, anchor: aLink });
-    } else {
-      result.externalOrs.push(aLink);
-    }
-  });
-  return { result };
-};
-/**@param {string} linkText */
-const isInternalChapLink = (linkText) => {
-  return new RegExpHandler(`\\b${chapterInfo.chapNo}\\.`).doesContain(linkText);
-};
-
-const makeLinkExpandTarget = (aLink, target) => {
-  if (target != null) {
-    aLink.anchor.addEventListener("click", () => {
-      expandSingle(target);
-      infoCS(
-        `Scrolling to element id = '#${aLink.anchor.innerHTML}'`,
-        "enhanceSecs.js",
-        "makeLinkExpandTarget"
-      );
-    });
-  }
-};
-
-/** returns target for creating internal ORS links
- * @param {string} linkText
- * @param {HTMLDivElement} bodyDiv */
-const getCollapsibleTarget = (linkText, bodyDiv) => {
-  let linkCleaned = linkText.replace(
-    /([!"#$%&'()*+,./:;<=>?@[\]^`{|}~])/g,
-    "\\$1"
-  ); // querySelector doesn't like unescaped punctuation
-  if (/\b\d/.test(linkCleaned)) {
-    linkCleaned = `\\3${linkCleaned.slice(0, 1)} ${linkCleaned.slice(1)}`; // it also doesn't like initial numbers
-  }
-  const targetSection = bodyDiv.querySelector(`#${linkCleaned}`);
-
-  const collapsible = targetSection?.children[1];
-  if (collapsible?.classList.contains("collapsible")) {
-    return targetSection;
-  }
-  warnCS(
-    `Link target: '${linkCleaned}' does not exist; or lacks collapsible children:\n Target is '${targetSection?.tagName}'. Child is '${collapsible?.tagName}'.`,
-    "enhanceSecs.js",
-    "getCollapsibleTarget"
-  );
-  return null;
 };
