@@ -17,7 +17,7 @@ const buildFloatingMenuDiv = async () => {
   let manifest = browser.runtime.getManifest(); // apparently does not require await
   let thisVersion = manifest.version;
   versionParagraph.classList.add("version");
-  versionParagraph.innerHTML = `style markup by <a href="https://github.com/mOrsExtension/mOrs/#readme">mOrs</a> v.${thisVersion}`;
+  versionParagraph.innerHTML = `style markup by mOrs v.${thisVersion}`;
   menuPanel.appendChild(versionParagraph);
   menuPanel.appendChild(buttonRow1);
   menuPanel.appendChild(buttonRow2);

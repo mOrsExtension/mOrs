@@ -6,7 +6,6 @@ C:\mOrs\backgroundLoader.js
 C:\mOrs\eslint.config.mjs
 C:\mOrs\LICENSE
 C:\mOrs\manifest.json
-C:\mOrs\mORSerror.md
 C:\mOrs\package-lock.json
 C:\mOrs\package.json
 C:\mOrs\README.md

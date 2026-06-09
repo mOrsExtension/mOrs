@@ -3,8 +3,7 @@
 //background/navigate.js
 
 /** constants for OrsSearch*/
-const errorUrl =
-  "https://github.com/mOrsExtension/mOrs/wiki/Help-Using-Omnibox";
+const errorUrl = "/data/help.html";
 
 //const orsRegExp is in helperBG.js
 const yearRegExp = /\b(?:19|20)\d{2}(?=[\D\b])/;

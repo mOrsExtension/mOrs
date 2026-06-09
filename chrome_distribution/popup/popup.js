@@ -74,9 +74,7 @@ const fetchAllStoredData = async () => {
 // User clicks "Help" button
 const addListenerHelp = () => {
   helpButton?.addEventListener("click", () => {
-    launchNewTab(
-      "https://github.com/mOrsExtension/mOrs/wiki/Help-Using-Omnibox"
-    );
+    launchNewTab("./data/help.html");
   });
 };
 
@@ -137,7 +135,8 @@ const addListenerCheckboxes = () => {
 const storeAndUpdateTabs = async (newValue, storeTo, msgToTabs) => {
   if (newValue != null) {
     browser.storage.sync.set({ [storeTo]: newValue });
-    newMsg.sendOneWay(new MessageDispatch({ [msgToTabs]: newValue }, "tabs"));
+    let newMsg = new MessageDispatch({ [msgToTabs]: newValue }, "tabs");
+    newMsg.sendOneWay();
   }
 };
 

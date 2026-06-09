@@ -1,0 +1,167 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta content="text/html" />
+<style>
+  body {
+    background-color: #357;
+  }
+  h1,
+  h2,
+  h3 {
+    text-align: center;
+  }
+  div {
+    max-width: 85ch;
+    margin: 5pt auto;
+    padding: 3pt;
+    outline: 1pt solid black;
+  }
+  .head {
+    background-color: antiquewhite;
+  }
+  #privacy {
+    background-color: #6dd;
+  }
+  #update {
+    background-color: #dd8;
+    text-align: center;
+  }
+  .search {
+    background-color: #cac;
+  }
+  .code {
+    font-family: "Courier New", Courier, monospace;
+    background-color: lightgrey;
+    margin: 10pt;
+    padding: 3pt;
+  }
+</style>
+<title>mORS Help</title>
+<html lang="en">
+  <body>
+    <div class="head" id="head">
+      <h1>
+        <img src="../images/icon128.png" alt="mORS logo" />
+        <br />
+        Browser App
+      </h1>
+    </div>
+    <div class="head" id="overview">
+      <h2>Overview</h2>
+      <p>
+        mORS is a Chrome/Edge extension that provides an overlay for the Oregon
+        Revised Statutes (the codified laws of the state of Oregon) on the
+        Oregon legislature's website to make the text easier to read and
+        navigate. It also improves navigation to Oregon's session laws.
+      </p>
+    </div>
+    <div class="search" id="search">
+      <h2>Help Using Search</h2>
+      <p>
+        There are three types of searches that the app allows you to perform
+        from your browser's search bar (sometimes called an address bar or
+        omnibox). To use the app, each shortcut begins with "ors" and a space:
+      </p>
+      <h3>1. ORS Chapters</h3>
+      <p>Type 'ors' + space + the chapter into browser search bar:</p>
+      <p>
+        <span class="code">ors 86A</span> or: <span class="code">ors 009</span>
+      </p>
+      <h3>2. ORS Sections</h3>
+      <p>Type 'ors ' + section number to be taken right to the section:</p>
+      <span class="code">ors 97.200</span> or:
+      <span class="code">ors 72a.3070</span>
+      <h3>3. Oregon Session Laws</h3>
+      <p>
+        Full text of the entire law (adapted from the enrolled and signed bill).
+      </p>
+      <p>
+        Type the year + "c." (most abbreviations for chapter should work) + the
+        chapter. E.g:
+      </p>
+      <p>
+        <span class="code">ors 2019 c.1</span> &rArr; chapter 1, Oregon Laws
+        2019
+      </p>
+      <p>Includes special sessions:</p>
+      <p>
+        <span class="code">ors 2020 s.s.1 chp. 13</span> &rArr; chapter 13,
+        Oregon Laws 2020 (first special session)
+      </p>
+    </div>
+    <div class="search">
+      <p>
+        For session law, you can also switch reader from the default in the
+        popup:
+      </p>
+      <p>Use "hein" for HeinOnline*, e.g.:</p>
+      <p class="code">ors hein 2005 c.550</p>
+      <p>Use "orLeg" for OregonLegislature.gov**, e.g.:</p>
+      <p class="code">ors orleg 2014 c.501</p>
+      <div>
+        <p>
+          * HeinOnline requires a subscription and defaults to a login through
+          the
+          <a href="https://soll.libguides.com/index/StateAgencies"
+            >State Law Library of Oregon</a
+          >. From 1849 to 2024.
+        </p>
+        <p>
+          ** Session law on the
+          <a
+            href="https://www.oregonlegislature.gov/bills_laws/Pages/Oregon-Laws.aspx"
+            >Oregon Legislature website</a
+          >
+          currently goes from 1999 to 2025 (regular session).
+        </p>
+      </div>
+    </div>
+
+    <div class="search">
+      <h3>Notes</h3>
+      <p>
+        You can type a string a valid terms separated by most non alphanumeric
+        character (not a period). E.g.,:
+      </p>
+      <p class="code">ors 9.460 ; 701 / 2019 c.444, hein 1989 ch. 658</p>
+      <p>...will launch four tabs &rArr;</p>
+      <ul>
+        <li>ORS 9.460</li>
+        <li>ORS chapter 701</li>
+        <li>chapter 444, Oregon Laws 2019</li>
+        <li>chapter 658, Oregon Laws 1989 (in HeinOnline)</li>
+      </ul>
+      <p>
+        If something seems broken, email mORS.Development@gmail.com or post an
+        issue to
+        <a href="https://github.com/morsExtension/mORS/issues">GitHub</a>.
+      </p>
+    </div>
+    <div id="privacy">
+      <h2>Privacy Policy</h2>
+      <p>
+        mORS respects your privacy. This policy explains our data collection and
+        storage practices.
+      </p>
+      <p>
+        Your person extension preferences (set in the popup menu) for the mORS
+        browser application are stored using your browser's sync storage. This
+        data:
+      </p>
+      <ul>
+        <li>
+          May be shared in between browsers if your browser is logged into an
+          account;
+        </li>
+        <li>Syncs across your devices where you're signed into that account</li>
+        <li>Is never transmitted to our servers;</li>
+        <li>Is never shared with third parties;</li>
+        <li>Can be deleted by uninstalling the extension</li>
+      </ul>
+      <p>No other data is generated for or by this application.</p>
+      <p>We do not collect, transmit, or sell any personal information.</p>
+    </div>
+    <div id="update"><p>Last updated: 11/21/2025</p></div>
+  </body>
+</html>

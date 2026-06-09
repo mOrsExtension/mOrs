@@ -3,12 +3,9 @@
 //background/navigate.js
 
 /** constants for OrsSearch*/
-const errorUrl =
-  "https://github.com/mOrsExtension/mOrs/wiki/Help-Using-Omnibox";
-
-//const orsRegExp is in helperBG.js
+const errorUrl = "/data/help.html";
 const yearRegExp = /\b(?:19|20)\d{2}(?=[\D\b])/;
-const chpRegExp = /(?:(?:19|20)\d{2}|ch?p?\.?)([1-9]\d{0,3})(?:[\D\b]|$)/; // works with "c" "ch" or "chp" for chapter w/
+const chpRegExp = /(?:(?:19|20)\d{2}|ch?p?\.?)([1-9]\d{0,3})(?:[\D\b]|$)/; // works with "c" "ch" or "chp" for chapter w/ or w/o period
 
 /**Builds url based on omnibox input */
 class UrlBuilderFromSearch {
@@ -27,16 +24,10 @@ class UrlBuilderFromSearch {
   getOrsUrl() {
     this.isOrs = orsRegExp.test(this.search);
     if (!this.isOrs) {
-      infoNav(
-        `Invalid search: ${this.search}; sending user to help page`,
-        "getOrsUrl"
-      );
       return errorUrl;
     }
     let orsUrl = this.search.replace(orsRegExp, "00$1.html#$1$3"); // add more than enough zeros
     orsUrl = orsUrl.replace(/^0+(\d{3})/, "$1"); // trim any excess leading 0s to 3 digits
-
-    infoNav(`Creating new ORS tab for '${orsUrl}'`, "getOrsUrl");
     return `https://www.oregonlegislature.gov/bills_laws/ors/ors${orsUrl}`;
   }
 
@@ -77,7 +68,6 @@ class UrlBuilderFromSearch {
     const specialSessionSearch = /s\.?s\.?(\d)/; // * special session = match 1
     if (specialSessionSearch.test(this.search)) {
       const ssNum = this.search.match(specialSessionSearch)[1];
-      infoNav(`Detected special session = ${ssNum}`);
       return ssNum;
     } else {
       return null;
@@ -85,7 +75,6 @@ class UrlBuilderFromSearch {
   }
 
   execute() {
-    infoNav(`Launching new tab to: ${this.url}`, "newUrlTab");
     browser.tabs.create({ url: this.url });
   }
 }
@@ -192,18 +181,12 @@ class OrLawRequest {
 
 /**sets up browser to listen for text entered after "ORS " in omnibox (search box)*/
 browser.omnibox.onInputEntered.addListener(async (omniString) => {
-  infoNav("Executed search from omnibox", "omniBox.addListener()");
   buildAndNavigateToUrls(omniString);
 });
 // takes in search string, opens a new tab for each unique search
 const buildAndNavigateToUrls = (searchString) => {
   const cleanText = sanitize(searchString);
-  infoNav(`Received search request: ${cleanText}`, "buildAndNavigateToUrls");
   let listOfSearches = cleanText.split("|");
-  infoNav(
-    `Received ${listOfSearches.length} search request(s): ${listOfSearches}`,
-    "buildAndNavigateToUrls"
-  );
   listOfSearches.forEach(async (aSearch) => {
     const search = new UrlBuilderFromSearch(aSearch);
     if (search.isOrLaw) {
@@ -214,9 +197,6 @@ const buildAndNavigateToUrls = (searchString) => {
     if (search.url && search.url?.length > 0) {
       search.execute();
     } else {
-      console.warn(
-        `URL is ${search.url}; something's wrong. Navigating to ${errorUrl}`
-      );
       search.execute(errorUrl);
     }
   });

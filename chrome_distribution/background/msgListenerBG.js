@@ -4,7 +4,7 @@
 
 /** Receives message and sends response */
 class MessageObj {
-  constructor({ message: receivedMsg }, { url }) {
+  constructor({ message: receivedMsg }, { _url }) {
     // destructure to get msg & url in msg object
     if (receivedMsg == null) {
       this.responseToSend = new Error(
@@ -114,10 +114,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 /** builds new MessageObj */
 const handleMessage = async (message, sender) => {
   let newMsg = new MessageObj(message, sender);
-  if (
-    newMsg.receivedMsg == null ||
-    newMsg.receivedMsg == undefined
-  ) {
+  if (newMsg.receivedMsg == null || newMsg.receivedMsg == undefined) {
     throw new Error("Received null/undefined message");
   }
   if (await newMsg.doTasksAndFetchResponse()) {
