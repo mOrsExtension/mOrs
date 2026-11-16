@@ -49,13 +49,13 @@ const finalCleanUp = (finalDivs) => {
       anchor.href = RegExpHandler.replaceAllWith(
         anchor.textContent,
         /[^]*?(([1-9]\d{0,2}[A-C]?)\.\S*)[^]*?/,
-        `https://www.oregonlegislature.gov/bills_laws/ors/ors00$2.html#$1`
+        `https://www.oregonlegislature.gov/bills_laws/ors/ors00$2.html#$1`,
       );
     }
     anchor.href = RegExpHandler.replaceAllWith(
       anchor.href,
       /(ors)0+(\d{3})/,
-      "$1$2"
+      "$1$2",
     ); // delete any extra zeros in link URLs (e.g. fixes "\ors0090.html" => "\ors090.html")
   });
   internalOrs.forEach((aLink) => {
@@ -75,29 +75,27 @@ const finalCleanUp = (finalDivs) => {
       infoCS(
         `Deleting ${anElement.innerHTML}`,
         "finalClean.js",
-        "forEach(anElement)"
+        "forEach(anElement)",
       );
       anElement.remove();
     }
   });
 
+  /** Append &nbsp; spaces to front of each line (in 0px) for copying hierarchy*/
   const addCopyOnlySpaces = () => {
     const spacesToAdd = {
       subSec: 2,
-      para: 4,
-      subPara: 7,
-      subSubPara: 10,
-      subSubSubPara: 13,
+      para: 5,
+      subPara: 8,
+      subSubPara: 11,
+      subSubSubPara: 14,
     };
     for (const unit in spacesToAdd) {
-      let spaces = "";
-      for (var i = 0; i < spacesToAdd[unit]; i++) {
-        spaces += "&nbsp;";
-      }
+      let spaces = "&nbsp;".repeat(spacesToAdd[unit]);
       finalBody.querySelectorAll(`.${unit}`).forEach((item) => {
         const span = document.createElement("span");
         span.className = "copyOnly";
-        span.textContent = spaces;
+        span.innerHTML = spaces;
         item.insertBefore(span, item.firstChild);
       });
     }
@@ -136,7 +134,7 @@ const makeLinkExpandTarget = (anchor, target) => {
       infoCS(
         `Scrolling to element id = '#${anchor.innerHTML}'`,
         "cleanAllLast.js",
-        "makeLinkExpandTarget"
+        "makeLinkExpandTarget",
       );
     });
   }
@@ -148,7 +146,7 @@ const makeLinkExpandTarget = (anchor, target) => {
 const getCollapsibleTarget = (linkText, bodyDiv) => {
   let linkCleaned = linkText.replace(
     /([!"#$%&'()*+,./:;<=>?@[\]^`{|}~])/g,
-    "\\$1"
+    "\\$1",
   ); // querySelector doesn't like unescaped punctuation
   if (/\b\d/.test(linkCleaned)) {
     linkCleaned = `\\3${linkCleaned.slice(0, 1)} ${linkCleaned.slice(1)}`; // it also doesn't like initial numbers
@@ -162,7 +160,7 @@ const getCollapsibleTarget = (linkText, bodyDiv) => {
   warnCS(
     `Link target: '${linkCleaned}' does not exist; or lacks collapsible children:\n Target is '${targetSection?.tagName}'. Child is '${collapsible?.tagName}'.`,
     "enhanceSecs.js",
-    "getCollapsibleTarget"
+    "getCollapsibleTarget",
   );
   return null;
 };
