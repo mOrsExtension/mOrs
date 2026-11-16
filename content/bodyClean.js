@@ -65,7 +65,7 @@ const bodyCleanUp = (docBody) => {
     ) {
       aPara.innerText = new RegExpHandler(`([^]*?)(\\s){2,}([^]*?)`).replaceAll(
         `${aPara.innerText} ${paraList[i + 1].innerText}`,
-        "$1 $3"
+        "$1 $3",
       );
       paraList[i + 1].remove();
     }
@@ -74,13 +74,13 @@ const bodyCleanUp = (docBody) => {
   //delete extra spaces in labeled paragraphs
   docBody
     .querySelectorAll(
-      "p.subSec, p.para, p.subPara, p.sectionStart, p.sourceNote, p.note"
+      "p.subSec, p.para, p.subPara, p.sectionStart, p.sourceNote, p.note",
     )
     .forEach((aPara) => {
       //search for leading tabs & delete
       aPara.innerHTML = new RegExpHandler(
         `^${tabRegExp}(?:<b>)?${tabRegExp}`,
-        ""
+        "",
       ).replacePerFlags(aPara.innerHTML, "");
     });
 
@@ -89,8 +89,8 @@ const bodyCleanUp = (docBody) => {
   subParas.forEach((aPara, pIndex) => {
     if (/^\(L+\)/.test(aPara.textContent)) {
       // find each upper case (L) (or (LL) or (LLL))
-      if (pIndex > 0 && !/^\(K+\)/.test(subParas[pIndex - 1].textContent)) {
-        // unless previous paragraph is a "(K+)"
+      if (pIndex < 1 || !/^\(K+\)/.test(subParas[pIndex - 1].textContent)) {
+        // unless previous paragraph exists & is a "(K+)" it's actually paragraph
         aPara.className = "para"; // reclass as paragraph
       }
     }
@@ -109,19 +109,19 @@ const bodyCleanUp = (docBody) => {
         infoCS(
           `Form start > '${aPara?.previousElementSibling?.textContent?.slice(
             0,
-            60
+            60,
           )}...'`,
           "bodyClean.js",
-          "defaultParas.forEach"
+          "defaultParas.forEach",
         );
       } else {
         infoCS(
           `Form end(?) > '${aPara?.previousElementSibling?.textContent?.slice(
             0,
-            60
+            60,
           )}...'`,
           "bodyClean.js",
-          "defaultParas.forEach"
+          "defaultParas.forEach",
         );
         aPara.className = "endForm";
       }
@@ -132,7 +132,7 @@ const bodyCleanUp = (docBody) => {
   let arraysBegan = 0;
   let priorEnd;
   let formParas = docBody.querySelectorAll(
-    "p.startForm, p.endForm, p.sectionStart"
+    "p.startForm, p.endForm, p.sectionStart",
   );
   formParas.forEach((aPara) => {
     switch (aPara.className) {
@@ -171,13 +171,13 @@ const bodyCleanUp = (docBody) => {
     aPara.innerHTML = RegExpHandler.replaceAllWith(
       aPara.innerHTML,
       `(\\/a>${tabRegExp})([^]{2,})`,
-      '$1<span class="leadline">$2</span>'
+      '$1<span class="leadline">$2</span>',
     );
     // for Session laws:
     aPara.innerHTML = RegExpHandler.replaceAllWith(
       aPara.innerHTML,
       `(Sec\\.\\s\\d{1,3}[a-f]?\\.${tabRegExp})([^]{2,})`,
-      '$1<span class="leadline">$2</span>'
+      '$1<span class="leadline">$2</span>',
     );
   });
 
